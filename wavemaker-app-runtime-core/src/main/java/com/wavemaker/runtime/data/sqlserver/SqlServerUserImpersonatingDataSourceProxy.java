@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
-import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +36,7 @@ import org.springframework.util.StringUtils;
 /**
  * DataSource proxy implementation that will allow impersonation of the currently authenticated user on MS SQLServer
  * when executing JDBC statements.
- * 
+ *
  * <p>
  * Impersonation of the current user is achieved by executing a SQLServer-specific
  * <code>EXECUTE AS USER='{username}'</code> statement, where {username} is the username for the currently authenticated
@@ -77,7 +76,7 @@ public class SqlServerUserImpersonatingDataSourceProxy extends DelegatingDataSou
     /**
      * Sets an Active Directory Domain name to be used as a prefix to the username when running an
      * <code>EXECUTE AS</code> statement to prepare a connection.
-     * 
+     *
      * @param activeDirectoryDomain the Active Directory Domain name
      */
     public void setActiveDirectoryDomain(String activeDirectoryDomain) {
@@ -91,7 +90,7 @@ public class SqlServerUserImpersonatingDataSourceProxy extends DelegatingDataSou
 
     private Connection getAuditingConnectionProxy(Connection connection) throws SQLException {
         return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(), new Class[]{ConnectionProxy.class},
-            new AuditingInvocationHandler(connection));
+                new AuditingInvocationHandler(connection));
     }
 
     private class AuditingInvocationHandler implements InvocationHandler {
@@ -149,12 +148,8 @@ public class SqlServerUserImpersonatingDataSourceProxy extends DelegatingDataSou
         }
 
         private void executeStatement(String sql) throws SQLException {
-            Statement statement = null;
-            try {
-                statement = this.target.createStatement();
+            try (Statement statement = this.target.createStatement()) {
                 statement.execute(sql);
-            } finally {
-                JdbcUtils.closeStatement(statement);
             }
         }
     }
