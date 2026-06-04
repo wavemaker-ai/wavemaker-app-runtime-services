@@ -32,6 +32,7 @@ import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -241,7 +242,8 @@ public class RestConnector {
                 logger.debug("Using proxy {} for target {}", proxyHost, target);
                 return defaultRoutePlanner.determineRoute(target, context);
             } else {
-                return new HttpRoute(target);
+                int port = DefaultSchemePortResolver.INSTANCE.resolve(target);
+                return new HttpRoute(new HttpHost(target.getSchemeName(), target.getHostName(), port));
             }
         };
     }
