@@ -26,23 +26,23 @@ public class MongoPersistenceConfig implements PersistenceConfig {
     public static final String MONGODB = "MONGODB";
 
     @NotEmpty
-    @ProfilizableProperty("${security.session.mongodb.host}")
+    @ProfilizableProperty(value = "${security.session.mongodb.host}", description = "MongoDB server hostname")
     private String host;
 
     @NotEmpty
-    @ProfilizableProperty("${security.session.mongodb.port}")
+    @ProfilizableProperty(value = "${security.session.mongodb.port}", description = "MongoDB server port (default: 27017)")
     private String port;
 
     @NotEmpty
-    @ProfilizableProperty("${security.session.mongodb.dbname}")
+    @ProfilizableProperty(value = "${security.session.mongodb.dbname}", description = "MongoDB database name for session storage")
     private String dbname;
 
     @NotEmpty
-    @ProfilizableProperty("${security.session.mongodb.username}")
+    @ProfilizableProperty(value = "${security.session.mongodb.username}", description = "MongoDB authentication username")
     private String username;
 
     @NotEmpty
-    @ProfilizableProperty("${security.session.mongodb.password}")
+    @ProfilizableProperty(value = "${security.session.mongodb.password}", description = "MongoDB authentication password")
     private String password;
 
     public String getHost() {

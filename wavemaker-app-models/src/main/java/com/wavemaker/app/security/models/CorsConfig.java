@@ -23,13 +23,13 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class CorsConfig {
 
-    @ProfilizableProperty("${security.general.cors.enabled}")
+    @ProfilizableProperty(value = "${security.general.cors.enabled}", description = "Enable CORS support")
     private boolean enabled;
 
-    @ProfilizableProperty("${security.general.cors.maxAge}")
+    @ProfilizableProperty(value = "${security.general.cors.maxAge}", description = "CORS preflight response cache duration in seconds")
     private long maxAge;
 
-    @ProfilizableProperty("${security.general.cors.allowCredentials}")
+    @ProfilizableProperty(value = "${security.general.cors.allowCredentials}", description = "Allow cookies and auth headers in cross-origin requests")
     private boolean allowCredentials;
     private Map<String, CorsPathEntry> pathEntries;
 

@@ -24,15 +24,15 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class CSRFConfig {
 
-    @ProfilizableProperty("${security.general.xsrf.enabled}")
+    @ProfilizableProperty(value = "${security.general.xsrf.enabled}", description = "Enable CSRF protection")
     private boolean enforceCsrfSecurity;
 
     @NotEmpty
-    @NonProfilizableProperty("${security.general.xsrf.headerName}")
+    @NonProfilizableProperty(value = "${security.general.xsrf.headerName}", description = "HTTP header name for CSRF token")
     private String headerName;
 
     @NotEmpty
-    @NonProfilizableProperty("${security.general.xsrf.cookieName}")
+    @NonProfilizableProperty(value = "${security.general.xsrf.cookieName}", description = "Cookie name for CSRF token")
     private String cookieName;
 
     public boolean isEnforceCsrfSecurity() {

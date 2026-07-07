@@ -52,34 +52,39 @@ public class DBConnectionProps extends DBTestConnectionProps {
     @NotBlank
     private String dbName;
     private String port;
-    @ProfilizableProperty("schemaName")
+    @ProfilizableProperty(value = "schemaName", description = "Database schema to use")
     private String schemaName;
     private List<TableSelector> tableFilter = Collections.emptyList();
     private List<String> schemaFilter = Collections.emptyList();
-    @ProfilizableProperty("impersonateUser")
+    @ProfilizableProperty(value = "impersonateUser", description = "Use logged-in user credentials for DB connections")
     private boolean impersonateUser;
 
     private String activeDirectoryDomain;
 
-    @ProfilizableProperty("hbm2ddl")
+    @ProfilizableProperty(value = "hbm2ddl", description = "Hibernate schema generation mode",
+        supportedValues = {"none", "validate", "update", "create", "create-drop"})
     private String hbm2ddl;
 
-    @FrameworkProfileProperty(value = "maxPageSize", defaultRef = "${db.maxPageSize}")
+    @FrameworkProfileProperty(value = "maxPageSize", defaultRef = "${db.maxPageSize}",
+        description = "Maximum rows per paginated query (default: 100)")
     private Integer maxPageSize;
 
-    @FrameworkProfileProperty(value = "minPoolSize", defaultRef = "${db.minPoolSize}")
+    @FrameworkProfileProperty(value = "minPoolSize", defaultRef = "${db.minPoolSize}",
+        description = "Minimum DB connection pool size (default: 2; e.g. 2, 5, 10)")
     private Integer minPoolSize;
 
-    @FrameworkProfileProperty(value = "maxPoolSize", defaultRef = "${db.maxPoolSize}")
+    @FrameworkProfileProperty(value = "maxPoolSize", defaultRef = "${db.maxPoolSize}",
+        description = "Maximum DB connection pool size (default: 4; e.g. 4, 10, 20)")
     private Integer maxPoolSize;
 
-    @FrameworkProfileProperty(value = "transactionTimeout", defaultRef = "${db.transactionTimeout}")
+    @FrameworkProfileProperty(value = "transactionTimeout", defaultRef = "${db.transactionTimeout}",
+        description = "Transaction timeout in seconds (default: 30; e.g. 30, 60, 120)")
     private Integer transactionTimeout;
 
-    @ProfilizableProperty("dataSourceType")
+    @ProfilizableProperty(value = "dataSourceType", description = "Data source management: WaveMaker-managed or JNDI lookup")
     private DataSourceType dataSourceType;
 
-    @ProfilizableProperty("jndiName")
+    @ProfilizableProperty(value = "jndiName", description = "JNDI name for externally managed data source")
     private String jndiName;
 
     private DataModelReloadInfo reloadInfo;

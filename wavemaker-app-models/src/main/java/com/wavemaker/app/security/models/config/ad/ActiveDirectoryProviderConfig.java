@@ -27,28 +27,29 @@ public class ActiveDirectoryProviderConfig extends AbstractProviderConfig {
 
     public static final String DIRECTORY = "AD";
 
-    @ProfilizableProperty("${security.providers.ad.url}")
+    @ProfilizableProperty(value = "${security.providers.ad.url}", description = "Active Directory LDAP URL (e.g. ldap://hostname:389/)")
     private String url;
 
-    @ProfilizableProperty("${security.providers.ad.domain}")
+    @ProfilizableProperty(value = "${security.providers.ad.domain}", description = "AD domain name (e.g. example.com)")
     private String domain;
 
-    @ProfilizableProperty("${security.providers.ad.rootDn}")
+    @ProfilizableProperty(value = "${security.providers.ad.rootDn}", description = "Root DN for user searches")
     private String rootDn;
 
-    @ProfilizableProperty("${security.providers.ad.userSearchPattern}")
+    @ProfilizableProperty(value = "${security.providers.ad.userSearchPattern}", description = "LDAP filter for user lookup; {0} is username")
     private String userSearchPattern;
 
-    @NonProfilizableProperty("${security.providers.ad.testUsername}")
+    @NonProfilizableProperty(value = "${security.providers.ad.testUsername}", description = "Username for LDAP connectivity test")
     private String testUsername;
 
-    @NonProfilizableProperty("${security.providers.ad.testPassword}")
+    @NonProfilizableProperty(value = "${security.providers.ad.testPassword}", description = "Password for LDAP connectivity test")
     private String testPassword;
 
-    @ProfilizableProperty(value = "${security.providers.ad.roleMappingEnabled}")
+    @ProfilizableProperty(value = "${security.providers.ad.roleMappingEnabled}", description = "Map AD groups to application roles")
     private boolean roleMappingEnabled;
 
-    @ProfilizableProperty(value = "${security.providers.ad.roleProvider}")
+    @ProfilizableProperty(value = "${security.providers.ad.roleProvider}", description = "Role assignment source",
+        supportedValues = {"Active Directory", "Database"})
     private String roleProvider;
 
     @JsonPropertyDescription("For roleMappingConfig, there can be only two allowed types ActiveDirectoryRoleMappingConfig, DatabaseRoleMappingConfig")

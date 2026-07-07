@@ -21,13 +21,13 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class TokenAuthConfig {
 
-    @ProfilizableProperty(value = "${security.general.tokenService.enabled}")
+    @ProfilizableProperty(value = "${security.general.tokenService.enabled}", description = "Enable token-based REST API authentication")
     private boolean enabled;
 
-    @ProfilizableProperty(value = "${security.general.tokenService.parameter}")
+    @ProfilizableProperty(value = "${security.general.tokenService.parameter}", description = "HTTP parameter name carrying the auth token")
     private String parameter;
 
-    @ProfilizableProperty(value = "${security.general.tokenService.tokenValiditySeconds}")
+    @ProfilizableProperty(value = "${security.general.tokenService.tokenValiditySeconds}", description = "Token validity duration in seconds")
     private int tokenValiditySeconds;
 
     public boolean isEnabled() {

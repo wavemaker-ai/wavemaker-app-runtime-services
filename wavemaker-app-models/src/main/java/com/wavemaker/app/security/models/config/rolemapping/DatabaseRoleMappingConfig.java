@@ -55,7 +55,7 @@ public class DatabaseRoleMappingConfig implements RoleMappingConfig {
     @NotBlank
     private String roleColumn;
 
-    @JsonPropertyDescription("If useRolesQuery is true, set the queryType to HQL or SQL based on the db query passed in roleQuery property")
+    @JsonPropertyDescription("If useRolesQuery is true, set the queryType to HQL or NATIVE_SQL based on the db query passed in roleQuery property")
     private RoleQueryType queryType;
     @JsonPropertyDescription("If useRolesQuery is true, pass the custom db roles query in this property.")
     private String roleQuery;

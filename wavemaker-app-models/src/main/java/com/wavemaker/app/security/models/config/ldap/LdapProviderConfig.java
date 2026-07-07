@@ -30,31 +30,32 @@ public class LdapProviderConfig extends AbstractProviderConfig {
 
     public static final String LDAP = "LDAP";
 
-    @ProfilizableProperty("${security.providers.ldap.url}")
+    @ProfilizableProperty(value = "${security.providers.ldap.url}", description = "LDAP server URL (e.g. ldap://hostname:389/)")
     private String url;
 
-    @ProfilizableProperty("${security.providers.ldap.managerUsername:null}")
+    @ProfilizableProperty(value = "${security.providers.ldap.managerUsername:null}", description = "Manager DN for LDAP bind")
     private String managerDn;
 
-    @ProfilizableProperty("${security.providers.ldap.managerPassword:null}")
+    @ProfilizableProperty(value = "${security.providers.ldap.managerPassword:null}", description = "Manager DN password")
     private String managerPassword;
 
     private String testDn;
     private String testPassword;
 
-    @NonProfilizableProperty("${security.providers.ldap.rootDn}")
+    @NonProfilizableProperty(value = "${security.providers.ldap.rootDn}", description = "Root DN for user and group searches")
     private String rootDn;
 
-    @ProfilizableProperty("${security.providers.ldap.userSearchPattern}")
+    @ProfilizableProperty(value = "${security.providers.ldap.userSearchPattern}", description = "User DN pattern; {0} is replaced by username")
     private String userDnPattern;
 
-    @ProfilizableProperty(value = "${security.providers.ldap.roleMappingEnabled}")
+    @ProfilizableProperty(value = "${security.providers.ldap.roleMappingEnabled}", description = "Map LDAP groups to application roles")
     private boolean roleMappingEnabled;
 
-    @ProfilizableProperty("${security.providers.ldap.groupSearchBase}")
+    @ProfilizableProperty(value = "${security.providers.ldap.groupSearchBase}", description = "Base DN for group searches")
     private String groupSearchBase;
 
-    @ProfilizableProperty(value = "${security.providers.ldap.roleProvider}")
+    @ProfilizableProperty(value = "${security.providers.ldap.roleProvider}", description = "Role assignment source",
+        supportedValues = {"LDAP", "Database"})
     @JsonPropertyDescription("Role provider can be 'Database' or 'LDAP'")
     private String roleProvider;
 

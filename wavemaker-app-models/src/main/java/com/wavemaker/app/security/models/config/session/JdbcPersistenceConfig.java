@@ -23,7 +23,7 @@ public class JdbcPersistenceConfig implements PersistenceConfig {
 
     public static final String JDBC = "JDBC";
     @NotEmpty
-    @ProfilizableProperty(value = "${security.session.jdbc.serviceName}")
+    @ProfilizableProperty(value = "${security.session.jdbc.serviceName}", description = "WaveMaker DB service name for JDBC session storage")
     public String serviceName;
 
     public String getServiceName() {

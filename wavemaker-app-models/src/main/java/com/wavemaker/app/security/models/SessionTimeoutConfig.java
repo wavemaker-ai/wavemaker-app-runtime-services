@@ -28,14 +28,14 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class SessionTimeoutConfig {
     @NotNull
-    @NonProfilizableProperty("${security.general.login.sessionTimeoutType}")
+    @NonProfilizableProperty(value = "${security.general.login.sessionTimeoutType}", description = "Session timeout redirect type")
     private LoginType type;
 
-    @NonProfilizableProperty("${security.general.login.sessionTimeoutPageName}")
+    @NonProfilizableProperty(value = "${security.general.login.sessionTimeoutPageName}", description = "Page to redirect to on session timeout")
     private String pageName;
 
     @Min(1)
-    @ProfilizableProperty("${security.general.session.timeout}")
+    @ProfilizableProperty(value = "${security.general.session.timeout}", description = "Session inactivity timeout in minutes (0 = no timeout)")
     private int timeoutValue;
 
     public LoginType getType() {

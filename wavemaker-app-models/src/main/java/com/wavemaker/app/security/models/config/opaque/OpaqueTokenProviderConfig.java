@@ -31,19 +31,19 @@ public class OpaqueTokenProviderConfig extends AbstractProviderConfig {
     public static final String OPAQUE_TOKEN = "OPAQUE_TOKEN";
 
     @NotBlank
-    @ProfilizableProperty("${security.providers.opaqueToken.introspectionUrl}")
+    @ProfilizableProperty(value = "${security.providers.opaqueToken.introspectionUrl}", description = "OAuth2 token introspection endpoint URL")
     private String introspectionUrl;
     @NotBlank
-    @ProfilizableProperty("${security.providers.opaqueToken.clientId}")
+    @ProfilizableProperty(value = "${security.providers.opaqueToken.clientId}", description = "Client ID for token introspection")
     private String clientId;
     @NotBlank
-    @ProfilizableProperty("${security.providers.opaqueToken.clientSecret}")
+    @ProfilizableProperty(value = "${security.providers.opaqueToken.clientSecret}", description = "Client secret for token introspection")
     private String clientSecret;
     @NotBlank
-    @ProfilizableProperty("${security.providers.opaqueToken.principalClaimName}")
+    @ProfilizableProperty(value = "${security.providers.opaqueToken.principalClaimName}", description = "Token claim to use as principal/username")
     private String principalClaimName;
 
-    @ProfilizableProperty("${security.providers.opaqueToken.roleMappingEnabled}")
+    @ProfilizableProperty(value = "${security.providers.opaqueToken.roleMappingEnabled}", description = "Map token claims to application roles")
     private boolean roleMappingEnabled;
     @Valid
     @JsonPropertyDescription("For roleMappingConfig, there can be only two allowed types DatabaseRoleMappingConfig, RoleAttributeNameMappingConfig")

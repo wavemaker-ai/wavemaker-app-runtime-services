@@ -32,7 +32,7 @@ public class CustomProviderConfig extends AbstractProviderConfig {
     public static final String CUSTOM = "CUSTOM";
 
     @Valid
-    @NonProfilizableProperty(value = "${security.providers.custom.class}")
+    @NonProfilizableProperty(value = "${security.providers.custom.class}", description = "Fully-qualified class name of custom AuthenticationManager")
     @JsonPropertyDescription("class name with package is passed to this field, and that class has the logic to authenticate the user.")
     private String fqCustomAuthenticationManagerClassName;
 

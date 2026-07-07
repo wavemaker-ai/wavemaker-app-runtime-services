@@ -27,13 +27,13 @@ public class SSLConfig {
 
     @Min(value = 1)
     @Max(value = 65536)
-    @ProfilizableProperty(value = "${security.general.ssl.port}")
+    @ProfilizableProperty(value = "${security.general.ssl.port}", description = "HTTPS port (default: 443)")
     private int sslPort = 443;
 
-    @ProfilizableProperty(value = "${security.general.ssl.enabled}")
+    @ProfilizableProperty(value = "${security.general.ssl.enabled}", description = "Enable HTTPS for the application")
     private boolean useSSL;
 
-    @NonProfilizableProperty("${security.general.ssl.excludedUrls:#{null}}")
+    @NonProfilizableProperty(value = "${security.general.ssl.excludedUrls:#{null}}", description = "URL patterns excluded from HTTPS enforcement")
     private String excludedUrls;
 
     public boolean isUseSSL() {

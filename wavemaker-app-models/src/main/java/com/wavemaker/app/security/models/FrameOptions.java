@@ -21,13 +21,13 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class FrameOptions {
 
-    @ProfilizableProperty("${security.general.frameOptions.allowFromUrl}")
+    @ProfilizableProperty(value = "${security.general.frameOptions.allowFromUrl}", description = "Allowed URL for X-Frame-Options ALLOW-FROM (deprecated, use CSP instead)")
     private String allowFromUrl;
 
-    @ProfilizableProperty("${security.general.frameOptions.enabled}")
+    @ProfilizableProperty(value = "${security.general.frameOptions.enabled}", description = "Enable X-Frame-Options header")
     private boolean enabled;
 
-    @ProfilizableProperty("${security.general.frameOptions.mode}")
+    @ProfilizableProperty(value = "${security.general.frameOptions.mode}", description = "Frame embedding policy")
     private Mode mode;
 
     public Mode getMode() {

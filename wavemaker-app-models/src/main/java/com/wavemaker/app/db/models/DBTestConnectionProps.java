@@ -27,22 +27,22 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class DBTestConnectionProps implements Serializable, Cloneable {
 
-    @ProfilizableProperty("username")
+    @ProfilizableProperty(value = "username", description = "Database username")
     private String username;
 
-    @ProfilizableProperty("password")
+    @ProfilizableProperty(value = "password", description = "Database password")
     private String password;
 
     @NotBlank
-    @ProfilizableProperty("url")
+    @ProfilizableProperty(value = "url", description = "JDBC connection URL")
     private String url;
 
     @NotBlank
-    @ProfilizableProperty("driverClass")
+    @ProfilizableProperty(value = "driverClass", description = "Fully-qualified JDBC driver class name")
     private String driverClass;
 
     @NotBlank
-    @ProfilizableProperty("dialect")
+    @ProfilizableProperty(value = "dialect", description = "Hibernate SQL dialect class (auto-detected if blank)")
     private String dialect;
 
     public DBTestConnectionProps() {

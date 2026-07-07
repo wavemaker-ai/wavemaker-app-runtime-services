@@ -30,23 +30,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SAMLProviderConfig extends AbstractProviderConfig {
     public static final String SAML = "SAML";
 
-    @ProfilizableProperty("${security.providers.saml.idpMetadataSource}")
-    private MetadataSource idpMetadataSource; // tells whether idp metadata is loaded from file or url.
+    @ProfilizableProperty(value = "${security.providers.saml.idpMetadataSource}", description = "tells whether idp metadata is loaded from file or url.")
+    private MetadataSource idpMetadataSource;
 
-    @ProfilizableProperty("${security.providers.saml.idpMetadataUrl}")
+    @ProfilizableProperty(value = "${security.providers.saml.idpMetadataUrl}", description = "URL to fetch IdP SAML metadata")
     private String idpMetadataUrl;
     private String idpEndpointUrl;
     private String idpPublicKey;
     private boolean createKeystore;
     private String keyStoreLocation; // import
 
-    @ProfilizableProperty("${security.providers.saml.keyStoreFile}")
+    @ProfilizableProperty(value = "${security.providers.saml.keyStoreFile}", description = "SP keystore file path")
     private String keyStoreName;
 
-    @ProfilizableProperty("${security.providers.saml.keyStorePassword}")
+    @ProfilizableProperty(value = "${security.providers.saml.keyStorePassword}", description = "SP keystore password")
     private String keyStorePassword;
 
-    @ProfilizableProperty("${security.providers.saml.keyAlias}")
+    @ProfilizableProperty(value = "${security.providers.saml.keyAlias}", description = "SP signing key alias in keystore")
     private String keyAlias;
     private String subjectName; //create
     /**
@@ -55,21 +55,21 @@ public class SAMLProviderConfig extends AbstractProviderConfig {
     @Deprecated
     private String entityBaseURL;
 
-    @ProfilizableProperty(value = "${security.providers.saml.roleMappingEnabled}")
+    @ProfilizableProperty(value = "${security.providers.saml.roleMappingEnabled}", description = "Map SAML attributes to application roles")
     private boolean roleMappingEnabled;
 
-    @ProfilizableProperty("${security.providers.saml.maxAuthenticationAge}")
+    @ProfilizableProperty(value = "${security.providers.saml.maxAuthenticationAge}", description = "Maximum age of SAML assertion in seconds (default: 7200)")
     private int maxAuthenticationAge = 7200;
 
     @JsonPropertyDescription("For roleMappingConfig, there can be only two allowed types DatabaseRoleMappingConfig, RoleAttributeNameMappingConfig")
     private RoleMappingConfig roleMappingConfig;
 
     @JsonIgnore
-    @ProfilizableProperty("${security.providers.saml.idpMetadataFile:/saml/metadata/idpMetadata.xml}")
+    @ProfilizableProperty(value = "${security.providers.saml.idpMetadataFile:/saml/metadata/idpMetadata.xml}", description = "Classpath path to IdP metadata XML file")
     private String idpMetadataFile;
 
     @JsonIgnore
-    @ProfilizableProperty("${security.providers.saml.urlValidateType}")
+    @ProfilizableProperty(value = "${security.providers.saml.urlValidateType}", description = "URL validation strategy for IdP metadata")
     private SAMLConfig.ValidateType urlValidateType;
 
     @Override

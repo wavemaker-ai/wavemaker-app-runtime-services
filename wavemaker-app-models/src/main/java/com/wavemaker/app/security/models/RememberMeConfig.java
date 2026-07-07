@@ -23,11 +23,11 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class RememberMeConfig {
 
-    @ProfilizableProperty("${security.general.rememberMe.enabled}")
+    @ProfilizableProperty(value = "${security.general.rememberMe.enabled}", description = "Enable persistent Remember Me login")
     private boolean enabled;
 
     @Min(1)
-    @ProfilizableProperty("${security.general.rememberMe.timeOut}")
+    @ProfilizableProperty(value = "${security.general.rememberMe.timeOut}", description = "Remember Me token validity in seconds")
     private long tokenValiditySeconds;
 
     public boolean isEnabled() {

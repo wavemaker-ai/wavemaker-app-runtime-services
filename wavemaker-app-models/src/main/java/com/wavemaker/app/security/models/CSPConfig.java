@@ -19,10 +19,10 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 
 public class CSPConfig {
 
-    @ProfilizableProperty("${security.general.csp.enabled}")
+    @ProfilizableProperty(value = "${security.general.csp.enabled}", description = "Enable Content Security Policy header")
     private boolean enabled;
 
-    @ProfilizableProperty("${security.general.csp.policy}")
+    @ProfilizableProperty(value = "${security.general.csp.policy}", description = "CSP directive string (e.g. default-src 'self')")
     private String policy;
 
     public boolean isEnabled() {

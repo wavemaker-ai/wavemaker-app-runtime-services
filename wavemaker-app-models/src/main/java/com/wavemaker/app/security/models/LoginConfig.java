@@ -28,25 +28,26 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
  */
 public class LoginConfig {
     @NotNull
-    @NonProfilizableProperty("${security.general.login.type}")
+    @NonProfilizableProperty(value = "${security.general.login.type}", description = "Login page type")
     private LoginType type;
 
-    @NonProfilizableProperty("${security.general.login.pageName}")
+    @NonProfilizableProperty(value = "${security.general.login.pageName}", description = "Custom login page name (when type is PAGE)")
     private String pageName;
 
-    @ProfilizableProperty(value = "${security.general.cookie.maxAge}")
+    @ProfilizableProperty(value = "${security.general.cookie.maxAge}", description = "Session cookie max age in seconds; -1 = browser session")
     private int cookieMaxAge;
 
-    @ProfilizableProperty("${security.general.cookie.path}")
+    @ProfilizableProperty(value = "${security.general.cookie.path}", description = "Cookie scope path (default: /)")
     private String cookiePath;
 
-    @ProfilizableProperty("${security.general.cookie.base64Encode:true}")
+    @ProfilizableProperty(value = "${security.general.cookie.base64Encode:true}", description = "Base64-encode cookie values")
     private boolean cookieBase64Encode;
 
-    @ProfilizableProperty("${security.general.cookie.jvmRoute}")
+    @ProfilizableProperty(value = "${security.general.cookie.jvmRoute}", description = "JVM route suffix for sticky session routing")
     private String jvmRoute;
 
-    @ProfilizableProperty("${security.general.cookie.sameSite}")
+    @ProfilizableProperty(value = "${security.general.cookie.sameSite}", description = "SameSite cookie attribute",
+        supportedValues = {"Strict", "Lax", "None"})
     private String sameSite;
 
     @NotNull

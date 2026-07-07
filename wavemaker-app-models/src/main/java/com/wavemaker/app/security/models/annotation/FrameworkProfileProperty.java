@@ -28,4 +28,8 @@ public @interface FrameworkProfileProperty {
     String value();
 
     String defaultRef() default "";
+
+    String description() default "";
+
+    String[] supportedValues() default {};
 }

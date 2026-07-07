@@ -19,16 +19,16 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 
 public class TrustStoreConfig {
 
-    @ProfilizableProperty("${security.general.truststore.config}")
+    @ProfilizableProperty(value = "${security.general.truststore.config}", description = "Trust store source type")
     private TrustStoreConfigType trustStoreConfigType;
 
-    @ProfilizableProperty("${security.general.truststore.file}")
+    @ProfilizableProperty(value = "${security.general.truststore.file}", description = "Trust store file path")
     private String file;
 
-    @ProfilizableProperty("${security.general.truststore.fileType}")
+    @ProfilizableProperty(value = "${security.general.truststore.fileType}", description = "Trust store format ex. JKS or PKCS12")
     private String fileType;
 
-    @ProfilizableProperty("${security.general.truststore.password}")
+    @ProfilizableProperty(value = "${security.general.truststore.password}", description = "Trust store password")
     private String password;
 
     public TrustStoreConfigType getTrustStoreConfigType() {

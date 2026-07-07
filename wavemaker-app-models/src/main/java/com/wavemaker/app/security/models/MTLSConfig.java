@@ -19,16 +19,16 @@ import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 
 public class MTLSConfig {
 
-    @ProfilizableProperty("${security.general.mtls.enabled}")
+    @ProfilizableProperty(value = "${security.general.mtls.enabled}", description = "Enable mutual TLS client certificate authentication")
     private boolean enabled;
 
-    @ProfilizableProperty("${security.general.mtls.keystore.file}")
+    @ProfilizableProperty(value = "${security.general.mtls.keystore.file}", description = "Keystore file path (classpath or filesystem)")
     private String file;
 
-    @ProfilizableProperty("${security.general.mtls.keystore.fileType}")
+    @ProfilizableProperty(value = "${security.general.mtls.keystore.fileType}", description = "Keystore format ex. JKS, PKCS12")
     private String fileType;
 
-    @ProfilizableProperty("${security.general.mtls.keystore.password}")
+    @ProfilizableProperty(value = "${security.general.mtls.keystore.password}", description = "Keystore password")
     private String password;
 
     public boolean isEnabled() {

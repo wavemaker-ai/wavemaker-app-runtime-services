@@ -32,25 +32,25 @@ public class CASProviderConfig extends AbstractProviderConfig {
 
     public static final String CAS = "CAS";
 
-    @ProfilizableProperty("${security.providers.cas.serverUrl}")
+    @ProfilizableProperty(value = "${security.providers.cas.serverUrl}", description = "CAS server root URL")
     private String serverUrl;
 
-    @ProfilizableProperty("${security.providers.cas.loginUrl}")
+    @ProfilizableProperty(value = "${security.providers.cas.loginUrl}", description = "CAS login endpoint URL")
     private String loginUrl;
 
-    @ProfilizableProperty("${security.providers.cas.validationUrl}")
+    @ProfilizableProperty(value = "${security.providers.cas.validationUrl}", description = "CAS ticket validation URL")
     private String validationUrl;
 
-    @ProfilizableProperty("${security.providers.cas.logoutUrl}")
+    @ProfilizableProperty(value = "${security.providers.cas.logoutUrl}", description = "CAS single-logout URL")
     private String logoutUrl;
 
-    @ProfilizableProperty("${security.providers.cas.serviceParameter}")
+    @ProfilizableProperty(value = "${security.providers.cas.serviceParameter}", description = "CAS service URL query parameter name")
     private String serviceParameter;
 
-    @ProfilizableProperty("${security.providers.cas.artifactParameter}")
+    @ProfilizableProperty(value = "${security.providers.cas.artifactParameter}", description = "CAS ticket artifact parameter name")
     private String artifactParameter;
 
-    @ProfilizableProperty(value = "${security.providers.cas.roleMappingEnabled}")
+    @ProfilizableProperty(value = "${security.providers.cas.roleMappingEnabled}", description = "Map CAS attributes to application roles")
     private boolean roleMappingEnabled;
 
     @JsonPropertyDescription("For roleMappingConfig, there can be only two allowed types RoleAttributeNameMappingConfig, DatabaseRoleMappingConfig")

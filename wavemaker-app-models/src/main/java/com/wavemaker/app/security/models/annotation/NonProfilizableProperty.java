@@ -31,4 +31,8 @@ import org.springframework.core.annotation.AliasFor;
 public @interface NonProfilizableProperty {
     @AliasFor(annotation = Value.class)
     String value();
+
+    String description() default "";
+
+    String[] supportedValues() default {};
 }
