@@ -18,8 +18,10 @@ import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -30,7 +32,7 @@ public class HttpResponseUtilTest {
 
     @Test
     public void getCookiesTest() {
-        Assert.assertNotNull(HttpResponseUtils.getCookies(getHttpResponseDetails()));
+        Assertions.assertNotNull(HttpResponseUtils.getCookies(getHttpResponseDetails()));
     }
 
     @Test
@@ -41,7 +43,7 @@ public class HttpResponseUtilTest {
     @Test
     public void toStringWithoutParametersTest() {
         MediaType mediaType = new MediaType("NAME", "VALUE");
-        Assert.assertNotNull(HttpResponseUtils.toStringWithoutParameters(mediaType));
+        Assertions.assertNotNull(HttpResponseUtils.toStringWithoutParameters(mediaType));
     }
 
     private HttpResponseDetails getHttpResponseDetails() {

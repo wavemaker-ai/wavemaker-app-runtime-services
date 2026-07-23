@@ -26,9 +26,16 @@ dependencies {
     implementation(appDependenciesLibs.jakarta.validationApi)
     implementation(appDependenciesLibs.feign.core)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
-    testImplementation(appDependenciesLibs.test.junit4)
     testImplementation(appDependenciesLibs.test.mockito.core)
     testImplementation(appDependenciesLibs.jakarta.servlet.api)
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
 }
 
 javaLibraryMavenPublish {

@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -48,27 +49,27 @@ public class PaginationJsonCheckTest {
 
         JsonNode node = WMObjectMapper.getInstance().readTree(pageObjectStringified);
 
-        Assert.assertTrue(node.get("sort").isArray());
+        Assertions.assertTrue(node.get("sort").isArray());
 
-        Assert.assertEquals("ASC", node.get("sort").get(0).get("direction").asText());
+        Assertions.assertEquals("ASC", node.get("sort").get(0).get("direction").asText());
 
-        Assert.assertFalse(node.get("sort").get(0).get("ignoreCase").asBoolean());
+        Assertions.assertFalse(node.get("sort").get(0).get("ignoreCase").asBoolean());
 
-        Assert.assertEquals("id", node.get("sort").get(0).get("property").asText());
+        Assertions.assertEquals("id", node.get("sort").get(0).get("property").asText());
 
-        Assert.assertEquals("NATIVE", node.get("sort").get(0).get("nullHandling").asText());
+        Assertions.assertEquals("NATIVE", node.get("sort").get(0).get("nullHandling").asText());
 
-        Assert.assertTrue(node.get("last").asBoolean());
+        Assertions.assertTrue(node.get("last").asBoolean());
 
-        Assert.assertFalse(node.get("first").asBoolean());
+        Assertions.assertFalse(node.get("first").asBoolean());
 
-        Assert.assertEquals(3, node.get("numberOfElements").asInt());
+        Assertions.assertEquals(3, node.get("numberOfElements").asInt());
 
-        Assert.assertEquals(20, node.get("size").asInt());
+        Assertions.assertEquals(20, node.get("size").asInt());
 
-        Assert.assertEquals(2, node.get("totalPages").asInt());
+        Assertions.assertEquals(2, node.get("totalPages").asInt());
 
-        Assert.assertEquals(23, node.get("totalElements").asInt());
+        Assertions.assertEquals(23, node.get("totalElements").asInt());
 
     }
 

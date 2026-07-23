@@ -14,9 +14,11 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.util;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.testng.annotations.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.wavemaker.runtime.data.exception.DataServiceRuntimeException;
 
@@ -34,13 +36,13 @@ public class DataServiceUtilsTest {
         Exception e3 = new NullPointerException("Null Values");
         InvalidDataAccessResourceUsageException invalid = new InvalidDataAccessResourceUsageException("Invalid data");
         RuntimeException rx = new IndexOutOfBoundsException("Check Array");
-        Assert.assertEquals(DataServiceUtils.unwrap(e), e);
-        Assert.assertEquals(DataServiceUtils.unwrap(e2), e);
-        Assert.assertEquals(DataServiceUtils.unwrap(rx), rx);
-        Assert.assertEquals(DataServiceUtils.unwrap(invalid), invalid);
-        Assert.assertEquals(DataServiceUtils.unwrap(e1), e);
-        Assert.assertEquals(DataServiceUtils.unwrap(runtimeException), runtimeException);
-        Assert.assertEquals(DataServiceUtils.unwrap(e3), e3);
+        Assertions.assertEquals(e, DataServiceUtils.unwrap(e));
+        Assertions.assertEquals(e, DataServiceUtils.unwrap(e2));
+        Assertions.assertEquals(rx, DataServiceUtils.unwrap(rx));
+        Assertions.assertEquals(invalid, DataServiceUtils.unwrap(invalid));
+        Assertions.assertEquals(e, DataServiceUtils.unwrap(e1));
+        Assertions.assertEquals(runtimeException, DataServiceUtils.unwrap(runtimeException));
+        Assertions.assertEquals(e3, DataServiceUtils.unwrap(e3));
 
     }
 
@@ -51,11 +53,11 @@ public class DataServiceUtilsTest {
         String query3 = "select * from detail";
         String query4 = "DELETE from detail where id=4";
         String query5 = "alter table detail add employeeid int";
-        Assert.assertTrue(DataServiceUtils.isDML(query1));
-        Assert.assertTrue(DataServiceUtils.isDML(query2));
-        Assert.assertFalse(DataServiceUtils.isDML(query3));
-        Assert.assertTrue(DataServiceUtils.isDML(query4));
-        Assert.assertTrue(DataServiceUtils.isDML(query5));
+        Assertions.assertTrue(DataServiceUtils.isDML(query1));
+        Assertions.assertTrue(DataServiceUtils.isDML(query2));
+        Assertions.assertFalse(DataServiceUtils.isDML(query3));
+        Assertions.assertTrue(DataServiceUtils.isDML(query4));
+        Assertions.assertTrue(DataServiceUtils.isDML(query5));
     }
 
     @Test
@@ -67,7 +69,7 @@ public class DataServiceUtilsTest {
             "&zeroDateTimeBehavior=convertToNull&createDatabaseIfNotExist=true";
 
         final String result = DataServiceUtils.replaceMySqlCloudToken(testUrl, "localhost:3306");
-        Assert.assertEquals(expectedUrl, result);
+        Assertions.assertEquals(expectedUrl, result);
     }
 
     @Test
@@ -79,7 +81,7 @@ public class DataServiceUtilsTest {
             "&zeroDateTimeBehavior=convertToNull&createDatabaseIfNotExist=true";
 
         final String result = DataServiceUtils.replaceMySqlCloudToken(testUrl, "localhost:3306");
-        Assert.assertEquals(expectedUrl, result);
+        Assertions.assertEquals(expectedUrl, result);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class DataServiceUtilsTest {
             "&zeroDateTimeBehavior=convertToNull&createDatabaseIfNotExist=true";
 
         final String result = DataServiceUtils.replaceMySqlCloudToken(testUrl, "localhost:3306");
-        Assert.assertEquals(expectedUrl, result);
+        Assertions.assertEquals(expectedUrl, result);
     }
 
     @Test
@@ -103,6 +105,6 @@ public class DataServiceUtilsTest {
             "&zeroDateTimeBehavior=convertToNull&createDatabaseIfNotExist=true";
 
         final String result = DataServiceUtils.replaceMySqlCloudToken(testUrl, "localhost:3306");
-        Assert.assertEquals(expectedUrl, result);
+        Assertions.assertEquals(expectedUrl, result);
     }
 }

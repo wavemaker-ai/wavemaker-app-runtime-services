@@ -20,8 +20,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.wavemaker.runtime.data.model.CustomProcedureParam;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameterType;
@@ -30,9 +32,9 @@ import com.wavemaker.runtime.data.model.procedures.ProcedureParameterType;
  * Created by anitha on 2/11/15.
  */
 
-@Test
 public class ProceduresUtilsTest {
 
+    @Test
     public void hasOutParamTest() {
         ProceduresUtils p = new ProceduresUtils();
         CustomProcedureParam cmp1 = new CustomProcedureParam("example", p, ProcedureParameterType.OUT, "int");
@@ -47,25 +49,27 @@ public class ProceduresUtilsTest {
         customProcedureParamList1.add(cmp2);
         customProcedureParamList1.add(cmp4);
         customProcedureParamList2.add(cmp3);
-        Assert.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList));
-        Assert.assertFalse(ProceduresUtils.hasOutParam(customProcedureParamList1));
-        Assert.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList2));
-        Assert.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList));
-        Assert.assertFalse(ProceduresUtils.hasOutParam(customProcedureParamList1));
+        Assertions.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList));
+        Assertions.assertFalse(ProceduresUtils.hasOutParam(customProcedureParamList1));
+        Assertions.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList2));
+        Assertions.assertTrue(ProceduresUtils.hasOutParam(customProcedureParamList));
+        Assertions.assertFalse(ProceduresUtils.hasOutParam(customProcedureParamList1));
 
     }
 
+    @Test
     public void hasOutParamTypeTest() {
         ProceduresUtils p = new ProceduresUtils();
         CustomProcedureParam cmp1 = new CustomProcedureParam("example", p, ProcedureParameterType.OUT, "int");
-        Assert.assertTrue(cmp1.getProcedureParamType().isOutParam());
+        Assertions.assertTrue(cmp1.getProcedureParamType().isOutParam());
         CustomProcedureParam cmp2 = new CustomProcedureParam("sample", p, ProcedureParameterType.IN, "int");
-        Assert.assertFalse(cmp2.getProcedureParamType().isOutParam());
+        Assertions.assertFalse(cmp2.getProcedureParamType().isOutParam());
         CustomProcedureParam cmp3 = new CustomProcedureParam("example", p, ProcedureParameterType.IN_OUT, "int");
-        Assert.assertTrue(cmp3.getProcedureParamType().isOutParam());
+        Assertions.assertTrue(cmp3.getProcedureParamType().isOutParam());
 
     }
 
+    @Test
     public void jdbcComplianceProcedure() {
         final String procedure1 = """
             sp_create_workorder_detail
@@ -110,15 +114,15 @@ public class ProceduresUtilsTest {
 
         final Set<String> namedParamSet = new HashSet<>(Arrays.asList(namedParams));
 
-        Assert.assertEquals(jdbcComplianceProcedure1, ProceduresUtils.jdbcComplianceProcedure(procedure1, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure2, ProceduresUtils.jdbcComplianceProcedure(procedure2, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure3, ProceduresUtils.jdbcComplianceProcedure(procedure3, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure4, ProceduresUtils.jdbcComplianceProcedure(procedure4, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure5, ProceduresUtils.jdbcComplianceProcedure(procedure5, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure6, ProceduresUtils.jdbcComplianceProcedure(procedure6, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure7, ProceduresUtils.jdbcComplianceProcedure(procedure7, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure8, ProceduresUtils.jdbcComplianceProcedure(procedure8, namedParamSet));
-        Assert.assertEquals(jdbcComplianceProcedure9, ProceduresUtils.jdbcComplianceProcedure(procedure9, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure1, ProceduresUtils.jdbcComplianceProcedure(procedure1, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure2, ProceduresUtils.jdbcComplianceProcedure(procedure2, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure3, ProceduresUtils.jdbcComplianceProcedure(procedure3, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure4, ProceduresUtils.jdbcComplianceProcedure(procedure4, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure5, ProceduresUtils.jdbcComplianceProcedure(procedure5, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure6, ProceduresUtils.jdbcComplianceProcedure(procedure6, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure7, ProceduresUtils.jdbcComplianceProcedure(procedure7, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure8, ProceduresUtils.jdbcComplianceProcedure(procedure8, namedParamSet));
+        Assertions.assertEquals(jdbcComplianceProcedure9, ProceduresUtils.jdbcComplianceProcedure(procedure9, namedParamSet));
 
     }
 

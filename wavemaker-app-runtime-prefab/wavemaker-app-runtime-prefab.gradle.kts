@@ -13,8 +13,15 @@ dependencies {
     implementation(appDependenciesLibs.commons.collections4)
     implementation(appDependenciesLibs.spring.webmvc)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
-    testImplementation(appDependenciesLibs.test.junit4)
     testImplementation(appDependenciesLibs.test.spring.test)
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
 }
 
 javaLibraryMavenPublish {

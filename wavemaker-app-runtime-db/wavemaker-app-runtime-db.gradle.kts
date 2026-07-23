@@ -23,12 +23,12 @@ dependencies {
     implementation(appDependenciesLibs.spring.data.commons)
     implementation(appDependenciesLibs.jackson.annotations)
     implementation(appDependenciesLibs.hibernate.core)
-    implementation(libs.jakarta.persistenceApi) {
+    implementation(appDependenciesLibs.jakarta.persistenceApi) {
         because("This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
                 "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
                 "To get the transaction related classes adding jakarta.persistence-api")
     }
-    implementation(libs.jakarta.transaction.api) {
+    implementation(appDependenciesLibs.jakarta.transaction.api) {
         because("This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
                 "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
                 "To get the transaction related classes adding jakarta.transaction-api")
@@ -48,8 +48,6 @@ dependencies {
     antlr(appDependenciesLibs.build.antlr4)
     runtimeOnly(appDependenciesLibs.antlr4Runtime)
     runtimeOnly(appDependenciesLibs.hikariCP)
-    testImplementation(appDependenciesLibs.test.junit4)
-    testImplementation(appDependenciesLibs.test.testng)
     testImplementation(appDependenciesLibs.commons.text)
 
     //TODO: To support DB2 implementation, the custom code needs to be updated as per the new hibernate library code
@@ -63,6 +61,14 @@ dependencies {
 configurations {
     runtimeOnly {
         exclude("org.antlr", "antlr4")
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
     }
 }
 

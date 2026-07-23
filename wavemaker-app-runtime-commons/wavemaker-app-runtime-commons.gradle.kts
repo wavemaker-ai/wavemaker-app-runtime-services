@@ -21,11 +21,18 @@ dependencies {
     implementation(appDependenciesLibs.jackson.datatype.jsr310)
     implementation(appDependenciesLibs.jackson.datatype.hibernate)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
-    testImplementation(appDependenciesLibs.test.junit4)
     testImplementation(appDependenciesLibs.test.jsonassert)
     testRuntimeOnly(appDependenciesLibs.hibernate.core) {
         because("jackson-datatype-hibernate5 depends on hibernate-core, TODO need to remove dependency on " +
                 "jackson-datatype-hibernate5 also in this module")
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
     }
 }
 

@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UrlParserUtilsTest {
 
@@ -29,7 +31,7 @@ public class UrlParserUtilsTest {
 
     List<String> expectedHostNames;
 
-    @Before
+    @BeforeEach
     public void init() {
         inputHostNames = new ArrayList<>();
         inputHostNames.add("wavemakeronline.com");
@@ -48,6 +50,6 @@ public class UrlParserUtilsTest {
     public void trimUrlForHostName() {
         List<String> sanitisedHostNames = inputHostNames.stream()
             .map(UrlParserUtils::trimUrlForHostName).collect(Collectors.toList());
-        Assert.assertEquals(sanitisedHostNames, expectedHostNames);
+        Assertions.assertEquals(expectedHostNames, sanitisedHostNames);
     }
 }

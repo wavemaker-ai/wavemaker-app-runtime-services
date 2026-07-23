@@ -21,9 +21,10 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.Assertions;
 
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.util.WMIOUtils;
@@ -35,7 +36,7 @@ public class XSSEncodeSanitizerTest {
     private List<String> encodedOnceList;
     private List<String> encodedTwiceList;
 
-    @Before
+    @BeforeEach
     public void init() {
         xssInputVectors = getFileLines("/com/wavemaker/runtime/xss/xss-attack-vector-input.txt");
         encodedOnceList = getFileLines("/com/wavemaker/runtime/xss/encoded-once.txt");
@@ -47,7 +48,7 @@ public class XSSEncodeSanitizerTest {
         XSSSanitizer xssSanitizer = new XSSEncodeSanitizer(true, XSSSanitizationLayer.INPUT);
         List<String> actualOutput = xssInputVectors.stream().map(str -> xssSanitizer.sanitizeIncomingData(str))
             .collect(Collectors.toList());
-        Assert.assertEquals(encodedOnceList, actualOutput);
+        Assertions.assertEquals(encodedOnceList, actualOutput);
     }
 
     @Test
@@ -55,7 +56,7 @@ public class XSSEncodeSanitizerTest {
         XSSSanitizer xssSanitizer = new XSSEncodeSanitizer(false, XSSSanitizationLayer.INPUT);
         List<String> actualOutput = xssInputVectors.stream().map(xssSanitizer::sanitizeOutgoingData)
             .collect(Collectors.toList());
-        Assert.assertEquals(encodedOnceList, actualOutput);
+        Assertions.assertEquals(encodedOnceList, actualOutput);
     }
 
     @Test
@@ -63,7 +64,7 @@ public class XSSEncodeSanitizerTest {
         XSSSanitizer xssSanitizer = new XSSEncodeSanitizer(false, XSSSanitizationLayer.OUTPUT);
         List<String> actualOutput = xssInputVectors.stream().map(xssSanitizer::sanitizeOutgoingData)
             .collect(Collectors.toList());
-        Assert.assertEquals(encodedOnceList, actualOutput);
+        Assertions.assertEquals(encodedOnceList, actualOutput);
     }
 
     @Test
@@ -71,7 +72,7 @@ public class XSSEncodeSanitizerTest {
         XSSSanitizer xssSanitizer = new XSSEncodeSanitizer(true, XSSSanitizationLayer.OUTPUT);
         List<String> actualOutput = encodedOnceList.stream().map(xssSanitizer::sanitizeOutgoingData)
             .collect(Collectors.toList());
-        Assert.assertEquals(encodedOnceList, actualOutput);
+        Assertions.assertEquals(encodedOnceList, actualOutput);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class XSSEncodeSanitizerTest {
         XSSSanitizer xssSanitizer = new XSSEncodeSanitizer(false, XSSSanitizationLayer.OUTPUT);
         List<String> actualOutput = encodedOnceList.stream().map(xssSanitizer::sanitizeOutgoingData)
             .collect(Collectors.toList());
-        Assert.assertEquals(encodedTwiceList, actualOutput);
+        Assertions.assertEquals(encodedTwiceList, actualOutput);
     }
 
     private List<String> getFileLines(String resourcePath) {

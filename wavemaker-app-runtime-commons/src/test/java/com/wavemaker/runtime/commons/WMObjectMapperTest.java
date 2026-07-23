@@ -20,7 +20,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

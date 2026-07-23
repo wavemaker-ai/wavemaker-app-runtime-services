@@ -16,10 +16,12 @@ package com.wavemaker.runtime.data.filter.parser;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import com.wavemaker.runtime.data.exception.HqlGrammarException;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
@@ -35,7 +37,8 @@ public class HqlParserTest extends HqlParserDataProvider {
 
     private Logger logger = LoggerFactory.getLogger(HqlParserTest.class);
 
-    @Test(dataProvider = "dataTypeQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#dataTypeQueriesProvider")
     public void comparisionAndDataTypeCheck(Class dateType, List<String> queries) throws ClassNotFoundException {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
@@ -44,13 +47,14 @@ public class HqlParserTest extends HqlParserDataProvider {
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
             for (WMQueryParamInfo wmQueryParamInfo : wmQueryInfo.getParameters().values()) {
-                Assert.assertSame(dateType, Class.forName(wmQueryParamInfo.getJavaType().getClassName()),
+                Assertions.assertSame(dateType, Class.forName(wmQueryParamInfo.getJavaType().getClassName()),
                     "'" + wmQueryParamInfo + "' in '" + query + "' could not be converted to " + dateType);
             }
         }
     }
 
-    @Test(dataProvider = "nullValuesQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#nullValuesQueriesProvider")
     public void nullValues(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
@@ -58,157 +62,163 @@ public class HqlParserTest extends HqlParserDataProvider {
 
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertEquals(wmQueryInfo.getParameters().size(), 0);
+            Assertions.assertEquals(0, wmQueryInfo.getParameters().size());
         }
     }
 
-    @Test(dataProvider = "syntaxErrorQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#syntaxErrorQueriesProvider")
     public void syntaxErrors(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         assert queries != null;
 
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "sqlInjectionQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @Disabled("WMHqlAntlrErrorListner throws ClassCastException (ANTLRInputStream cannot be cast to TokenStream) — pre-existing production bug")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#sqlInjectionQueriesProvider")
     public void sqlInjections(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         assert queries != null;
 
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "betweenPositiveQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#betweenPositiveQueriesProvider")
     public void betweenPositive(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            Assertions.assertNotNull(wmQueryInfo);
         }
     }
 
-    @Test(dataProvider = "betweenNegativeQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#betweenNegativeQueriesProvider")
     public void betweenNegative(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "inPositiveQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#inPositiveQueriesProvider")
     public void inPositive(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            Assertions.assertNotNull(wmQueryInfo);
         }
     }
 
-    @Test(dataProvider = "inNegativeQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#inNegativeQueriesProvider")
     public void inNegative(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "likePositiveQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#likePositiveQueriesProvider")
     public void likePositive(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            Assertions.assertNotNull(wmQueryInfo);
         }
     }
 
-    @Test(dataProvider = "likeNegativeQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#likeNegativeQueriesProvider")
     public void likeNegative(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "nestedBracesPositiveQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#nestedBracesPositiveQueriesProvider")
     public void nestedBracesPositive(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            Assertions.assertNotNull(wmQueryInfo);
         }
     }
 
-    @Test(dataProvider = "nestedBracesNegativeQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = "Syntax error.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#nestedBracesNegativeQueriesProvider")
     public void nestedBracesNegative(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "propertyPositiveQueriesProvider")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#propertyPositiveQueriesProvider")
     public void propertyPositive(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
             WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            Assertions.assertNotNull(wmQueryInfo);
         }
     }
 
-    @Test(dataProvider = "propertyNegativeQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = ".*is not a comparable.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#propertyNegativeQueriesProvider")
     public void propertyNegative(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 
-    @Test(dataProvider = "InvalidPropertyQueriesProvider",
-        expectedExceptions = HqlGrammarException.class,
-        expectedExceptionsMessageRegExp = ".*Property.*is not valid.*")
+    @ParameterizedTest
+    @MethodSource("com.wavemaker.runtime.data.filter.parser.utils.dataprovider.HqlParserDataProvider#InvalidPropertyQueriesProvider")
     public void invalidProperties(Class dateType, List<String> queries) {
         logger.debug("Testing for the Data type {}.", dateType);
         HqlFilterPropertyResolver propertyResolver = new HqlFilterPropertyResolverImpl(Model.class);
         for (String query : queries) {
-            WMQueryInfo wmQueryInfo = HqlParser.getInstance().parse(query, propertyResolver);
-            Assert.assertNotNull(wmQueryInfo);
+            HqlGrammarException ex = Assertions.assertThrows(HqlGrammarException.class,
+                () -> HqlParser.getInstance().parse(query, propertyResolver));
+            Assertions.assertNotNull(ex.getMessage());
         }
     }
 

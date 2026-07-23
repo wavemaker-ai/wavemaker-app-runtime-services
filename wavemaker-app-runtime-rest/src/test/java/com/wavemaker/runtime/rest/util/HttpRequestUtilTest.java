@@ -27,8 +27,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,22 +47,22 @@ public class HttpRequestUtilTest {
 
     @Test
     public void messageParseTest() {
-        Assert.assertNotNull(HttpRequestUtils.getFormMessage(getDetailMap()));
-        Assert.assertNotNull(HttpRequestUtils.getMultipartMessage(getMultiValueMapMap()));
+        Assertions.assertNotNull(HttpRequestUtils.getFormMessage(getDetailMap()));
+        Assertions.assertNotNull(HttpRequestUtils.getMultipartMessage(getMultiValueMapMap()));
     }
 
     @Test
     public void jsonMessageTest() {
         try {
             HttpRequestUtils.getJsonMessage("");
-            Assert.fail("Should throw exception");
+            Assertions.fail("Should throw exception");
         } catch (WMRuntimeException e) {
-            Assert.assertEquals(COM_WM_EMPTY_OBJECT, e.getMessageResourceHolder().getMessageResource().getMessageKey());
+            Assertions.assertEquals(COM_WM_EMPTY_OBJECT, e.getMessageResourceHolder().getMessageResource().getMessageKey());
         }
         try {
-            Assert.assertNotNull(HttpRequestUtils.getJsonMessage("name"));
+            Assertions.assertNotNull(HttpRequestUtils.getJsonMessage("name"));
         } catch (WMRuntimeException e) {
-            Assert.assertEquals(COM_WM_EMPTY_OBJECT, e.getMessageResourceHolder().getMessageResource().getMessageKey());
+            Assertions.assertEquals(COM_WM_EMPTY_OBJECT, e.getMessageResourceHolder().getMessageResource().getMessageKey());
         }
     }
 

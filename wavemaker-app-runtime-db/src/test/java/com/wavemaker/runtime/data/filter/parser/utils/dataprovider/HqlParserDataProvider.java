@@ -16,8 +16,9 @@ package com.wavemaker.runtime.data.filter.parser.utils.dataprovider;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.testng.annotations.DataProvider;
+import org.junit.jupiter.params.provider.Arguments;
 
 import com.wavemaker.runtime.data.filter.parser.utils.dataprovider.queries.BetweenQueries;
 import com.wavemaker.runtime.data.filter.parser.utils.dataprovider.queries.DataTypeQueries;
@@ -36,93 +37,68 @@ import com.wavemaker.runtime.data.filter.parser.utils.dataprovider.queries.Synta
  */
 public class HqlParserDataProvider {
 
-    @DataProvider
-    public static Object[][] dataTypeQueriesProvider() {
+    public static Stream<Arguments> dataTypeQueriesProvider() {
         return getParameters(DataTypeQueries::getQueries, FieldsMetadata.getFields());
     }
 
-    @DataProvider
-    public static Object[][] nullValuesQueriesProvider() {
+    public static Stream<Arguments> nullValuesQueriesProvider() {
         return getParameters(NullCheckQueries::getQueries, FieldsMetadata.getFields());
     }
 
-    @DataProvider
-    public static Object[][] syntaxErrorQueriesProvider() {
+    public static Stream<Arguments> syntaxErrorQueriesProvider() {
         return getParameters(SyntaxErrorQueries::getQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] sqlInjectionQueriesProvider() {
+    public static Stream<Arguments> sqlInjectionQueriesProvider() {
         return getParameters(SqlInjectionQueries::getQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] betweenPositiveQueriesProvider() {
+    public static Stream<Arguments> betweenPositiveQueriesProvider() {
         return getParameters(BetweenQueries::getPositiveQueries, FieldsMetadata.getFieldsExcluding(Boolean.class, String.class));
     }
 
-    @DataProvider
-    public static Object[][] betweenNegativeQueriesProvider() {
+    public static Stream<Arguments> betweenNegativeQueriesProvider() {
         return getParameters(BetweenQueries::getNegativeQueries, FieldsMetadata.getFieldsExcluding(Boolean.class, String.class));
     }
 
-    @DataProvider
-    public static Object[][] inPositiveQueriesProvider() {
+    public static Stream<Arguments> inPositiveQueriesProvider() {
         return getParameters(InQueries::getPositiveQueries, FieldsMetadata.getFieldsExcluding(Boolean.class, String.class));
     }
 
-    @DataProvider
-    public static Object[][] inNegativeQueriesProvider() {
+    public static Stream<Arguments> inNegativeQueriesProvider() {
         return getParameters(InQueries::getNegativeQueries, FieldsMetadata.getFieldsExcluding(Boolean.class, String.class));
     }
 
-    @DataProvider
-    public static Object[][] likePositiveQueriesProvider() {
+    public static Stream<Arguments> likePositiveQueriesProvider() {
         return getParameters(LikeQueries::getPositiveQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] likeNegativeQueriesProvider() {
+    public static Stream<Arguments> likeNegativeQueriesProvider() {
         return getParameters(LikeQueries::getNegativeQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] nestedBracesPositiveQueriesProvider() {
+    public static Stream<Arguments> nestedBracesPositiveQueriesProvider() {
         return getParameters(NestedBracesQueries::getPositiveQueries, FieldsMetadata.getFields());
     }
 
-    @DataProvider
-    public static Object[][] nestedBracesNegativeQueriesProvider() {
+    public static Stream<Arguments> nestedBracesNegativeQueriesProvider() {
         return getParameters(NestedBracesQueries::getNegativeQueries, FieldsMetadata.getFields());
     }
 
-    @DataProvider
-    public static Object[][] propertyPositiveQueriesProvider() {
+    public static Stream<Arguments> propertyPositiveQueriesProvider() {
         return getParameters(PropertyQueries::getPositiveQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] propertyNegativeQueriesProvider() {
+    public static Stream<Arguments> propertyNegativeQueriesProvider() {
         return getParameters(PropertyQueries::getNegativeQueries, Collections.singletonList(String.class));
     }
 
-    @DataProvider
-    public static Object[][] InvalidPropertyQueriesProvider() {
+    public static Stream<Arguments> InvalidPropertyQueriesProvider() {
         return getParameters(InvalidPropertyQueries::getQueries, Collections.singletonList(String.class));
     }
 
-    private static Object[][] getParameters(QueriesProvider queriesProvider, List<Class<?>> fields) {
-        Object[][] parameters = new Object[fields.size()][2];
-        int i = 0;
-        for (Class<?> dataType : fields) {
-            List<String> queries = queriesProvider.getQueries(dataType);
-
-            parameters[i][0] = dataType;
-            parameters[i][1] = queries;
-            i++;
-        }
-
-        return parameters;
+    private static Stream<Arguments> getParameters(QueriesProvider queriesProvider, List<Class<?>> fields) {
+        return fields.stream().map(dataType -> Arguments.of(dataType, queriesProvider.getQueries(dataType)));
     }
 
     @FunctionalInterface

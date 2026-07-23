@@ -17,8 +17,10 @@ package com.wavemaker.runtime.data.filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -53,7 +55,7 @@ public class LegacyQueryFilterInterceptorTest {
     @Test
     public void testReplaceExpressionWithHQL() {
         for (Map.Entry<String, String> testCase : expressionVsExpectedQuery.entrySet()) {
-            Assert.assertEquals(LegacyQueryFilterInterceptor.replaceExpressionWithHQL(testCase.getKey()), testCase.getValue());
+            Assertions.assertEquals(testCase.getValue(), LegacyQueryFilterInterceptor.replaceExpressionWithHQL(testCase.getKey()));
         }
     }
 

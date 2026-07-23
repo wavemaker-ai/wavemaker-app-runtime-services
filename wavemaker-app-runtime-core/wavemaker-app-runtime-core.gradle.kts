@@ -69,8 +69,6 @@ dependencies {
     implementation(appDependenciesLibs.jakarta.xml.bind.api) {
         because("Used for getting jakarta xml bind packages, but previously javax bind api used to be loaded in app runtime core")
     }
-    testImplementation(appDependenciesLibs.test.junit4)
-
     //Logging related dependencies
     implementation(appDependenciesLibs.slf4j.api)
     implementation(appDependenciesLibs.log4j.core)
@@ -104,6 +102,14 @@ tasks {
         dependsOn(":wavemaker-app-runtime-connector-app-integration:jar")
         dependsOn(":wavemaker-app-runtime-connector-api:jar")
         dependsOn(":wavemaker-app-memory-management:jar")
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
     }
 }
 

@@ -14,8 +14,10 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.export;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -29,7 +31,7 @@ public class SimpleFieldValueProviderTest {
 
         Employee testData = new Employee("testEmpName", new Department("testDeptName"));
 
-        Assert.assertEquals("testEmpName", valueProvider.getValue(testData));
+        Assertions.assertEquals("testEmpName", valueProvider.getValue(testData));
     }
 
     @Test
@@ -38,7 +40,7 @@ public class SimpleFieldValueProviderTest {
 
         Employee testData = new Employee("testEmpName", new Department("testDeptName"));
 
-        Assert.assertEquals("testDeptName", valueProvider.getValue(testData));
+        Assertions.assertEquals("testDeptName", valueProvider.getValue(testData));
     }
 
     private static class Employee {

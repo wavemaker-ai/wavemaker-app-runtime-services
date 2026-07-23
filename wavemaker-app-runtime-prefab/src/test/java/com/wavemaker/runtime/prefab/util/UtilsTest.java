@@ -18,24 +18,25 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.wavemaker.runtime.prefab.config.PrefabServletConfig;
 import com.wavemaker.runtime.prefab.config.PrefabsConfig;
 
-import junit.framework.Assert;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Dilip Kumar
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = PrefabServletConfig.class)
-@Ignore
+@Disabled
 public class UtilsTest {
     private static final String SAMPLE_PREFAB_DIR = "/testPrefab";
     private static final String JAR_FILE = SAMPLE_PREFAB_DIR + File.separator + PrefabConstants.PREFAB_DEFAULT_LIB_DIR
@@ -48,19 +49,19 @@ public class UtilsTest {
 
     @Test
     public void testIsReadableJarFile() throws Exception {
-        Assert.assertFalse(Utils.isReadableJarFile(new File("not/valid/path")));
-        Assert.assertFalse(Utils.isReadableJarFile(new File("not_valid_test.jar")));
-        Assert.assertFalse(Utils.isReadableJarFile(null));
-        Assert.assertFalse(Utils.isReadableJarFile(getClassPathResourceAsFile(SAMPLE_PREFAB_DIR)));
-        Assert.assertTrue(Utils.isReadableJarFile(getClassPathResourceAsFile(JAR_FILE)));
+        Assertions.assertFalse(Utils.isReadableJarFile(new File("not/valid/path")));
+        Assertions.assertFalse(Utils.isReadableJarFile(new File("not_valid_test.jar")));
+        Assertions.assertFalse(Utils.isReadableJarFile(null));
+        Assertions.assertFalse(Utils.isReadableJarFile(getClassPathResourceAsFile(SAMPLE_PREFAB_DIR)));
+        Assertions.assertTrue(Utils.isReadableJarFile(getClassPathResourceAsFile(JAR_FILE)));
     }
 
     @Test
     public void testReadJarFilesForPrefab() throws Exception {
-        Assert.assertEquals(1, prefabUtils.readJarFilesForPrefab(getClassPathResourceAsFile("/testPrefab")).length);
-        Assert.assertEquals(PrefabConstants.ZERO_FILES.length, prefabUtils.readJarFilesForPrefab(new File("not/valid/dir"))
+        Assertions.assertEquals(1, prefabUtils.readJarFilesForPrefab(getClassPathResourceAsFile("/testPrefab")).length);
+        Assertions.assertEquals(PrefabConstants.ZERO_FILES.length, prefabUtils.readJarFilesForPrefab(new File("not/valid/dir"))
             .length);
-        Assert.assertEquals(PrefabConstants.ZERO_FILES.length, prefabUtils.readJarFilesForPrefab(null).length);
+        Assertions.assertEquals(PrefabConstants.ZERO_FILES.length, prefabUtils.readJarFilesForPrefab(null).length);
     }
 
     public static String getClassPathResource(String path) {
@@ -73,40 +74,40 @@ public class UtilsTest {
 
     @Test
     public void testGetPrefabLibDirectory() throws Exception {
-        Assert.assertEquals(new File(SAMPLE_PREFAB_DIR, prefabsConfig.getPrefabLibDir()),
+        Assertions.assertEquals(new File(SAMPLE_PREFAB_DIR, prefabsConfig.getPrefabLibDir()),
             prefabUtils.getPrefabLibDirectory(new File(SAMPLE_PREFAB_DIR))
         );
     }
 
     @Test
     public void testGetPrefabConfigDirectory() throws Exception {
-        Assert.assertEquals(new File(SAMPLE_PREFAB_DIR, prefabsConfig.getPrefabConfigDir()),
+        Assertions.assertEquals(new File(SAMPLE_PREFAB_DIR, prefabsConfig.getPrefabConfigDir()),
             prefabUtils.getPrefabConfigDirectory(new File(SAMPLE_PREFAB_DIR))
         );
     }
 
     @Test
     public void testIsReadableDirectory() throws Exception {
-        Assert.assertFalse(Utils.isReadableDirectory(new File("not/valid/path")));
-        Assert.assertFalse(Utils.isReadableDirectory(new File("not_valid_test.jar")));
-        Assert.assertFalse(Utils.isReadableDirectory(null));
-        Assert.assertTrue(Utils.isReadableDirectory(getClassPathResourceAsFile(SAMPLE_PREFAB_DIR)));
-        Assert.assertFalse(Utils.isReadableDirectory(getClassPathResourceAsFile(JAR_FILE)));
+        Assertions.assertFalse(Utils.isReadableDirectory(new File("not/valid/path")));
+        Assertions.assertFalse(Utils.isReadableDirectory(new File("not_valid_test.jar")));
+        Assertions.assertFalse(Utils.isReadableDirectory(null));
+        Assertions.assertTrue(Utils.isReadableDirectory(getClassPathResourceAsFile(SAMPLE_PREFAB_DIR)));
+        Assertions.assertFalse(Utils.isReadableDirectory(getClassPathResourceAsFile(JAR_FILE)));
     }
 
     @Test
     public void testListPrefabDirectories() throws Exception {
-        Assert.assertEquals(0, prefabUtils.listPrefabDirectories(new File("/not/valid/dir")).length);
-        Assert.assertEquals(1, prefabUtils.listPrefabDirectories(getClassPathResourceAsFile(File.separator)).length);
-        Assert.assertEquals(0, prefabUtils.listPrefabDirectories(getClassPathResourceAsFile(JAR_FILE)).length);
+        Assertions.assertEquals(0, prefabUtils.listPrefabDirectories(new File("/not/valid/dir")).length);
+        Assertions.assertEquals(1, prefabUtils.listPrefabDirectories(getClassPathResourceAsFile(File.separator)).length);
+        Assertions.assertEquals(0, prefabUtils.listPrefabDirectories(getClassPathResourceAsFile(JAR_FILE)).length);
     }
 
     @Test
     public void testConvertToURLS() throws Exception {
         File[] files = new File[]{getClassPathResourceAsFile(JAR_FILE)};
         URL[] urls = Utils.convertToURLS(prefabUtils.getPrefabConfigDirectory(getClassPathResourceAsFile(SAMPLE_PREFAB_DIR)), files);
-        Assert.assertEquals((files.length + 1), urls.length);
-        Assert.assertTrue(Arrays.asList(urls).contains(files[0].toURI().toURL()));
+        Assertions.assertEquals((files.length + 1), urls.length);
+        Assertions.assertTrue(Arrays.asList(urls).contains(files[0].toURI().toURL()));
     }
 
 }
