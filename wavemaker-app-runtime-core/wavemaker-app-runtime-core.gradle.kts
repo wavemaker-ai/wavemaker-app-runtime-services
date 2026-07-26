@@ -4,8 +4,8 @@ plugins {
 
 group ="ai.wavemaker.runtime"
 
-val loggingCapabilityConfiguration: Configuration by configurations.creating
-val runtimeLibDependencies: Configuration by configurations.creating {
+val loggingCapabilityConfiguration = configurations.create("loggingCapabilityConfiguration")
+val runtimeLibDependencies = configurations.create("runtimeLibDependencies") {
     extendsFrom(loggingCapabilityConfiguration)
 }
 
@@ -107,7 +107,7 @@ tasks {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        named<JvmTestSuite>("test") {
             useJUnitJupiter(libs.versions.junit.get())
         }
     }
