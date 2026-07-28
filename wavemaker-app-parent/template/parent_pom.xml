@@ -207,6 +207,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipUiBuild}</skip>
                             <target>
                                 <ant antfile="${basedir}/build.xml" target="uiBuild"/>
                             </target>
@@ -503,5 +504,6 @@
         <wavemaker.app.build.version>@version@</wavemaker.app.build.version>
         <wavemaker.app.runtime.services.version>@version@</wavemaker.app.runtime.services.version>
         <maven.war.packagingExcludes>README.md</maven.war.packagingExcludes>
+        <skipUiBuild>false</skipUiBuild>
     </properties>
 </project>
