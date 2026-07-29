@@ -29,6 +29,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
@@ -56,6 +57,9 @@ public class ContentSecurityPolicyFilter extends GenericFilterBean {
     private AntPathRequestMatcher indexPathMatcher = new AntPathRequestMatcher("/index.html");
     private AntPathRequestMatcher rootPathMatcher = new AntPathRequestMatcher("/");
 
+    @Autowired
+    private ReactCspScriptHashResolver reactCspScriptHashResolver;
+
     @Override
     protected void initFilterBean() {
         if (cspEnabled) {
@@ -74,9 +78,10 @@ public class ContentSecurityPolicyFilter extends GenericFilterBean {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         if (cspEnabled && requestMatches(httpServletRequest)) {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            String effectivePolicy = reactCspScriptHashResolver.resolveEffectivePolicy(httpServletRequest, cspPolicy);
             if (nonceReplacementNeeded) {
                 String nonce = generateRandomNonce(12);
-                httpServletResponse.addHeader(CSP_HEADER, cspPolicy.replace(NONCE_PLACEHOLDER, nonce));
+                httpServletResponse.addHeader(CSP_HEADER, effectivePolicy.replace(NONCE_PLACEHOLDER, nonce));
                 CSPResponseWrapper cspResponseWrapper = new CSPResponseWrapper(httpServletResponse);
                 chain.doFilter(httpServletRequest, cspResponseWrapper);
                 String res = new String(cspResponseWrapper.getByteArray());
@@ -87,7 +92,7 @@ public class ContentSecurityPolicyFilter extends GenericFilterBean {
                 writer.flush();
                 return;
             } else {
-                httpServletResponse.addHeader(CSP_HEADER, cspPolicy);
+                httpServletResponse.addHeader(CSP_HEADER, effectivePolicy);
             }
         }
         chain.doFilter(request, response);
