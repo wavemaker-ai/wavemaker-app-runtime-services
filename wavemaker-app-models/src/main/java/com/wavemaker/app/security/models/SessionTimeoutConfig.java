@@ -16,7 +16,6 @@ package com.wavemaker.app.security.models;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -33,7 +32,6 @@ public class SessionTimeoutConfig {
     @NonProfilizableProperty("${security.general.login.sessionTimeoutType}")
     private LoginType type;
 
-    @Null
     @JsonProperty
     @NonProfilizableProperty("${security.general.login.sessionTimeoutPageName}")
     private String pageName;
