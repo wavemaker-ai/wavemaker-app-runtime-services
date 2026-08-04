@@ -20,6 +20,7 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavemaker.app.security.models.annotation.NonProfilizableProperty;
 import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 
@@ -31,6 +32,7 @@ public class SessionTimeoutConfig {
     @NonProfilizableProperty("${security.general.login.sessionTimeoutType}")
     private LoginType type;
 
+    @JsonProperty
     @NonProfilizableProperty("${security.general.login.sessionTimeoutPageName}")
     private String pageName;
 

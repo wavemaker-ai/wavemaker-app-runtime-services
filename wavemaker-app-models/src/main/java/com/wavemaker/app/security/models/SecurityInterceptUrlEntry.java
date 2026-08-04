@@ -16,6 +16,7 @@ package com.wavemaker.app.security.models;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavemaker.app.web.http.HttpMethod;
 
 public class SecurityInterceptUrlEntry {
@@ -23,6 +24,8 @@ public class SecurityInterceptUrlEntry {
     private String urlPattern;
     private Permission permission;
     private String[] roles;
+
+    @JsonProperty
     private HttpMethod httpMethod;
 
     public SecurityInterceptUrlEntry() {

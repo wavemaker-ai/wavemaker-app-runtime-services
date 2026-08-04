@@ -16,12 +16,16 @@ package com.wavemaker.app.security.models;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by Arjun Sahasranam on 30/6/15.
  */
 public class Role {
 
     private String name;
+
+    @JsonProperty
     private String description;
     private final RoleConfig roleConfig;
 
