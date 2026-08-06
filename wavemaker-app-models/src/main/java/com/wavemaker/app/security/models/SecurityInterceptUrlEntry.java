@@ -23,6 +23,8 @@ public class SecurityInterceptUrlEntry {
 
     private String urlPattern;
     private Permission permission;
+
+    @JsonProperty
     private String[] roles;
 
     @JsonProperty

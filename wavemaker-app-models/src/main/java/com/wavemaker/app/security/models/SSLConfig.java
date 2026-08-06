@@ -17,6 +17,7 @@ package com.wavemaker.app.security.models;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavemaker.app.security.models.annotation.NonProfilizableProperty;
 import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 
@@ -33,6 +34,7 @@ public class SSLConfig {
     @ProfilizableProperty(value = "${security.general.ssl.enabled}")
     private boolean useSSL;
 
+    @JsonProperty
     @NonProfilizableProperty("${security.general.ssl.excludedUrls:#{null}}")
     private String excludedUrls;
 

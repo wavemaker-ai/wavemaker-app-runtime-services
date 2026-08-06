@@ -16,6 +16,8 @@ package com.wavemaker.app.security.models;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Uday Shankar
  */
@@ -23,8 +25,14 @@ public class CustomFilter {
 
     private String name;
     private String ref;
+
+    @JsonProperty
     private String before;
+
+    @JsonProperty
     private String position;
+
+    @JsonProperty
     private String after;
 
     public String getName() {

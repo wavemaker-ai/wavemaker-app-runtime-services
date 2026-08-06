@@ -16,6 +16,7 @@ package com.wavemaker.app.security.models;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.wavemaker.app.security.models.annotation.NonProfilizableProperty;
 import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
@@ -28,6 +29,7 @@ public class XSSConfig {
     @ProfilizableProperty("${security.general.xss.enabled}")
     private boolean enforceXssSecurity;
 
+    @JsonProperty
     @JsonPropertyDescription("The policy file is the name of the xml file which has the antisamy rules. And this policy file is in WEB-INF folder." +
         "This policyFile property can be null, when XSSPolicyType is MANUAL")
     @NonProfilizableProperty("${security.general.xss.policyFile}")
