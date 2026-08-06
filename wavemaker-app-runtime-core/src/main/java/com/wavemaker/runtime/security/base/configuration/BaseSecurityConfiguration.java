@@ -41,7 +41,6 @@ import com.wavemaker.runtime.security.filter.WMFrameOptionsHeaderFilter;
 import com.wavemaker.runtime.security.filter.WMXContentTypeOptionsFilter;
 import com.wavemaker.runtime.security.xss.filter.WMXSSFilter;
 import com.wavemaker.runtime.web.filter.ContentSecurityPolicyFilter;
-import com.wavemaker.runtime.web.filter.ReactCspScriptHashResolver;
 import com.wavemaker.runtime.web.filter.SSLSecureFilter;
 
 @Configuration
@@ -71,11 +70,6 @@ public class BaseSecurityConfiguration {
     @Bean(name = "contentSecurityPolicyFilter")
     public Filter contentSecurityPolicyFilter() {
         return new ContentSecurityPolicyFilter();
-    }
-
-    @Bean(name = "reactCspScriptHashResolver")
-    public ReactCspScriptHashResolver reactCspScriptHashResolver() {
-        return new ReactCspScriptHashResolver();
     }
 
     @Bean(name = "wmFrameOptionsFilter")
