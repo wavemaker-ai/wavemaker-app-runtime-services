@@ -15,11 +15,9 @@
 
 package com.wavemaker.runtime.web.filter;
 
-import java.io.File;
 import java.io.IOException;
 
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -34,25 +32,17 @@ import org.springframework.web.util.UrlPathHelper;
 public class ReactRoutingFilter extends GenericFilterBean {
 
     private static final Logger reactRoutelogger = LoggerFactory.getLogger(ReactRoutingFilter.class);
+    private static final String INDEX_HTML_PATH = "/index.html";
     private final AntPathRequestMatcher pagePathMatcher = new AntPathRequestMatcher("/react-pages/*");
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         if (requestMatches(httpRequest)) {
-            String uri = new UrlPathHelper().getPathWithinApplication(httpRequest);
-            String fileName = uri.substring(uri.lastIndexOf('/') + 1);
-            boolean hasExtension = fileName.contains(".");
-            if (!hasExtension) {
-                String htmlPath = uri + ".html";
-                File htmlFile = new File(getServletContext().getRealPath(htmlPath));
-                if (htmlFile.isFile()) {
-                    reactRoutelogger.debug("Forwarding request {} to {}", uri, htmlPath);
-                    RequestDispatcher dispatcher = request.getRequestDispatcher(htmlPath);
-                    dispatcher.forward(request, response);
-                    return;
-                }
-            }
+            reactRoutelogger.info("ReactRoutingFilter matched request {}", httpRequest.getRequestURI());
+            reactRoutelogger.debug("Forwarding request {} to {}", new UrlPathHelper().getPathWithinApplication(httpRequest), INDEX_HTML_PATH);
+            request.getRequestDispatcher(INDEX_HTML_PATH).forward(request, response);
+            return;
         }
         chain.doFilter(request, response);
     }

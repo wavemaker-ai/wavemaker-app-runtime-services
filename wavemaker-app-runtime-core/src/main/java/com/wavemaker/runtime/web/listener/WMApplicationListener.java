@@ -139,7 +139,7 @@ public class WMApplicationListener implements ServletContextListener {
             activeThemeFilter.addMappingForUrlPatterns(null, true, "/*");
         }
 
-        Set<String> resourcePaths = servletContext.getResourcePaths("/_next");
+        Set<String> resourcePaths = servletContext.getResourcePaths("/_assets");
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             FilterRegistration.Dynamic reactRoutingFilter = registerDelegatingFilterProxyFilter(servletContext, "reactRoutingFilter");
             logger.debug("Registering React filter : {} ", reactRoutingFilter);
