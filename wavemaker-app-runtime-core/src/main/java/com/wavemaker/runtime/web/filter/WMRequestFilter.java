@@ -23,7 +23,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.slf4j.MDC;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
@@ -43,11 +42,9 @@ public class WMRequestFilter extends GenericFilterBean {
         try {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-            MDC.put(APP_NAME_KEY, httpServletRequest.getServletContext().getContextPath());
             httpRequestResponseHolderThreadLocal.set(new HttpRequestResponseHolder(httpServletRequest, httpServletResponse));
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            MDC.remove(APP_NAME_KEY);
             httpRequestResponseHolderThreadLocal.remove();
         }
     }

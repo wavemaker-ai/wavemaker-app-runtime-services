@@ -37,6 +37,8 @@ import com.wavemaker.runtime.commons.WMAppContext;
 import com.wavemaker.runtime.prefab.web.PrefabControllerServlet;
 import com.wavemaker.runtime.security.config.WMAppSecurityConfig;
 import com.wavemaker.runtime.service.AppRuntimeService;
+import com.wavemaker.runtime.web.filter.WMAppNameMdcFilter;
+import com.wavemaker.runtime.web.servlet.MdcAwareServletWrapper;
 import com.wavemaker.runtime.web.servlet.PrefabWebContentServlet;
 
 public class WMApplicationListener implements ServletContextListener {
@@ -61,7 +63,7 @@ public class WMApplicationListener implements ServletContextListener {
             environment.getProperty("app.multipartconfig.maxFileSize", Long.class, 300000000L),
             environment.getProperty("app.multipartconfig.maxRequestSize", Long.class, -1L), 0);
 
-        ServletRegistration.Dynamic servicesServlet = registerServlet(servletContext, "services", new DispatcherServlet());
+        ServletRegistration.Dynamic servicesServlet = registerServlet(servletContext, "services", new MdcAwareServletWrapper(new DispatcherServlet()));
         servicesServlet.setLoadOnStartup(1);
         servicesServlet.setInitParameter("namespace", "project-services");
         servicesServlet.setInitParameter(CONTEXT_CONFIG_LOCATION, "");
@@ -69,7 +71,7 @@ public class WMApplicationListener implements ServletContextListener {
         servicesServlet.setMultipartConfig(multipartConfigElement);
         servicesServlet.addMapping("/services/*");
         servicesServlet.setAsyncSupported(Boolean.TRUE.equals(environment.getProperty("app.servlet.asyncSupported", Boolean.class)));
-        ServletRegistration.Dynamic prefabsServlet = registerServlet(servletContext, "prefabs", new PrefabControllerServlet());
+        ServletRegistration.Dynamic prefabsServlet = registerServlet(servletContext, "prefabs", new MdcAwareServletWrapper(new PrefabControllerServlet()));
         prefabsServlet.setLoadOnStartup(1);
         prefabsServlet.setInitParameter("contextClass", "org.springframework.web.context.support.AnnotationConfigWebApplicationContext");
         prefabsServlet.setInitParameter(CONTEXT_CONFIG_LOCATION, "com.wavemaker.runtime.prefab.config.PrefabServletConfig");
@@ -82,6 +84,10 @@ public class WMApplicationListener implements ServletContextListener {
 
     private void registerFilters(ServletContext servletContext, AppRuntimeService appRuntimeService) {
         String applicationType = appRuntimeService.getApplicationType();
+
+        FilterRegistration.Dynamic appNameMdcFilter = registerFilter(servletContext, "appNameMdcFilter", new WMAppNameMdcFilter());
+        appNameMdcFilter.addMappingForUrlPatterns(null, false, "/*");
+
         FilterRegistration.Dynamic throwableTranslationFilter = registerDelegatingFilterProxyFilter(servletContext, "throwableTranslationFilter");
         throwableTranslationFilter.addMappingForUrlPatterns(null, false, "/*");
 
