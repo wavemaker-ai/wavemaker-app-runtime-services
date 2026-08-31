@@ -59,7 +59,9 @@ public class InMemoryRegistrationRepository implements ClientRegistrationReposit
             .clientId(openIdProviderConfig.getClientId())
             .clientSecret(openIdProviderConfig.getClientSecret())
             .clientName(openIdProviderConfig.getProviderId())
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .clientAuthenticationMethod(openIdProviderConfig.getClientAuthenticationMethod() != null
+                ? new ClientAuthenticationMethod(openIdProviderConfig.getClientAuthenticationMethod().getValue())
+                : ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .userNameAttributeName(openIdProviderConfig.getUserNameAttributeName())
             .build();
     }

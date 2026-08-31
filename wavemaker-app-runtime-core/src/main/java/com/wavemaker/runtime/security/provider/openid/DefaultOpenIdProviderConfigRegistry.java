@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 import com.wavemaker.app.security.models.config.openid.OpenIdProviderConfig;
+import com.wavemaker.app.security.models.config.openid.WMClientAuthenticationMethod;
 import com.wavemaker.app.security.models.config.rolemapping.DatabaseRoleMappingConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleAttributeNameMappingConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
@@ -64,6 +65,14 @@ public class DefaultOpenIdProviderConfigRegistry implements OpenIdProviderConfig
         openIdProviderConfig.setTokenUrl(environment.getProperty(SECURITY_PROVIDERS_OPEN_ID + providerId + ".tokenUrl"));
         openIdProviderConfig.setUserInfoUrl(environment.getProperty(SECURITY_PROVIDERS_OPEN_ID + providerId + ".userInfoUrl"));
         openIdProviderConfig.setUserNameAttributeName(environment.getProperty(SECURITY_PROVIDERS_OPEN_ID + providerId + ".userNameAttributeName"));
+        String clientAuthenticationMethod = environment.getProperty(SECURITY_PROVIDERS_OPEN_ID + providerId + ".clientAuthenticationMethod");
+        try {
+            openIdProviderConfig.setClientAuthenticationMethod(clientAuthenticationMethod != null
+                ? WMClientAuthenticationMethod.valueOf(clientAuthenticationMethod)
+                : WMClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+        } catch (IllegalArgumentException e) {
+            openIdProviderConfig.setClientAuthenticationMethod(WMClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+        }
         String scopes = environment.getProperty(SECURITY_PROVIDERS_OPEN_ID + providerId + ".scopes");
         List<String> scopesList = new ArrayList<>();
         if (scopes != null) {

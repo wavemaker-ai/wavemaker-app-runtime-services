@@ -45,7 +45,7 @@ public class OpenIdProviderConfig extends AbstractProviderConfig {
     private List<@NotBlank String> scopes;
     private String userNameAttributeName;
     private String logoutUrl;
-
+    private WMClientAuthenticationMethod clientAuthenticationMethod;
     private boolean roleMappingEnabled;
     @JsonPropertyDescription("For roleMappingConfig, there can be only two allowed types DatabaseRoleMappingConfig, RoleAttributeNameMappingConfig")
     private RoleMappingConfig roleMappingConfig;
@@ -151,5 +151,13 @@ public class OpenIdProviderConfig extends AbstractProviderConfig {
 
     public void setRoleMappingConfig(RoleMappingConfig roleMappingConfig) {
         this.roleMappingConfig = roleMappingConfig;
+    }
+
+    public WMClientAuthenticationMethod getClientAuthenticationMethod() {
+        return clientAuthenticationMethod;
+    }
+
+    public void setClientAuthenticationMethod(WMClientAuthenticationMethod clientAuthenticationMethod) {
+        this.clientAuthenticationMethod = clientAuthenticationMethod;
     }
 }
