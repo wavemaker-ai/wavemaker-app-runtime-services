@@ -33,9 +33,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
-import org.apache.tika.config.TikaConfig;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -254,7 +254,7 @@ public class WMMultipartUtils {
 
     private static String getFileExtensionFromContentType(String contentType) {
         try {
-            MimeType mimeType = TikaConfig.getDefaultConfig().getMimeRepository().forName(contentType);
+            MimeType mimeType = MimeTypes.getDefaultMimeTypes().forName(contentType);
             return mimeType.getExtension();
         } catch (Exception e) {
             LOGGER.warn("Could not get file extension for file type {}", contentType);
@@ -266,7 +266,7 @@ public class WMMultipartUtils {
         String contentType = null;
         try {
             contentType = new Tika().detect(is);
-            return TikaConfig.getDefaultConfig().getMimeRepository().forName(contentType);
+            return MimeTypes.getDefaultMimeTypes().forName(contentType);
         } catch (IOException | MimeTypeException e) {
             LOGGER.warn("Could not get file extension for file type {}", contentType);
             return null;
