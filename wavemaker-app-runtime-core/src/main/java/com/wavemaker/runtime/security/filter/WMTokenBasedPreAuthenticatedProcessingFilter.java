@@ -15,8 +15,8 @@
 package com.wavemaker.runtime.security.filter;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Map;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import jakarta.servlet.FilterChain;
@@ -40,6 +40,7 @@ import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.util.HttpRequestUtils;
@@ -151,14 +152,8 @@ public class WMTokenBasedPreAuthenticatedProcessingFilter extends GenericFilterB
     }
 
     protected String getTokenFromReq(final HttpServletRequest request) {
-        String token;
-
         //extracting token from request param.
-        try {
-            token = getQueryParamValue(request, wmTokenBasedAuthenticationService.getParameter());
-        } catch (URISyntaxException e) {
-            throw new WMRuntimeException(e);
-        }
+        String token = getQueryParamValue(request, wmTokenBasedAuthenticationService.getParameter());
 
         //extracting token from header
         if (!StringUtils.isNotBlank(token)) {
@@ -207,13 +202,17 @@ public class WMTokenBasedPreAuthenticatedProcessingFilter extends GenericFilterB
         request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, failed);
     }
 
-    private String getQueryParamValue(final HttpServletRequest request, final String param) throws URISyntaxException {
-        Map parameterMap = request.getParameterMap();
-        String[] values = (String[]) parameterMap.get(param);
-        if (values != null) {
-            return values[0];
+    private String getQueryParamValue(final HttpServletRequest request, final String param) {
+        String queryString = request.getQueryString();
+        if (queryString == null) {
+            return null;
         }
-        return null;
+        String value = UriComponentsBuilder.newInstance()
+            .query(queryString)
+            .build()
+            .getQueryParams()
+            .getFirst(param);
+        return value != null ? URLDecoder.decode(value, StandardCharsets.UTF_8) : null;
     }
 
     @Override
