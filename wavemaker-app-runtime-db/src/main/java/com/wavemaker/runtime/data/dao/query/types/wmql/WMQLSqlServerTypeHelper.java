@@ -14,7 +14,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dao.query.types.wmql;
 
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  * @author Sujith Simon

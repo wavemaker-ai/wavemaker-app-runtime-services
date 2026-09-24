@@ -31,7 +31,7 @@ import org.springframework.orm.hibernate5.HibernateOperations;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.dao.procedure.parameters.ResolvableParam;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameter;
 import com.wavemaker.runtime.data.transform.Transformers;
 import com.wavemaker.runtime.data.transform.WMResultTransformer;

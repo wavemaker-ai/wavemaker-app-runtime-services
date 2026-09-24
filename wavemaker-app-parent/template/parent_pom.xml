@@ -365,6 +365,11 @@
                     <artifactId>wavemaker-app-runtime-core</artifactId>
                     <version>${wavemaker.app.runtime.services.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>ai.wavemaker.runtime</groupId>
+                    <artifactId>wavemaker-app-runtime-db</artifactId>
+                    <version>${wavemaker.app.runtime.services.version}</version>
+                </dependency>
             </dependencies>
         </profile>
         <profile>

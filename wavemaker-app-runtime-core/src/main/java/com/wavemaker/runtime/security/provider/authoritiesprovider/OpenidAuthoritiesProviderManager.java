@@ -19,15 +19,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.orm.hibernate5.HibernateOperations;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.config.openid.OpenIdProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.DatabaseRoleMappingConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleAttributeNameMappingConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleMappingConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.provider.database.authorities.DefaultAuthoritiesProviderImpl;
 import com.wavemaker.runtime.security.provider.openid.IdentityProviderUserAuthoritiesProvider;
@@ -38,10 +36,10 @@ public class OpenidAuthoritiesProviderManager {
     private Map<String, AuthoritiesProvider> authoritiesProviders = new ConcurrentHashMap<>();
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private OpenIdProviderConfigRegistry openIdProviderConfigRegistry;
 
     @Autowired
-    private OpenIdProviderConfigRegistry openIdProviderConfigRegistry;
+    private DatabaseQueryExecutorFactory databaseQueryExecutorFactory;
 
     public AuthoritiesProvider getAuthoritiesProvider(String providerId) {
         OpenIdProviderConfig openIdProviderConfig = openIdProviderConfigRegistry.getOpenIdProviderConfig(providerId);
@@ -67,10 +65,8 @@ public class OpenidAuthoritiesProviderManager {
 
     private AuthoritiesProvider getDatabaseAuthoritiesProvider(DatabaseRoleMappingConfig databaseRoleMappingConfig) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
-
-        String modelName = databaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(databaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         defaultAuthoritiesProvider.setHql(databaseRoleMappingConfig.getQueryType() == RoleQueryType.HQL);
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(databaseRoleMappingConfig.getRoleQuery());
         return defaultAuthoritiesProvider;

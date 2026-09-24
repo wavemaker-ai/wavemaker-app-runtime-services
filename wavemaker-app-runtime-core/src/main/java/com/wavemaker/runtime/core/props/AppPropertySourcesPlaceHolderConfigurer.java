@@ -21,11 +21,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.context.ServletContextAware;
 
+import com.wavemaker.app.db.constants.DataServiceConstants;
+import com.wavemaker.app.db.util.DBUtils;
 import com.wavemaker.commons.properties.EnvironmentRegisteringPropertySourcesPlaceHolderConfigurer;
 import com.wavemaker.commons.util.StringUtils;
 import com.wavemaker.commons.util.SystemUtils;
-import com.wavemaker.runtime.data.util.DataServiceConstants;
-import com.wavemaker.runtime.data.util.DataServiceUtils;
 
 public class AppPropertySourcesPlaceHolderConfigurer extends EnvironmentRegisteringPropertySourcesPlaceHolderConfigurer implements ServletContextAware {
 
@@ -56,7 +56,7 @@ public class AppPropertySourcesPlaceHolderConfigurer extends EnvironmentRegister
         }
 
         if (value.contains(DataServiceConstants.WM_MY_SQL_CLOUD_HOST_TOKEN)) {
-            value = DataServiceUtils.replaceMySqlCloudToken(value, DataServiceConstants.WM_MY_SQL_CLOUD_HOST);
+            value = DBUtils.replaceMySqlCloudToken(value, DataServiceConstants.WM_MY_SQL_CLOUD_HOST);
         }
 
         if (value.contains(DataServiceConstants.WM_MY_SQL_CLOUD_USER_NAME_TOKEN)) {

@@ -23,10 +23,10 @@ import java.util.Set;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 
+import com.wavemaker.app.db.constants.ExportType;
 import com.wavemaker.commons.json.deserializer.WMSqlDateDeSerializer;
 import com.wavemaker.commons.util.StringUtils;
-import com.wavemaker.runtime.data.export.ExportType;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  *

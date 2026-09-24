@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.runtime.data.annotations.TableTemporal;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>

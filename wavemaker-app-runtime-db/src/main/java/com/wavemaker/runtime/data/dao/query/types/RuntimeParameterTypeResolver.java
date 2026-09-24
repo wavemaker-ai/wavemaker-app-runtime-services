@@ -26,7 +26,7 @@ import org.hibernate.type.Type;
 
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryParamInfo;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.model.queries.QueryParameter;
 import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
 

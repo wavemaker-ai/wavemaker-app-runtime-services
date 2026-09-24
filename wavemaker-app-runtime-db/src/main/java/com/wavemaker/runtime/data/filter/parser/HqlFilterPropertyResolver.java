@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.filter.parser;
 
 import java.lang.reflect.Field;
 
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  * @author Sujith Simon

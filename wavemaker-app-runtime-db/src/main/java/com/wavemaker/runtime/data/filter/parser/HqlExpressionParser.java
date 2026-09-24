@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 
 import com.wavemaker.runtime.data.filter.parser.antlr4.HqlFilterParser;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.util.QueryParserConstants;
 
 /**

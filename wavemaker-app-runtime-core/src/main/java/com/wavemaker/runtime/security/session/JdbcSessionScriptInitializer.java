@@ -27,18 +27,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
-import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.app.db.constants.DBType;
-import com.wavemaker.runtime.data.datasource.WMDataSource;
+import com.wavemaker.commons.WMRuntimeException;
 
 public class JdbcSessionScriptInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcSessionScriptInitializer.class);
 
+    /*
+     * Declared as DelegatingDataSource (Spring) rather than the concrete WMDataSource (runtime-db) so this
+     * class has no compile-time dependency on runtime-db; Spring's @Resource-by-name injection still resolves
+     * fine since WMDataSource is a DelegatingDataSource.
+     */
     @Resource(name = "${security.session.jdbc.serviceName}DataSource")
-    private WMDataSource dataSource;
+    private DelegatingDataSource dataSource;
 
     @PostConstruct
     public void initializeScript() {

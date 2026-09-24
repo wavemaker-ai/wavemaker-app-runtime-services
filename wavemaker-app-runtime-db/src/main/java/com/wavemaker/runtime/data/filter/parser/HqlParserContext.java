@@ -19,7 +19,7 @@ import java.util.Map;
 
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
 import com.wavemaker.runtime.data.filter.WMQueryParamInfo;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  * @author Sujith Simon

@@ -23,11 +23,11 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.wavemaker.app.db.constants.ExportType;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.commons.file.model.DownloadResponse;
 import com.wavemaker.runtime.commons.file.model.Downloadable;
 import com.wavemaker.runtime.data.export.ExportOptions;
-import com.wavemaker.runtime.data.export.ExportType;
 import com.wavemaker.runtime.data.model.CustomQuery;
 import com.wavemaker.runtime.data.model.QueryProcedureInput;
 import com.wavemaker.runtime.data.model.UpdatableQueryInput;

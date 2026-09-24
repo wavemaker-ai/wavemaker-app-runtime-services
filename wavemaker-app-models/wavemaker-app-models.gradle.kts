@@ -14,3 +14,11 @@ dependencies {
     implementation(appDependenciesLibs.swagger.core)
     implementation(projects.wavemakerCommonsUtil)
 }
+
+testing {
+    suites {
+        named<JvmTestSuite>("test") {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
+}

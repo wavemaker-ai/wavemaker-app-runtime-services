@@ -32,14 +32,12 @@ import org.apereo.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -58,12 +56,12 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.Permission;
 import com.wavemaker.app.security.models.SecurityInterceptUrlEntry;
 import com.wavemaker.app.security.models.config.cas.CASProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
 import com.wavemaker.runtime.security.config.WMSecurityConfiguration;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
@@ -85,9 +83,6 @@ import com.wavemaker.runtime.security.utils.SecurityPropertyUtils;
 public class CASSecurityProviderConfiguration implements WMSecurityConfiguration {
     @Autowired
     private Environment environment;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Autowired
     @Qualifier("successHandler")
@@ -240,14 +235,14 @@ public class CASSecurityProviderConfiguration implements WMSecurityConfiguration
 
     @Bean(name = "casAuthoritiesProvider")
     @Conditional(CASDatabaseAuthoritiesProviderCondition.class)
-    public AuthoritiesProvider casDatabaseAuthoritiesProvider(RuntimeDatabaseRoleMappingConfig casRuntimeDatabaseRoleMappingConfig) {
+    public AuthoritiesProvider casDatabaseAuthoritiesProvider(RuntimeDatabaseRoleMappingConfig casRuntimeDatabaseRoleMappingConfig,
+                                                              DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
         defaultAuthoritiesProvider.setHql(casRuntimeDatabaseRoleMappingConfig.getQueryType() == RoleQueryType.HQL);
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(casRuntimeDatabaseRoleMappingConfig.getRolesByUsernameQuery());
-        String modelName = casRuntimeDatabaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(casRuntimeDatabaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 

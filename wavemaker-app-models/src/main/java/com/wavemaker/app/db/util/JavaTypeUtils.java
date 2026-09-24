@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.wavemaker.runtime.data.util;
+package com.wavemaker.app.db.util;
 
 import java.util.Collection;
 import java.util.Date;
@@ -21,11 +21,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.ClassUtils;
-import org.hibernate.HibernateException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -58,8 +57,8 @@ public class JavaTypeUtils {
                 try {
                     convertedValue = javaType.fromDbValue(value);
                     break;
-                } catch (HibernateException e) {
-                    // ignore
+                } catch (RuntimeException e) { //TODO - revisit for HibernateException
+                    // this JavaType candidate doesn't match the value - try the next one
                 }
             }
         }

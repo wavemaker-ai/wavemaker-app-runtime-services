@@ -27,7 +27,7 @@ public class StringTypeConverter extends HibernateBackedJavaTypeConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StringTypeConverter.class);
 
     public StringTypeConverter() {
-        super(StringType.INSTANCE.getJavaTypeDescriptor());
+        super(() -> StringType.INSTANCE.getJavaTypeDescriptor());
     }
 
     @Override

@@ -8,14 +8,28 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-                            http://www.springframework.org/schema/beans/spring-beans.xsd
-                            http://www.springframework.org/schema/aop
-                            http://www.springframework.org/schema/aop/spring-aop.xsd">
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <aop:aspectj-autoproxy/>
 
     <import resource="config.xml"/>
     <import resource="springapp-mvc.xml"/>
+
+    <!-- dbExceptionResolver itself is declared inside wavemaker-app-runtime-db's own jar
+         (db-exception-resolver.xml) - this resolves to nothing if runtime-db isn't on the classpath, so the
+         bean only exists for apps that actually have it. It's a plain ErrorResponseResolver bean (not a
+         HandlerExceptionResolver), auto-collected by handlerExceptionResolver's
+         @Autowired List<ErrorResponseResolver> and tried first for every exception, falling through (empty
+         Optional) for anything that isn't a Hibernate/data-service exception, so handlerExceptionResolver's
+         own generic handling still covers everything else. -->
+    <import resource="classpath*:db-exception-resolver.xml"/>
+
+    <!-- Switches JavaType (used for REST parameter binding, page variables, etc.) over to real
+         database conversion when wavemaker-app-runtime-db is present; otherwise JavaType keeps
+         using its own generic, Hibernate-free converters. See db-java-type-converters.xml. -->
+    <import resource="classpath*:db-java-type-converters.xml"/>
 
     <bean id="wmAppContext" class="com.wavemaker.runtime.commons.WMAppContext"/>
 

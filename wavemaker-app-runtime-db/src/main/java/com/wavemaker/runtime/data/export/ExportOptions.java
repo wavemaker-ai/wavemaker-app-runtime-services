@@ -17,6 +17,8 @@ package com.wavemaker.runtime.data.export;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wavemaker.app.db.constants.ExportType;
+
 public class ExportOptions {
     private List<FieldInfo> fields = new ArrayList<>();
     private ExportType exportType;

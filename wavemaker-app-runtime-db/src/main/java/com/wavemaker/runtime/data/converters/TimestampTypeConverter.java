@@ -20,6 +20,8 @@ import org.hibernate.type.TimestampType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.wavemaker.app.db.converters.ConverterUtil;
+
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 12/1/17
@@ -29,7 +31,7 @@ public class TimestampTypeConverter extends HibernateBackedJavaTypeConverter {
     public static final String ORACLE_SQL_TIMESTAMP = "oracle.sql.TIMESTAMP";
 
     public TimestampTypeConverter() {
-        super(TimestampType.INSTANCE.getJavaTypeDescriptor());
+        super(() -> TimestampType.INSTANCE.getJavaTypeDescriptor());
     }
 
     @Override

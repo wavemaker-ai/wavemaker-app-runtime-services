@@ -16,6 +16,8 @@
 package com.wavemaker.app.db.util;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,14 @@ import com.wavemaker.app.db.constants.DBType;
 public class DBUtils {
     private static final Logger logger = LoggerFactory.getLogger(DBUtils.class);
     public static final String JDBC_URL_SCHEME = "jdbc:";
+
+    private static final String WM_MYSQL_CLOUD_TOKEN_PATTERN_STRING = "\\{WM_CLOUD_MYSQL_HOST\\}(:[\\d]+)?";
+    private static final Pattern WM_MYSQL_CLOUD_TOKEN_PATTERN = Pattern.compile(WM_MYSQL_CLOUD_TOKEN_PATTERN_STRING);
+
+    public static String replaceMySqlCloudToken(String url, String hostPortString) {
+        final Matcher matcher = WM_MYSQL_CLOUD_TOKEN_PATTERN.matcher(url);
+        return matcher.replaceFirst(hostPortString);
+    }
 
     public static DBType getDBTypeByUrl(String url) {
         if (!url.startsWith(JDBC_URL_SCHEME)) {

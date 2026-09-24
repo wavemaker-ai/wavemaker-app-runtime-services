@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Bundled inside wavemaker-app-runtime-db's own jar, and imported by runtime-core's springapp.xml via
+     classpath*: - resolves to nothing (no ClassNotFoundException, no missed-resource error) if runtime-db
+     isn't on the classpath at all, so dbExceptionResolver only ever exists for apps that actually have it.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="dbExceptionResolver" class="com.wavemaker.runtime.data.exception.resolver.DbExceptionResolver"/>
+</beans>

@@ -20,12 +20,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.orm.hibernate5.HibernateOperations;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.provider.database.authorities.DefaultAuthoritiesProviderImpl;
 
@@ -39,7 +37,7 @@ public class JWSAuthoritiesProviderManager {
     private Environment environment;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private DatabaseQueryExecutorFactory databaseQueryExecutorFactory;
 
     public AuthoritiesProvider getAuthoritiesProvider(String providerId) {
         return this.authoritiesProviders.computeIfAbsent(providerId, authoritiesProvider -> {
@@ -52,10 +50,8 @@ public class JWSAuthoritiesProviderManager {
         defaultAuthoritiesProvider.setHql(Objects.equals(environment.getProperty(SECURITY_PROVIDERS_JWS + providerId + ".database.queryType"), RoleQueryType.HQL.name()));
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(environment.getProperty(SECURITY_PROVIDERS_JWS + providerId + ".database.rolesByUsernameQuery"));
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext
-            .getBean(environment.getProperty(SECURITY_PROVIDERS_JWS + providerId + ".database.modelName") + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext
-            .getBean(environment.getProperty(SECURITY_PROVIDERS_JWS + providerId + ".database.modelName") + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(environment.getProperty(SECURITY_PROVIDERS_JWS + providerId + ".database.modelName"));
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 }

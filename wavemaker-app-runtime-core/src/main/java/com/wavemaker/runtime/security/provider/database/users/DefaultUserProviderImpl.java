@@ -15,11 +15,12 @@
 package com.wavemaker.runtime.security.provider.database.users;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 
-import org.hibernate.Session;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,8 +49,10 @@ public class DefaultUserProviderImpl extends AbstractDatabaseSupport implements 
 
     @Override
     public UserDetails loadUser(final String username) {
-        return getTransactionTemplate()
-            .execute(status -> getHibernateTemplate().execute(session -> getWmUser(session, username)));
+        Map<String, Object> params = new HashMap<>();
+        params.put(USERNAME, username);
+        List<Map<String, Object>> rows = executeQuery(getUsersByUsernameQuery(), params);
+        return getWmUser(rows);
     }
 
     @Override
@@ -63,31 +66,20 @@ public class DefaultUserProviderImpl extends AbstractDatabaseSupport implements 
             wmUserDetails.getLoginTime());
     }
 
-    private WMUser getWmUser(final Session session, final String username) {
-        String usersByUsernameQuery = getUsersByUsernameQuery();
-        if (isHql()) {
-            final List list = session.createQuery(usersByUsernameQuery).setParameter(USERNAME, username).list();
-            return getWmUser(list);
-        } else {
-            final List list = session.createNativeQuery(usersByUsernameQuery).setParameter(USERNAME, username).list();
-            return getWmUser(list);
-        }
-    }
-
-    private WMUser getWmUser(List<Object> content) {
+    private WMUser getWmUser(final List<Map<String, Object>> content) {
         if (!content.isEmpty()) {
-            Object[] resultMap = (Object[]) content.get(0);
-            String userId = String.valueOf(resultMap[0]);
-            String password = String.valueOf(resultMap[1]);
+            Map<String, Object> resultMap = content.get(0);
+            String userId = String.valueOf(resultMap.get("0"));
+            String password = String.valueOf(resultMap.get("1"));
             // MYSQL returns BigInteger. Enabled column should be introduced or "1" should be removed.
             int enabled = 0;
-            final Object column3 = resultMap[2];
+            final Object column3 = resultMap.get("2");
             if (column3 instanceof Integer) {
                 enabled = (Integer) column3;
             } else if (column3 instanceof BigInteger bigInteger) {
                 enabled = bigInteger.intValue();
             }
-            String userName = String.valueOf(resultMap[3]);
+            String userName = String.valueOf(resultMap.get("3"));
             int tenantId = -1;
             long loginTime = System.currentTimeMillis();
             boolean isEnabled = enabled == 1 ? true : false;

@@ -14,33 +14,51 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.converters;
 
+import java.util.function.Supplier;
+
 import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
 
+import com.wavemaker.app.db.converters.JavaTypeConverter;
+
 /**
+ * Converts values using a Hibernate type, loaded only when actually needed.
+ * <p>
+ * The Hibernate type is passed in as a {@link Supplier}, not resolved up front. This means creating a
+ * converter does not touch Hibernate at all - Hibernate is only loaded the first time a value is actually
+ * converted.
+ *
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 12/1/17
  */
 public class HibernateBackedJavaTypeConverter implements JavaTypeConverter {
 
+    private final Supplier<JavaTypeDescriptor> descriptorSupplier;
     private JavaTypeDescriptor descriptor;
 
-    public HibernateBackedJavaTypeConverter(final JavaTypeDescriptor descriptor) {
-        this.descriptor = descriptor;
+    public HibernateBackedJavaTypeConverter(final Supplier<JavaTypeDescriptor> descriptorSupplier) {
+        this.descriptorSupplier = descriptorSupplier;
+    }
+
+    private JavaTypeDescriptor descriptor() {
+        if (descriptor == null) {
+            descriptor = descriptorSupplier.get();
+        }
+        return descriptor;
     }
 
     @Override
     public Object fromString(final String value) {
-        return descriptor.fromString(value);
+        return descriptor().fromString(value);
     }
 
     @Override
     public Object fromDbValue(final Object value) {
-        return descriptor.wrap(value, null);
+        return descriptor().wrap(value, null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Object toDbValue(final Object value, Class<?> toType) {
-        return descriptor.unwrap(value, toType, null);
+        return descriptor().unwrap(value, toType, null);
     }
 }

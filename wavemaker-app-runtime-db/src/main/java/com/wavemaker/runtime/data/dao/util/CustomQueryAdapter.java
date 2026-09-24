@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 
 import com.wavemaker.runtime.data.model.CustomQuery;
 import com.wavemaker.runtime.data.model.CustomQueryParam;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.model.queries.QueryParameter;
 import com.wavemaker.runtime.data.model.queries.QueryType;
 import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>

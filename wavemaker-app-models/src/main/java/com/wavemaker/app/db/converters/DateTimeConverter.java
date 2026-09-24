@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.wavemaker.runtime.data.converters;
+package com.wavemaker.app.db.converters;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -20,8 +20,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.commons.json.deserializer.WMLocalDateTimeDeSerializer;
-import com.wavemaker.runtime.data.model.JavaType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>

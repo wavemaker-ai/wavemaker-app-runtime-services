@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Bundled inside wavemaker-app-runtime-db's own jar, and imported by runtime-core's springapp.xml via
+     classpath*: - resolves to nothing if runtime-db isn't on the classpath, so JavaType just keeps using
+     its generic, Hibernate-free converters for apps that don't have it.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="com.wavemaker.runtime.data.converters.DbJavaTypeConverterRegistrar"/>
+</beans>

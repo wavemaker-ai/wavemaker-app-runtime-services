@@ -15,9 +15,10 @@
 package com.wavemaker.runtime.security.provider.database.authorities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Session;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -40,8 +41,10 @@ public class DefaultAuthoritiesProviderImpl extends AbstractDatabaseSupport impl
 
     @Override
     public List<GrantedAuthority> loadAuthorities(AuthenticationContext authenticationContext) {
-        return getTransactionTemplate()
-            .execute(status -> getHibernateTemplate().execute(session -> getGrantedAuthorities(session, authenticationContext.getUsername())));
+        Map<String, Object> params = new HashMap<>();
+        params.put(USERNAME, authenticationContext.getUsername());
+        List<Map<String, Object>> rows = executeQuery(getAuthoritiesByUsernameQuery(), params);
+        return getAuthorities(rows);
     }
 
     public String getAuthoritiesByUsernameQuery() {
@@ -70,41 +73,11 @@ public class DefaultAuthoritiesProviderImpl extends AbstractDatabaseSupport impl
         }
     }
 
-    private List<GrantedAuthority> getGrantedAuthorities(final Session session, final String username) {
-        String authoritiesByUsernameQuery = getAuthoritiesByUsernameQuery();
-        if (!isHql()) {
-            return getGrantedAuthoritiesByNativeSql(session, authoritiesByUsernameQuery, username);
-        } else {
-            return getGrantedAuthoritiesByHQL(session, authoritiesByUsernameQuery, username);
-        }
-    }
-
-    private List<GrantedAuthority> getGrantedAuthoritiesByHQL(
-        Session session, String authoritiesByUsernameQuery, String username) {
-        final List list = session.createQuery(authoritiesByUsernameQuery).setParameter(USERNAME, username).list();
-        return getAuthorities(list);
-    }
-
-    private List<GrantedAuthority> getGrantedAuthoritiesByNativeSql(
-        Session session, String authoritiesByUsernameQuery, String username) {
-        final List list = session.createNativeQuery(authoritiesByUsernameQuery).setParameter(USERNAME, username).list();
-        return getAuthorities(list);
-    }
-
-    private List<GrantedAuthority> getAuthorities(List<Object> content) {
+    private List<GrantedAuthority> getAuthorities(final List<Map<String, Object>> content) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         if (!content.isEmpty()) {
-            for (Object o : content) {
-                Object role;
-                if (o instanceof Object[] result) {
-                    if (result.length == 1) {
-                        role = String.valueOf(result[0]);
-                    } else {
-                        role = String.valueOf(result[1]);
-                    }
-                } else {
-                    role = o;
-                }
+            for (Map<String, Object> row : content) {
+                Object role = row.size() == 1 ? row.get("0") : row.get("1");
                 SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(getRolePrefix() + role);
                 grantedAuthorities.add(simpleGrantedAuthority);
             }

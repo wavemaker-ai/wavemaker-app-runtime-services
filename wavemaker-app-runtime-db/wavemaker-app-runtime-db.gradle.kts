@@ -3,7 +3,7 @@ plugins {
     `antlr`
 }
 
-group ="ai.wavemaker.runtime"
+group = "ai.wavemaker.runtime"
 
 dependencies {
     implementation(enforcedPlatform(appDependenciesLibs.boms.slf4j.get().toString()))
@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.wavemakerCommonsUtil)
     implementation(projects.wavemakerAppRuntimeCommons)
     implementation(projects.wavemakerAppModels)
+    implementation(projects.wavemakerAppRuntimeDbApi)
     implementation(appDependenciesLibs.slf4j.api)
     implementation(appDependenciesLibs.commons.lang3)
     implementation(appDependenciesLibs.guava)
@@ -20,18 +21,23 @@ dependencies {
     implementation(appDependenciesLibs.spring.context)
     implementation(appDependenciesLibs.spring.orm)
     implementation(appDependenciesLibs.spring.web)
+    implementation(appDependenciesLibs.spring.webmvc)
     implementation(appDependenciesLibs.spring.data.commons)
     implementation(appDependenciesLibs.jackson.annotations)
     implementation(appDependenciesLibs.hibernate.core)
     implementation(appDependenciesLibs.jakarta.persistenceApi) {
-        because("This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
-                "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
-                "To get the transaction related classes adding jakarta.persistence-api")
+        because(
+            "This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
+                    "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
+                    "To get the transaction related classes adding jakarta.persistence-api"
+        )
     }
     implementation(appDependenciesLibs.jakarta.transaction.api) {
-        because("This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
-                "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
-                "To get the transaction related classes adding jakarta.transaction-api")
+        because(
+            "This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
+                    "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
+                    "To get the transaction related classes adding jakarta.transaction-api"
+        )
     }
     implementation(appDependenciesLibs.aspectjrt)
     implementation(appDependenciesLibs.aspectjweaver)
@@ -73,7 +79,7 @@ testing {
 }
 
 javaLibraryMavenPublish {
-    scmUrl="git:https://github.com/wavemaker/wavemaker-app-runtime-services.git"
+    scmUrl = "git:https://github.com/wavemaker/wavemaker-app-runtime-services.git"
 }
 
 tasks {

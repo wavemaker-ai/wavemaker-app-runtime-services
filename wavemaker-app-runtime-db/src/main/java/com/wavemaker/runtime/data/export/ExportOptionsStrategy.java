@@ -29,7 +29,7 @@ import org.springframework.util.CollectionUtils;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.dao.validators.HqlPropertyResolver;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 public class ExportOptionsStrategy {
 

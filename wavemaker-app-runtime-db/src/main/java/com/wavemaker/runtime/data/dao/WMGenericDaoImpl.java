@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
+import com.wavemaker.app.db.constants.ExportType;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
@@ -57,7 +58,6 @@ import com.wavemaker.runtime.data.dao.validators.SortValidator;
 import com.wavemaker.runtime.data.exception.EntityNotFoundException;
 import com.wavemaker.runtime.data.export.DataExportOptions;
 import com.wavemaker.runtime.data.export.DataExporter;
-import com.wavemaker.runtime.data.export.ExportType;
 import com.wavemaker.runtime.data.export.QueryExtractor;
 import com.wavemaker.runtime.data.export.hqlquery.HqlQueryExtractor;
 import com.wavemaker.runtime.data.expression.QueryFilter;

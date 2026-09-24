@@ -17,6 +17,7 @@ package com.wavemaker.runtime.exception.resolver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,17 +27,12 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hibernate.exception.GenericJDBCException;
-import org.hibernate.exception.SQLGrammarException;
 import org.hibernate.validator.internal.engine.path.NodeImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.orm.hibernate5.HibernateJdbcException;
-import org.springframework.orm.hibernate5.HibernateQueryException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -59,9 +55,6 @@ import com.wavemaker.commons.WMException;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.core.web.rest.ErrorResponse;
 import com.wavemaker.commons.core.web.rest.ErrorResponses;
-import com.wavemaker.runtime.data.exception.BlobContentNotFoundException;
-import com.wavemaker.runtime.data.exception.EntityNotFoundException;
-import com.wavemaker.runtime.data.exception.QueryParameterMismatchException;
 import com.wavemaker.runtime.security.xss.handler.XSSSecurityHandler;
 
 /**
@@ -70,13 +63,24 @@ import com.wavemaker.runtime.security.xss.handler.XSSSecurityHandler;
 public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExceptionResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationRestServiceExceptionResolver.class);
-    private static final String INPUT_INVALID_MESSAGE = "The input parameters are not valid.";
+
+    @Autowired
+    private List<ErrorResponseResolver> errorResponseResolvers;
 
     @Override
     protected ModelAndView doResolveException(
         HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
         logger.error("Error occurred while serving the request with url {} and method {}", request.getRequestURI(),request.getMethod(), ex);
+
+        for (ErrorResponseResolver resolver : errorResponseResolvers) {
+            Optional<ErrorResolution> resolution = resolver.tryResolve(ex);
+            if (resolution.isPresent()) {
+                ErrorResolution errorResolution = resolution.get();
+                response.setStatus(errorResolution.getStatus());
+                return getModelAndView(getErrorResponse(errorResolution.getMessageResource(), errorResolution.getArgs()));
+            }
+        }
 
         // Validator Errors/ Invalid data validated at controller level
         if (ex instanceof MethodArgumentTypeMismatchException) {
@@ -97,27 +101,6 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
         } else if (ex instanceof AuthenticationException) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return handleUnAuthorizedException(ex, response);
-        } else if (ex instanceof org.hibernate.exception.ConstraintViolationException) {//Hibernate jdbc exceptions
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return handleRuntimeException((RuntimeException) ex);
-        } else if (ex instanceof DataIntegrityViolationException) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return handleRuntimeException((DataIntegrityViolationException) ex);
-        } else if (ex instanceof GenericJDBCException) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return handleRuntimeException((GenericJDBCException) ex);
-        } else if (ex instanceof SQLGrammarException) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return handleRuntimeException((SQLGrammarException) ex);
-        } else if (ex instanceof QueryParameterMismatchException) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return handleRuntimeException((QueryParameterMismatchException) ex);
-        } else if (ex instanceof HibernateQueryException) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return handleHibernateQueryException((HibernateQueryException) ex);
-        } else if (ex instanceof EntityNotFoundException || ex instanceof BlobContentNotFoundException) {//WM Runtime Exceptions
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return handleWMExceptions((WMRuntimeException) ex, MessageResource.ENTITY_NOT_FOUND);
         } else if (ex instanceof InvalidInputException) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return handleWMExceptions((WMRuntimeException) ex, MessageResource.INVALID_INPUT, ex.getMessage());
@@ -171,16 +154,6 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
             getErrorResponse(MessageResource.INVALID_INPUT, "The input for " + ex.getName() + " is invalid."));
     }
 
-    private ModelAndView handleHibernateJdbcException(HibernateJdbcException ex) {
-        // Not using the root cause for now.
-        return getModelAndView(getErrorResponse(MessageResource.INVALID_INPUT, INPUT_INVALID_MESSAGE));
-    }
-
-    private ModelAndView handleHibernateQueryException(HibernateQueryException ex) {
-        // Not using the root cause for now.
-        return getModelAndView(getErrorResponse(MessageResource.INVALID_INPUT, INPUT_INVALID_MESSAGE));
-    }
-
     private ModelAndView handleMethodArgumentNotValidException(
         MethodArgumentNotValidException methodArgumentNotValidException, HttpServletResponse response) {
         BindingResult bindingResult = methodArgumentNotValidException.getBindingResult();
@@ -203,18 +176,6 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
         } else {
             return getModelAndView(Collections.emptyList());
         }
-    }
-
-    private ModelAndView handleRuntimeException(RuntimeException ex) {
-        String msg = ExceptionUtils.getRootCauseMessage(ex);
-        ErrorResponse errorResponse = getErrorResponse(MessageResource.UNEXPECTED_ERROR, getDefaultInternalServerErrorMsg(msg));
-        return getModelAndView(errorResponse);
-    }
-
-    private ModelAndView handleRuntimeException(DataIntegrityViolationException ex) {
-        ErrorResponse errorResponse = getErrorResponse(MessageResource.DATA_INTEGRITY_VIOALATION,
-            ex.getMostSpecificCause().getMessage());
-        return getModelAndView(errorResponse);
     }
 
     private ModelAndView handleException(Exception ex, HttpServletResponse response) {

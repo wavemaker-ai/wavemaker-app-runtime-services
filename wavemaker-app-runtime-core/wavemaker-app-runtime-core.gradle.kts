@@ -2,7 +2,7 @@ plugins {
     `java-library-maven-publish`
 }
 
-group ="ai.wavemaker.runtime"
+group = "ai.wavemaker.runtime"
 
 val loggingCapabilityConfiguration = configurations.create("loggingCapabilityConfiguration")
 val runtimeLibDependencies = configurations.create("runtimeLibDependencies") {
@@ -21,7 +21,7 @@ dependencies {
     implementation(projects.wavemakerAppRuntimeCommons)
     implementation(projects.wavemakerAppRuntimePrefab)
     implementation(projects.wavemakerAppRuntimeRest)
-    implementation(projects.wavemakerAppRuntimeDb)
+    implementation(projects.wavemakerAppRuntimeDbApi)
     implementation(projects.wavemakerAppRuntimeConnectorAppIntegration)
     implementation(projects.wavemakerToolsApidocsCore)
     implementation(projects.wavemakerAppModels)
@@ -62,9 +62,12 @@ dependencies {
     compileOnly(appDependenciesLibs.mongodb.driver.sync)
     compileOnly(appDependenciesLibs.spring.session.data.mongodb)
     compileOnly(appDependenciesLibs.spring.session.data.redis)
-    compileOnly(appDependenciesLibs.hibernate.core) {
-        because("Used for getting roles for logged in user. Used in conjuction with database service in the project." +
-                "TODO need to remove this dependency.")
+    testRuntimeOnly(appDependenciesLibs.hibernate.core) {
+        because(
+            "WMObjectMapper (runtime-commons) registers Hibernate5JakartaModule directly; hibernate-core used to " +
+                    "reach the test runtime classpath transitively via the old implementation(runtime-db) dependency, " +
+                    "now compileOnly. See the identical fix already in wavemaker-app-runtime-commons."
+        )
     }
     implementation(appDependenciesLibs.jakarta.xml.bind.api) {
         because("Used for getting jakarta xml bind packages, but previously javax bind api used to be loaded in app runtime core")
@@ -84,9 +87,9 @@ tasks {
         doLast {
             var content = ""
             project.configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts.forEach {
-                content+=it.moduleVersion.toString()+"\n"
+                content += it.moduleVersion.toString() + "\n"
             }
-            val resourcesDir : File = sourceSets.main.get().output.resourcesDir!!
+            val resourcesDir: File = sourceSets.main.get().output.resourcesDir!!
             resourcesDir.mkdirs()
             File(resourcesDir, "app-runtime-dependencies.txt").writeText(content)
         }
@@ -97,6 +100,7 @@ tasks {
         dependsOn(":wavemaker-app-runtime-commons:jar")
         dependsOn(":wavemaker-app-runtime-prefab:jar")
         dependsOn(":wavemaker-app-runtime-db:jar")
+        dependsOn(":wavemaker-app-runtime-db-api:jar")
         dependsOn(":wavemaker-app-runtime-rest:jar")
         dependsOn(":wavemaker-tools-apidocs-core:jar")
         dependsOn(":wavemaker-app-runtime-connector-app-integration:jar")
@@ -114,6 +118,6 @@ testing {
 }
 
 javaLibraryMavenPublish {
-    scmUrl="git:https://github.com/wavemaker/wavemaker-app-runtime-services.git"
+    scmUrl = "git:https://github.com/wavemaker/wavemaker-app-runtime-services.git"
     scopeMapping.get("compile")?.add(loggingCapabilityConfiguration.name)
 }

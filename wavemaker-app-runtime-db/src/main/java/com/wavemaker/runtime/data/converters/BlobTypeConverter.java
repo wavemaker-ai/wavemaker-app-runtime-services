@@ -24,7 +24,7 @@ import org.hibernate.type.BlobType;
  */
 public class BlobTypeConverter extends HibernateBackedJavaTypeConverter {
     public BlobTypeConverter() {
-        super(BlobType.INSTANCE.getJavaTypeDescriptor());
+        super(() -> BlobType.INSTANCE.getJavaTypeDescriptor());
     }
 
     @Override

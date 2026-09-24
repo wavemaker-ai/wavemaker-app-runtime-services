@@ -33,7 +33,7 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 import com.wavemaker.runtime.data.dao.query.types.RuntimeParameterTypeResolver;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameter;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameterType;
 import com.wavemaker.runtime.data.model.procedures.RuntimeProcedure;

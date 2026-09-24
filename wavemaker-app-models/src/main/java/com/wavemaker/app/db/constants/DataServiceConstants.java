@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.wavemaker.runtime.data.util;
+package com.wavemaker.app.db.constants;
 
 /**
  * @author Simon Toens

@@ -38,7 +38,7 @@ import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.annotations.ColumnAlias;
 import com.wavemaker.runtime.data.exception.TypeMappingException;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>

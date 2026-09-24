@@ -23,7 +23,7 @@ import org.hibernate.dialect.OracleTypesHelper;
 import com.wavemaker.commons.CommonConstants;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 
 public class JDBCUtils {
 

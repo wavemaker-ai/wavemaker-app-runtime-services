@@ -20,8 +20,8 @@ import java.util.Optional;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.runtime.data.dao.validators.HqlPropertyResolver;
 import com.wavemaker.runtime.data.exception.HqlGrammarException;
-import com.wavemaker.runtime.data.model.JavaType;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.constants.JavaType;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 /**
  * @author Sujith Simon

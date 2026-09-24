@@ -22,7 +22,7 @@ import org.hibernate.Session;
 import org.hibernate.type.Type;
 
 import com.wavemaker.runtime.data.dao.util.QueryHelper;
-import com.wavemaker.runtime.data.model.JavaType;
+import com.wavemaker.app.db.constants.JavaType;
 import com.wavemaker.runtime.data.model.queries.QueryParameter;
 import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
 import com.wavemaker.runtime.data.util.HibernateUtils;

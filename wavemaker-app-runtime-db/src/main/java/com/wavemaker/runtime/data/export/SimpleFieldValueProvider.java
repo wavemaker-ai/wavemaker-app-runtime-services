@@ -20,7 +20,7 @@ import org.springframework.beans.BeanUtils;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 public class SimpleFieldValueProvider implements FieldValueProvider {
 

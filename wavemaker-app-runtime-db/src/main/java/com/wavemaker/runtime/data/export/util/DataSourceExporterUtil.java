@@ -28,8 +28,8 @@ import org.springframework.util.ReflectionUtils;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.export.ExportCellStyles;
-import com.wavemaker.runtime.data.model.JavaType;
-import com.wavemaker.runtime.data.util.JavaTypeUtils;
+import com.wavemaker.app.db.constants.JavaType;
+import com.wavemaker.app.db.util.JavaTypeUtils;
 
 /**
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>

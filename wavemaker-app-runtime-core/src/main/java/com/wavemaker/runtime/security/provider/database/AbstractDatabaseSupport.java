@@ -14,20 +14,20 @@
  ******************************************************************************/
 package com.wavemaker.runtime.security.provider.database;
 
-import org.springframework.orm.hibernate5.HibernateOperations;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import java.util.List;
+import java.util.Map;
+
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutor;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 
 /**
  * Created by ArjunSahasranam on 11/3/16.
  */
-public abstract class AbstractDatabaseSupport extends HibernateDaoSupport {
+public abstract class AbstractDatabaseSupport {
 
-    protected TransactionTemplate transactionTemplate;
-    protected PlatformTransactionManager transactionManager;
     protected boolean hql;
+    private String serviceName;
+    private DatabaseQueryExecutorFactory executorFactory;
 
     public boolean isHql() {
         return hql;
@@ -37,20 +37,20 @@ public abstract class AbstractDatabaseSupport extends HibernateDaoSupport {
         this.hql = hql;
     }
 
-    public PlatformTransactionManager getTransactionManager() {
-        return transactionManager;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setTransactionManager(final PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-        this.transactionTemplate = new TransactionTemplate(this.transactionManager);
+    public void setServiceName(final String serviceName) {
+        this.serviceName = serviceName;
     }
 
-    public TransactionTemplate getTransactionTemplate() {
-        return transactionTemplate;
+    public void setExecutorFactory(final DatabaseQueryExecutorFactory executorFactory) {
+        this.executorFactory = executorFactory;
     }
 
-    public void setHibernateTemplate(final HibernateOperations hibernateTemplate) {
-        super.setHibernateTemplate((HibernateTemplate) hibernateTemplate);
+    protected List<Map<String, Object>> executeQuery(final String query, final Map<String, Object> params) {
+        DatabaseQueryExecutor executor = executorFactory.getExecutor(serviceName, !hql);
+        return executor.execute(query, params);
     }
 }
