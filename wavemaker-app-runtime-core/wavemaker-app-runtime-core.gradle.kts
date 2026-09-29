@@ -89,6 +89,13 @@ tasks {
             project.configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts.forEach {
                 content += it.moduleVersion.toString() + "\n"
             }
+            // Also list wavemaker-app-runtime-db itself and everything it depends on.
+            val runtimeDbProject = project(":wavemaker-app-runtime-db")
+            content += "${runtimeDbProject.group}:${runtimeDbProject.name}:${runtimeDbProject.version}\n"
+            runtimeDbProject.configurations.getByName("runtimeClasspath")
+                .resolvedConfiguration.resolvedArtifacts.forEach {
+                    content += it.moduleVersion.toString() + "\n"
+                }
             val resourcesDir: File = sourceSets.main.get().output.resourcesDir!!
             resourcesDir.mkdirs()
             File(resourcesDir, "app-runtime-dependencies.txt").writeText(content)
