@@ -22,11 +22,9 @@ import java.util.Objects;
 import jakarta.servlet.Filter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,16 +35,16 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.SecurityInterceptUrlEntry;
 import com.wavemaker.app.security.models.config.opaque.OpaqueTokenProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
 import com.wavemaker.runtime.security.config.WMSecurityConfiguration;
-import com.wavemaker.runtime.security.model.AuthProviderType;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondition;
+import com.wavemaker.runtime.security.model.AuthProviderType;
 import com.wavemaker.runtime.security.provider.database.authorities.DefaultAuthoritiesProviderImpl;
 import com.wavemaker.runtime.security.provider.roles.RuntimeDatabaseRoleMappingConfig;
 
@@ -81,15 +79,14 @@ public class OpaqueTokenSecurityProviderConfiguration implements WMSecurityConfi
 
     @Bean(name = "opaqueAuthoritiesProvider")
     @Conditional(OpaqueDatabaseRoleProviderCondition.class)
-    public AuthoritiesProvider opaqueAuthoritiesProvider(ApplicationContext applicationContext,
-                                                         RuntimeDatabaseRoleMappingConfig opaqueRuntimeDatabaseRoleMappingConfig) {
+    public AuthoritiesProvider opaqueAuthoritiesProvider(RuntimeDatabaseRoleMappingConfig opaqueRuntimeDatabaseRoleMappingConfig,
+                                                         DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
         defaultAuthoritiesProvider.setHql(Objects.equals(opaqueRuntimeDatabaseRoleMappingConfig.getQueryType(), RoleQueryType.HQL));
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(opaqueRuntimeDatabaseRoleMappingConfig.getRolesByUsernameQuery());
-        String modelName = opaqueRuntimeDatabaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(opaqueRuntimeDatabaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 

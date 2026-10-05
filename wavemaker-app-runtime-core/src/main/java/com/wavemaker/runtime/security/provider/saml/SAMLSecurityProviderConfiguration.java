@@ -27,14 +27,12 @@ import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml2.provider.service.authentication.logout.OpenSamlLogoutRequestValidator;
@@ -64,13 +62,13 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.SecurityInterceptUrlEntry;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
 import com.wavemaker.app.security.models.config.saml.SAMLConfig;
 import com.wavemaker.app.security.models.config.saml.SAMLProviderConfig;
 import com.wavemaker.runtime.RuntimeEnvironment;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.config.WMSecurityConfiguration;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondition;
@@ -259,15 +257,14 @@ public class SAMLSecurityProviderConfiguration implements WMSecurityConfiguratio
 
     @Bean(name = "samlAuthoritiesProvider")
     @Conditional(SAMLDatabaseRoleProviderCondition.class)
-    public AuthoritiesProvider authoritiesProvider(RuntimeDatabaseRoleMappingConfig samlRuntimeDatabaseRoleMappingConfig, ApplicationContext applicationContext) {
+    public AuthoritiesProvider authoritiesProvider(RuntimeDatabaseRoleMappingConfig samlRuntimeDatabaseRoleMappingConfig,
+                                                   DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
         defaultAuthoritiesProvider.setHql(Objects.equals(samlRuntimeDatabaseRoleMappingConfig.getQueryType(), RoleQueryType.HQL));
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(samlRuntimeDatabaseRoleMappingConfig.getRolesByUsernameQuery());
-        String modelName = samlRuntimeDatabaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager(
-            (PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(samlRuntimeDatabaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 

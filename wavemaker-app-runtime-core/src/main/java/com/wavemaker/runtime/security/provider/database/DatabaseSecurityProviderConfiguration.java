@@ -17,22 +17,19 @@ package com.wavemaker.runtime.security.provider.database;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.config.database.DatabaseProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondition;
@@ -45,13 +42,11 @@ import com.wavemaker.runtime.security.provider.database.users.UserProvider;
 @Configuration
 @Conditional({SecurityEnabledCondition.class, DatabaseSecurityProviderCondition.class})
 public class DatabaseSecurityProviderConfiguration {
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Bean(name = "databaseAuthenticationProvider")
-    public AuthenticationProvider daoAuthenticationProvider() {
+    public AuthenticationProvider daoAuthenticationProvider(DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(databaseUserDetailsService(databaseProviderConfig()));
+        authenticationProvider.setUserDetailsService(databaseUserDetailsService(databaseProviderConfig(), databaseQueryExecutorFactory));
         authenticationProvider.setPasswordEncoder(noOpPasswordEncoder());
         return authenticationProvider;
     }
@@ -68,33 +63,31 @@ public class DatabaseSecurityProviderConfiguration {
     }
 
     @Bean(name = "jdbcDaoImpl")
-    public UserDetailsService databaseUserDetailsService(DatabaseProviderConfig databaseProviderConfig) {
+    public UserDetailsService databaseUserDetailsService(DatabaseProviderConfig databaseProviderConfig, DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DatabaseUserDetailsService databaseUserDetailsService = new DatabaseUserDetailsService();
-        databaseUserDetailsService.setAuthoritiesProvider(defaultAuthoritiesProviderImpl(databaseProviderConfig));
-        databaseUserDetailsService.setUserProvider(defaultUserProviderImpl(databaseProviderConfig));
+        databaseUserDetailsService.setAuthoritiesProvider(defaultAuthoritiesProviderImpl(databaseProviderConfig, databaseQueryExecutorFactory));
+        databaseUserDetailsService.setUserProvider(defaultUserProviderImpl(databaseProviderConfig, databaseQueryExecutorFactory));
         return databaseUserDetailsService;
     }
 
     @Bean(name = "defaultUserProvider")
-    public UserProvider defaultUserProviderImpl(DatabaseProviderConfig databaseProviderConfig) {
+    public UserProvider defaultUserProviderImpl(DatabaseProviderConfig databaseProviderConfig, DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultUserProviderImpl defaultUserProvider = new DefaultUserProviderImpl();
-        String modelName = databaseProviderConfig.getModelName();
         defaultUserProvider.setHql(true);
         defaultUserProvider.setUsersByUsernameQuery(databaseProviderConfig.getUsersByUsernameQuery());
-        defaultUserProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultUserProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultUserProvider.setServiceName(databaseProviderConfig.getModelName());
+        defaultUserProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultUserProvider;
     }
 
     @Bean(name = "defaultAuthoritiesProvider")
-    public AuthoritiesProvider defaultAuthoritiesProviderImpl(DatabaseProviderConfig databaseProviderConfig) {
+    public AuthoritiesProvider defaultAuthoritiesProviderImpl(DatabaseProviderConfig databaseProviderConfig, DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
-        String modelName = databaseProviderConfig.getModelName();
         defaultAuthoritiesProvider.setHql(Objects.equals(databaseProviderConfig.getQueryType(), RoleQueryType.HQL.name()));
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(databaseProviderConfig.getRolesByUsernameQuery());
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(databaseProviderConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 

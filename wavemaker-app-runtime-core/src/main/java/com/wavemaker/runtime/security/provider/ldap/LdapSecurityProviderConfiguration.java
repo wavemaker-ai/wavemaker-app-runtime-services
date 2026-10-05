@@ -20,7 +20,6 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +28,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.support.AbstractContextSource;
 import org.springframework.ldap.core.support.BaseLdapPathContextSource;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
@@ -43,10 +41,10 @@ import org.springframework.security.ldap.search.LdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.config.ldap.LdapProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
 import com.wavemaker.runtime.security.core.AuthoritiesProvider;
 import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondition;
@@ -75,14 +73,14 @@ public class LdapSecurityProviderConfiguration {
 
     @Bean(name = "defaultAuthoritiesProvider")
     @Conditional(LdapDatabaseAuthoritiesProviderCondition.class)
-    public AuthoritiesProvider defaultAuthoritiesProvider(ApplicationContext applicationContext, RuntimeDatabaseRoleMappingConfig ldapRuntimeDatabaseRoleMappingConfig) {
+    public AuthoritiesProvider defaultAuthoritiesProvider(RuntimeDatabaseRoleMappingConfig ldapRuntimeDatabaseRoleMappingConfig,
+                                                          DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
         defaultAuthoritiesProvider.setHql(ldapRuntimeDatabaseRoleMappingConfig.getQueryType() == RoleQueryType.HQL);
         defaultAuthoritiesProvider.setRolePrefix("ROLE_");
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(ldapRuntimeDatabaseRoleMappingConfig.getRolesByUsernameQuery());
-        String modelName = ldapRuntimeDatabaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(modelName + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(modelName + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(ldapRuntimeDatabaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 

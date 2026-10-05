@@ -18,22 +18,20 @@ package com.wavemaker.runtime.security.provider.ad;
 import java.util.Objects;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.wavemaker.app.security.models.config.ad.ActiveDirectoryProviderConfig;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
+import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
 import com.wavemaker.runtime.security.model.AuthProviderType;
 import com.wavemaker.runtime.security.model.ProviderOrder;
@@ -94,23 +92,22 @@ public class ActiveDirectorySecurityProviderConfiguration {
 
     @Bean(name = "adAuthoritiesPopulator")
     @Conditional(DatabaseActiveDirectoryAuthoritiesPopulatorCondition.class)
-    public ActiveDirectoryAuthoritiesPopulator activeDirectoryDatabaseAuthoritiesPopulator(ApplicationContext applicationContext,
-                                                                                           RuntimeDatabaseRoleMappingConfig runtimeDatabaseRoleMappingConfig) {
+    public ActiveDirectoryAuthoritiesPopulator activeDirectoryDatabaseAuthoritiesPopulator(RuntimeDatabaseRoleMappingConfig runtimeDatabaseRoleMappingConfig,
+                                                                                           DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         ActiveDirectoryDatabaseAuthoritiesPopulator activeDirectoryDatabaseAuthoritiesPopulator = new ActiveDirectoryDatabaseAuthoritiesPopulator();
-        activeDirectoryDatabaseAuthoritiesPopulator.setAuthoritiesProvider(defaultAuthoritiesProviderImpl(applicationContext, runtimeDatabaseRoleMappingConfig));
+        activeDirectoryDatabaseAuthoritiesPopulator.setAuthoritiesProvider(defaultAuthoritiesProviderImpl(runtimeDatabaseRoleMappingConfig, databaseQueryExecutorFactory));
         return activeDirectoryDatabaseAuthoritiesPopulator;
     }
 
     @Bean(name = "defaultAuthoritiesProvider")
     @Conditional(DatabaseActiveDirectoryAuthoritiesPopulatorCondition.class)
-    public AuthoritiesProvider defaultAuthoritiesProviderImpl(ApplicationContext applicationContext,
-                                                              RuntimeDatabaseRoleMappingConfig activeDirectoryRuntimeDatabaseRoleMappingConfig) {
+    public AuthoritiesProvider defaultAuthoritiesProviderImpl(RuntimeDatabaseRoleMappingConfig activeDirectoryRuntimeDatabaseRoleMappingConfig,
+                                                              DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
         DefaultAuthoritiesProviderImpl defaultAuthoritiesProvider = new DefaultAuthoritiesProviderImpl();
         defaultAuthoritiesProvider.setHql(Objects.equals(activeDirectoryRuntimeDatabaseRoleMappingConfig.getQueryType(), RoleQueryType.HQL));
         defaultAuthoritiesProvider.setAuthoritiesByUsernameQuery(activeDirectoryRuntimeDatabaseRoleMappingConfig.getRolesByUsernameQuery());
-        String roleModel = activeDirectoryRuntimeDatabaseRoleMappingConfig.getModelName();
-        defaultAuthoritiesProvider.setHibernateTemplate((HibernateOperations) applicationContext.getBean(roleModel + "Template"));
-        defaultAuthoritiesProvider.setTransactionManager((PlatformTransactionManager) applicationContext.getBean(roleModel + "TransactionManager"));
+        defaultAuthoritiesProvider.setServiceName(activeDirectoryRuntimeDatabaseRoleMappingConfig.getModelName());
+        defaultAuthoritiesProvider.setExecutorFactory(databaseQueryExecutorFactory);
         return defaultAuthoritiesProvider;
     }
 
