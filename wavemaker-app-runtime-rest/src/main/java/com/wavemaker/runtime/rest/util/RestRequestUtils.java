@@ -38,8 +38,8 @@ public class RestRequestUtils {
         final String variableType = (String) VendorUtils.getWMExtension(parameter, RestConstants.VARIABLE_TYPE);
         final String variableValue = (String) VendorUtils.getWMExtension(parameter, RestConstants.VARIABLE_KEY);
         if (StringUtils.isNotBlank(variableType) && StringUtils.isNotBlank(variableValue)) {
-            final String value = VariableType.valueOf(variableType.toUpperCase()).getValue(variableValue, String.class);
-            return Optional.ofNullable(value);
+            final Object value = VariableType.valueOf(variableType.toUpperCase()).getValue(variableValue);
+            return Optional.ofNullable(value).map(String::valueOf);
         }
 
         return Optional.empty();

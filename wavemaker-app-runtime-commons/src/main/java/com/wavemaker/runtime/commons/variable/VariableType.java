@@ -49,14 +49,6 @@ public enum VariableType {
         return null;
     }
 
-    public <T> T getValue(String variableName, Class<T> requiredType) {
-        VariableValueProvider variableValueProvider = getVariableValueProvider();
-        if (variableValueProvider != null) {
-            return variableValueProvider.getValue(variableName, requiredType);
-        }
-        return null;
-    }
-
     public String toVariableName(String variableName, String parameterName) {
         return VariableTypeHelper.toVariableName(this, variableName, parameterName);
     }

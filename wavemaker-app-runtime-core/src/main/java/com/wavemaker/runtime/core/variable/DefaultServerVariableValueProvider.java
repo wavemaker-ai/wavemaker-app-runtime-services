@@ -33,7 +33,7 @@ import com.wavemaker.runtime.security.SecurityService;
  * @since 10/7/17
  */
 @Component
-public class DefaultServerVariableValueProvider extends AbstractVariableValueProvider implements ServerVariableValueProvider {
+public class DefaultServerVariableValueProvider implements ServerVariableValueProvider {
 
     private final SecurityService securityService;
 

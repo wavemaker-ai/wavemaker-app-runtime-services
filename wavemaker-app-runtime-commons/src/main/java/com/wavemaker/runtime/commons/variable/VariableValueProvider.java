@@ -22,6 +22,4 @@ public interface VariableValueProvider {
 
     Object getValue(String variableName);
 
-    <T> T getValue(String variableName, Class<T> requiredType);
-
 }

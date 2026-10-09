@@ -50,7 +50,7 @@ public class VariableDefinedPropertyProvider implements ValueProvider {
 
     @Override
     public Object getValue(ListenerContext context) {
-        return type.getValue(name, fieldType);
+        return type.getValue(name);
     }
 
     @Override

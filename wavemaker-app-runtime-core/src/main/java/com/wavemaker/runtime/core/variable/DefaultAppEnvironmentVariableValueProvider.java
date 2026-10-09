@@ -25,7 +25,7 @@ import com.wavemaker.runtime.commons.variable.AppEnvironmentVariableValueProvide
  * @since 10/7/17
  */
 @Component
-public class DefaultAppEnvironmentVariableValueProvider extends AbstractVariableValueProvider implements AppEnvironmentVariableValueProvider {
+public class DefaultAppEnvironmentVariableValueProvider implements AppEnvironmentVariableValueProvider {
 
     private static final String APP_ENVIRONMENT_PROPERTY_PREFIX = "app.environment.";
 

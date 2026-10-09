@@ -14,6 +14,8 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.export;
 
+import com.wavemaker.runtime.commons.file.model.ExportType;
+
 /**
  * @author Dilip Kumar
  * @since 1/6/18

@@ -59,7 +59,7 @@ public class AppRuntimeParameterProvider implements ParametersProvider {
             if (variableType.isVariable()) {
                 final Optional<Type> type = getType(session, name);
                 if (type.isPresent()) {
-                    value = variableType.getValue(variableName, type.get().getReturnedClass());
+                    value = variableType.getValue(variableName);
                 } else {
                     value = variableType.getValue(variableName);
                 }

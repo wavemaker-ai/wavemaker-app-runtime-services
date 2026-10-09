@@ -23,8 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.orm.hibernate5.HibernateCallback;
 
 import com.wavemaker.runtime.commons.file.model.Downloadable;
+import com.wavemaker.runtime.commons.file.model.ExportType;
 import com.wavemaker.runtime.data.export.DataExportOptions;
-import com.wavemaker.runtime.data.export.ExportType;
 import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 
