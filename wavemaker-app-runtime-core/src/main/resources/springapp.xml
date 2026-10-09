@@ -16,6 +16,7 @@
 
     <import resource="config.xml"/>
     <import resource="springapp-mvc.xml"/>
+    <import resource="classpath*:data-springapp.xml"/>
 
     <bean id="wmAppContext" class="com.wavemaker.runtime.commons.WMAppContext"/>
 
@@ -239,6 +240,8 @@
     <bean id="deleteMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.DeleteMethodInvocationHandler"/>
 
     <bean id="restExecutor" class="com.wavemaker.runtime.rest.RestExecutor"/>
+
+    <bean id="webAppRootTokenResolver" class="com.wavemaker.runtime.core.props.WebAppRootTokenResolver"/>
 
     <bean class="com.wavemaker.runtime.core.props.AppPropertySourcesPlaceHolderConfigurer" id="appPropertySourcesPlaceHolderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>

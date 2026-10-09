@@ -29,24 +29,9 @@ public class DataServiceConstants {
 
     public static final String WM_MY_SQL_CLOUD_PASSWORD_TOKEN = "{WM_CLOUD_MYSQL_PASSWORD}";
 
-    public static final String WM_MY_SQL_CLOUD_HOST;
-
-    public static final String WM_MY_SQL_CLOUD_USER_NAME;
-
-    public static final String WM_MY_SQL_CLOUD_PASSWORD;
-
     public static final String QUERY_EXECUTION_CONTROLLER = "QueryExecutionController";
 
     public static final String PROCEDURE_EXECUTION_CONTROLLER = "ProcedureExecutionController";
-
-    static {
-        final String mySqlCloudHost = "wm.mysqlCloudHost";
-        final String mySqlCloudUsername = "wm.mysqlCloudUsername";
-        final String mySqlCloudPassword = "wm.mysqlCloudPassword";
-        WM_MY_SQL_CLOUD_HOST = (System.getenv(mySqlCloudHost) != null) ? System.getenv(mySqlCloudHost) : System.getProperty(mySqlCloudHost, "localhost:3306");
-        WM_MY_SQL_CLOUD_USER_NAME = (System.getenv(mySqlCloudUsername) != null) ? System.getenv(mySqlCloudUsername) : System.getProperty(mySqlCloudUsername, "root");
-        WM_MY_SQL_CLOUD_PASSWORD = (System.getenv(mySqlCloudPassword) != null) ? System.getenv(mySqlCloudPassword) : System.getProperty(mySqlCloudPassword, "cloudjee123");
-    }
 
     private DataServiceConstants() {
     }
