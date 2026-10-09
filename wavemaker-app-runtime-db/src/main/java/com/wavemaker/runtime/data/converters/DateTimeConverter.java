@@ -53,7 +53,7 @@ public class DateTimeConverter implements JavaTypeConverter {
     public Object toDbValue(final Object value, final Class<?> toType) {
         if (value instanceof LocalDateTime) {
             Timestamp timeStamp = Timestamp.valueOf(((LocalDateTime) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            return JavaType.TIMESTAMP.toDbValue(timeStamp);
+            return JavaTypeConverters.get(JavaType.TIMESTAMP).toDbValue(timeStamp, Timestamp.class);
         }
         return value;
     }

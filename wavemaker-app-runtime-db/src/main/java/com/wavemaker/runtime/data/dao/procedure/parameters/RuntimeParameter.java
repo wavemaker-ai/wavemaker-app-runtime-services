@@ -17,6 +17,8 @@ package com.wavemaker.runtime.data.dao.procedure.parameters;
 import java.util.Map;
 
 import com.wavemaker.runtime.commons.variable.VariableType;
+import com.wavemaker.runtime.data.converters.JavaTypeConverters;
+import com.wavemaker.runtime.data.model.JavaType;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameter;
 
 /**
@@ -37,13 +39,14 @@ public class RuntimeParameter implements ResolvableParam {
     public Object getValue() {
         final Object value;
         final VariableType variableType = parameter.getVariableType();
+        final JavaType type = parameter.getType();
         if (variableType.isVariable()) {
-            value = parameter.getType().fromDbValue(variableType.getValue(parameter.getVariableName()));
+            value = JavaTypeConverters.get(type).fromDbValue(variableType.getValue(parameter.getVariableName()));
         } else {
             value = params.get(parameter.getName());
         }
 
-        return parameter.getType().toDbValue(value);
+        return JavaTypeConverters.get(type).toDbValue(value, type.getClassType());
     }
 
     @Override

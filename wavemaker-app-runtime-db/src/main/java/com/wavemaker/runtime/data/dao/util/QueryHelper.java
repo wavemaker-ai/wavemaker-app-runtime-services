@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
+import com.wavemaker.runtime.data.converters.JavaTypeConverters;
 import com.wavemaker.runtime.data.dao.query.types.RuntimeParameterTypeResolver;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
@@ -228,9 +229,9 @@ public class QueryHelper {
         if (value != null && javaType != JavaType.BLOB) {
             final String fromValue = String.valueOf(value);
             if (StringUtils.isNotBlank(fromValue) || parameter.getType() == JavaType.STRING) {
-                convertedValue = javaType.fromString(fromValue);
+                convertedValue = JavaTypeConverters.get(javaType).fromString(fromValue);
                 if (isNative) {
-                    convertedValue = javaType.toDbValue(convertedValue);
+                    convertedValue = JavaTypeConverters.get(javaType).toDbValue(convertedValue, javaType.getClassType());
                 }
             }
         }

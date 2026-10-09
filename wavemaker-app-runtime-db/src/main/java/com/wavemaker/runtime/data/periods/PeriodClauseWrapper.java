@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 
 import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.runtime.data.annotations.TableTemporal;
+import com.wavemaker.runtime.data.converters.JavaTypeConverters;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
 import com.wavemaker.runtime.data.model.JavaType;
 
@@ -41,16 +42,16 @@ public class PeriodClauseWrapper implements PeriodClause {
         try {
             if ("as_of".equalsIgnoreCase(periodType)) {
                 Assert.isTrue(tokens.length == 2, "As of clause MUST have one argument");
-                periodClause = new AsOfClause(type, (Timestamp) JavaType.TIMESTAMP.fromString(tokens[1]));
+                periodClause = new AsOfClause(type, (Timestamp) JavaTypeConverters.get(JavaType.TIMESTAMP).fromString(tokens[1]));
             } else if ("from_to".equalsIgnoreCase(periodType)) {
                 Assert.isTrue(tokens.length == 3, "FromTo clause MUST have two arguments");
-                final Timestamp from = (Timestamp) JavaType.TIMESTAMP.fromString(tokens[1]);
-                final Timestamp to = (Timestamp) JavaType.TIMESTAMP.fromString(tokens[2]);
+                final Timestamp from = (Timestamp) JavaTypeConverters.get(JavaType.TIMESTAMP).fromString(tokens[1]);
+                final Timestamp to = (Timestamp) JavaTypeConverters.get(JavaType.TIMESTAMP).fromString(tokens[2]);
                 periodClause = new FromToClause(type, from, to);
             } else if ("between".equalsIgnoreCase(periodType)) {
                 Assert.isTrue(tokens.length == 3, "Between clause MUST have two arguments");
-                final Timestamp from = (Timestamp) JavaType.TIMESTAMP.fromString(tokens[1]);
-                final Timestamp to = (Timestamp) JavaType.TIMESTAMP.fromString(tokens[2]);
+                final Timestamp from = (Timestamp) JavaTypeConverters.get(JavaType.TIMESTAMP).fromString(tokens[1]);
+                final Timestamp to = (Timestamp) JavaTypeConverters.get(JavaType.TIMESTAMP).fromString(tokens[2]);
                 periodClause = new BetweenClause(type, from, to);
             } else {
                 throw new InvalidInputException(ERROR_MESSAGE);

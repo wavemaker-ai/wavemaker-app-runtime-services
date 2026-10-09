@@ -25,6 +25,7 @@ import org.hibernate.HibernateException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.wavemaker.runtime.data.converters.JavaTypeConverters;
 import com.wavemaker.runtime.data.model.JavaType;
 
 /**
@@ -56,7 +57,7 @@ public class JavaTypeUtils {
         if (classNameVsJavaTypeMap.containsKey(toClass)) {
             for (final JavaType javaType : classNameVsJavaTypeMap.get(toClass)) {
                 try {
-                    convertedValue = javaType.fromDbValue(value);
+                    convertedValue = JavaTypeConverters.get(javaType).fromDbValue(value);
                     break;
                 } catch (HibernateException e) {
                     // ignore

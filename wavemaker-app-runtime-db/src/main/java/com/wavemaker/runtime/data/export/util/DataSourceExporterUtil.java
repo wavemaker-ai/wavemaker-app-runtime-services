@@ -27,6 +27,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.runtime.data.converters.JavaTypeConverters;
 import com.wavemaker.runtime.data.export.ExportCellStyles;
 import com.wavemaker.runtime.data.model.JavaType;
 import com.wavemaker.runtime.data.util.JavaTypeUtils;
@@ -72,7 +73,7 @@ public class DataSourceExporterUtil {
                         case FLOAT:
                         case BIG_DECIMAL:
                             cell.setCellType(CellType.NUMERIC);
-                            cell.setCellValue((double) JavaType.DOUBLE.fromString(data.toString()));
+                            cell.setCellValue((double) JavaTypeConverters.get(JavaType.DOUBLE).fromString(data.toString()));
                             break;
                         default:
                             cell.setCellValue(data.toString());
