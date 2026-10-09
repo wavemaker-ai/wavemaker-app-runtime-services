@@ -15,69 +15,73 @@
 package com.wavemaker.runtime.security.session;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
+
+import javax.sql.DataSource;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.jdbc.DatabaseDriver;
+import org.springframework.boot.jdbc.init.PlatformPlaceholderDatabaseDriverResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.util.ResourceUtils;
 
 import com.wavemaker.commons.WMRuntimeException;
-import com.wavemaker.app.db.constants.DBType;
-import com.wavemaker.runtime.data.datasource.WMDataSource;
 
 public class JdbcSessionScriptInitializer {
 
+    private static final String SCHEMA_LOCATION_PATTERN = "classpath:org/springframework/session/jdbc/schema-@@platform@@.sql";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcSessionScriptInitializer.class);
 
-    @Resource(name = "${security.session.jdbc.serviceName}DataSource")
-    private WMDataSource dataSource;
+    private final DataSource dataSource;
+
+    public JdbcSessionScriptInitializer(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @PostConstruct
     public void initializeScript() {
-        try {
-            ResultSet resultSet;
+        try (Connection connection = dataSource.getConnection()) {
+            DatabaseMetaData metaData = connection.getMetaData();
             String tableName = "SPRING_SESSION";
-            try (Connection connection = dataSource.getTargetDataSource().getConnection()) {
-                if ("PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())) {
-                    //PostgreSQL is storing tableNames in lower case so getTables check also need to be done on the lowercase
-                    tableName = StringUtils.lowerCase(tableName);
+            if ("PostgreSQL".equals(metaData.getDatabaseProductName())) {
+                //PostgreSQL is storing tableNames in lower case so getTables check also need to be done on the lowercase
+                tableName = StringUtils.lowerCase(tableName);
+            }
+            try (ResultSet resultSet = metaData.getTables(connection.getCatalog(), null, tableName, new String[]{"TABLE"})) {
+                if (resultSet.next()) {
+                    LOGGER.debug("Skipping SPRING_SESSION table creation as it already exists");
+                    return;
                 }
-                resultSet = connection.getMetaData().getTables(connection.getCatalog(), null, tableName, new String[]{"TABLE"});
             }
-            if (resultSet.next()) {
-                LOGGER.debug("Skipping SPRING_SESSION table creation as it already exists");
-            } else {
-                ResourceDatabasePopulator resourceDatabasePopulator = new ResourceDatabasePopulator();
-                ClassPathResource classPathResource = new ClassPathResource(getSchemaFileFromJdbcUrl(dataSource.getConnection().getMetaData().getURL()));
-                LOGGER.debug("executing sql script from resource: {}", classPathResource.getPath());
-                resourceDatabasePopulator.addScript(classPathResource);
-                resourceDatabasePopulator.execute(dataSource);
-            }
+            ClassPathResource classPathResource = getSchemaResource();
+            LOGGER.debug("executing sql script from resource: {}", classPathResource.getPath());
+            ResourceDatabasePopulator resourceDatabasePopulator = new ResourceDatabasePopulator();
+            resourceDatabasePopulator.addScript(classPathResource);
+            resourceDatabasePopulator.populate(connection);
         } catch (SQLException throwables) {
             throw new WMRuntimeException(throwables.getCause());
         }
     }
 
-    private String getSchemaFileFromJdbcUrl(String url) {
-        String[] connectionUrl = url.split(":");
-        String jdbcProtocol = connectionUrl[1];
-        DBType[] dbTypes = DBType.values();
-        for (DBType dbType : dbTypes) {
-            List<String> supportedJdbcProtocols = dbType.getSupportedJdbcProtocols();
-            for (String supportedJdbcProtocol : supportedJdbcProtocols) {
-                if (Objects.equals(jdbcProtocol, supportedJdbcProtocol)) {
-                    return dbType.getSpringSessionSchemaCreationFile();
-                }
-            }
+    private ClassPathResource getSchemaResource() {
+        // Same platform resolution Spring Boot uses for its own Spring Session JDBC schema initialization
+        List<String> locations = new PlatformPlaceholderDatabaseDriverResolver()
+            .withDriverPlatform(DatabaseDriver.MARIADB, "mysql")
+            .resolveAll(dataSource, SCHEMA_LOCATION_PATTERN);
+        String path = StringUtils.removeStart(locations.get(0), ResourceUtils.CLASSPATH_URL_PREFIX);
+        ClassPathResource classPathResource = new ClassPathResource(path);
+        if (!classPathResource.exists()) {
+            throw new WMRuntimeException("No Spring Session JDBC schema script found for the database at " + path);
         }
-        throw new WMRuntimeException("Failed to retrieve DBType from URL");
+        return classPathResource;
     }
 }

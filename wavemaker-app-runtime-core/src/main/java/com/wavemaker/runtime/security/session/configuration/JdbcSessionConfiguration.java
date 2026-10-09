@@ -37,6 +37,7 @@ import org.springframework.session.jdbc.config.annotation.web.http.WMJdbcHttpSes
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.wavemaker.runtime.data.datasource.DataSourceBeanNames;
 import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondition;
 import com.wavemaker.runtime.security.session.JdbcSessionScriptInitializer;
 
@@ -51,8 +52,7 @@ public class JdbcSessionConfiguration {
 
     @Bean(name = "jdbcSessionRepositoryTransactionManager")
     public PlatformTransactionManager jdbcSessionRepositoryTransactionManager() {
-        return new DataSourceTransactionManager((DataSource) applicationContext.getBean(
-            environment.getProperty("security.session.jdbc.serviceName") + "DataSource"));
+        return new DataSourceTransactionManager(dataSource());
     }
 
     @Bean
@@ -77,12 +77,12 @@ public class JdbcSessionConfiguration {
 
     @Bean(name = "jdbcSessionScriptInitializer")
     public JdbcSessionScriptInitializer jdbcSessionScriptInitializer() {
-        return new JdbcSessionScriptInitializer();
+        return new JdbcSessionScriptInitializer(dataSource());
     }
 
     @Bean(name = "jdbcSessionPersistenceDataSource")
     public DataSource dataSource() {
         return (DataSource) applicationContext.getBean(
-            environment.getProperty("security.session.jdbc.serviceName") + "DataSource");
+            DataSourceBeanNames.dataSource(environment.getProperty("security.session.jdbc.serviceName")));
     }
 }

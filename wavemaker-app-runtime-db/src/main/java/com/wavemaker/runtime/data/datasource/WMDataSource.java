@@ -75,7 +75,7 @@ public class WMDataSource extends DelegatingDataSource {
                 JndiTemplate jndiTemplate = new JndiTemplate();
                 dataSource = jndiTemplate.lookup(getJndiName(), DataSource.class);
             } else {
-                dataSource = context.getBean(serviceId + "WMManagedDataSource", DataSource.class);
+                dataSource = context.getBean(DataSourceBeanNames.managedDataSource(serviceId), DataSource.class);
             }
         } catch (NamingException e) {
             throw new WMRuntimeException(e.getMessage(), e);

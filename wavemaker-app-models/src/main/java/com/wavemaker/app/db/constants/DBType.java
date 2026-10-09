@@ -23,16 +23,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DBType {
-    HSQL("HSQLDB", List.of("hsqldb"), "org/springframework/session/jdbc/schema-hsqldb.sql"),
-    MYSQL("MySQL", List.of("mariadb", "mysql"), "org/springframework/session/jdbc/schema-mysql.sql"),
-    POSTGRES("PostgreSQL", List.of("postgresql"), "org/springframework/session/jdbc/schema-postgresql.sql"),
-    ORACLE("Oracle", List.of("oracle"), "org/springframework/session/jdbc/schema-oracle.sql"),
-    SQL_SERVER("SQLServer", List.of("sqlserver"), "org/springframework/session/jdbc/schema-sqlserver.sql"),
-    DB2("DB2", List.of("db2"), "org/springframework/session/jdbc/schema-db2.sql"),
-    SQLITE("sql_lite", List.of("sqllite"), "org/springframework/session/jdbc/schema-sqllite.sql"),
-    REDSHIFT("Redshift", List.of("redshift"), "org/springframework/session/jdbc/schema-redshift.sql"),
-    SAP_HANA("SAP_HANA", List.of("sap"), "org/springframework/session/jdbc/schema-sap.sql"),
-    OTHER("Other", List.of("other"), "");
+    HSQL("HSQLDB", List.of("hsqldb")),
+    MYSQL("MySQL", List.of("mariadb", "mysql")),
+    POSTGRES("PostgreSQL", List.of("postgresql")),
+    ORACLE("Oracle", List.of("oracle")),
+    SQL_SERVER("SQLServer", List.of("sqlserver")),
+    DB2("DB2", List.of("db2")),
+    SQLITE("sql_lite", List.of("sqllite")),
+    REDSHIFT("Redshift", List.of("redshift")),
+    SAP_HANA("SAP_HANA", List.of("sap")),
+    OTHER("Other", List.of("other"));
 
     private static final Map<String, DBType> valueVsDBType = new HashMap<>();
 
@@ -54,12 +54,10 @@ public enum DBType {
 
     private final String id;
     private final List<String> supportedJdbcProtocols;
-    private final String springSessionSchemaCreationFile;
 
-    DBType(String id, List<String> supportedJdbcProtocols, String springSessionSchemaCreationFile) {
+    DBType(String id, List<String> supportedJdbcProtocols) {
         this.id = id;
         this.supportedJdbcProtocols = supportedJdbcProtocols;
-        this.springSessionSchemaCreationFile = springSessionSchemaCreationFile;
     }
 
     public String getId() {
@@ -68,10 +66,6 @@ public enum DBType {
 
     public List<String> getSupportedJdbcProtocols() {
         return supportedJdbcProtocols;
-    }
-
-    public String getSpringSessionSchemaCreationFile() {
-        return springSessionSchemaCreationFile;
     }
 }
 
