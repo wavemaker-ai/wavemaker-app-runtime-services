@@ -9,7 +9,17 @@ val runtimeLibDependencies = configurations.create("runtimeLibDependencies") {
     extendsFrom(loggingCapabilityConfiguration)
 }
 
+// Lists the jars the app runtime already provides (app-runtime-dependencies.txt), so Studio does not copy them again
+// into a project. runtime-db is not a dependency of this module anymore, but the shared runtime lib still carries it
+// with its libraries (hibernate etc), so it is listed as well.
+val appRuntimeDependencies = configurations.create("appRuntimeDependencies") {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    extendsFrom(configurations.implementation.get(), configurations.runtimeOnly.get())
+}
+
 dependencies {
+    appRuntimeDependencies(projects.wavemakerAppRuntimeDb)
     implementation(enforcedPlatform(appDependenciesLibs.boms.slf4j.get().toString()))
     implementation(enforcedPlatform(appDependenciesLibs.boms.springFramework.get().toString()))
     implementation(enforcedPlatform(appDependenciesLibs.boms.springSecurity.get().toString()))
@@ -21,7 +31,6 @@ dependencies {
     implementation(projects.wavemakerAppRuntimeCommons)
     implementation(projects.wavemakerAppRuntimePrefab)
     implementation(projects.wavemakerAppRuntimeRest)
-    implementation(projects.wavemakerAppRuntimeDb)
     implementation(projects.wavemakerAppRuntimeDbApi)
     implementation(projects.wavemakerAppRuntimeConnectorAppIntegration)
     implementation(projects.wavemakerToolsApidocsCore)
@@ -40,7 +49,6 @@ dependencies {
     implementation(appDependenciesLibs.hibernate.validator)
     implementation(appDependenciesLibs.jackson.dataformat.yaml)
     implementation(appDependenciesLibs.jackson.datatype.jsr310)
-    implementation(appDependenciesLibs.jackson.datatype.hibernate)
     implementation(appDependenciesLibs.apache.httpclient)
     implementation(appDependenciesLibs.tika.core)
     compileOnly(appDependenciesLibs.opensaml.saml.impl)
@@ -52,6 +60,13 @@ dependencies {
     implementation(appDependenciesLibs.wordnik.swagger.annotations)
     implementation(appDependenciesLibs.jakarta.annotation.api)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
+    testRuntimeOnly(appDependenciesLibs.hibernate.core) {
+        because(
+            "WMObjectMapper in runtime-commons still registers the Hibernate jackson module, which needs " +
+                    "hibernate-core; this was coming transitively from runtime-db. TODO remove once WMObjectMapper " +
+                    "no longer depends on it"
+        )
+    }
     compileOnly(appDependenciesLibs.spring.contextSupport)
     compileOnly(appDependenciesLibs.spring.security.cas)
     compileOnly(appDependenciesLibs.spring.security.ldap)
@@ -63,10 +78,6 @@ dependencies {
     compileOnly(appDependenciesLibs.mongodb.driver.sync)
     compileOnly(appDependenciesLibs.spring.session.data.mongodb)
     compileOnly(appDependenciesLibs.spring.session.data.redis)
-    compileOnly(appDependenciesLibs.hibernate.core) {
-        because("Used for getting roles for logged in user. Used in conjuction with database service in the project." +
-                "TODO need to remove this dependency.")
-    }
     implementation(appDependenciesLibs.jakarta.xml.bind.api) {
         because("Used for getting jakarta xml bind packages, but previously javax bind api used to be loaded in app runtime core")
     }
@@ -81,13 +92,13 @@ dependencies {
 
 tasks {
     processResources {
-        inputs.files(configurations.runtimeClasspath.get().files)
+        inputs.files(appRuntimeDependencies)
         doLast {
             var content = ""
-            project.configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts.forEach {
-                content+=it.moduleVersion.toString()+"\n"
+            appRuntimeDependencies.resolvedConfiguration.resolvedArtifacts.forEach {
+                content += it.moduleVersion.toString() + "\n"
             }
-            val resourcesDir : File = sourceSets.main.get().output.resourcesDir!!
+            val resourcesDir: File = sourceSets.main.get().output.resourcesDir!!
             resourcesDir.mkdirs()
             File(resourcesDir, "app-runtime-dependencies.txt").writeText(content)
         }
@@ -97,7 +108,6 @@ tasks {
         dependsOn(":wavemaker-app-models:jar")
         dependsOn(":wavemaker-app-runtime-commons:jar")
         dependsOn(":wavemaker-app-runtime-prefab:jar")
-        dependsOn(":wavemaker-app-runtime-db:jar")
         dependsOn(":wavemaker-app-runtime-db-api:jar")
         dependsOn(":wavemaker-app-runtime-rest:jar")
         dependsOn(":wavemaker-tools-apidocs-core:jar")
