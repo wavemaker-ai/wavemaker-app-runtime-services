@@ -32,7 +32,7 @@ dependencies {
     implementation(appDependenciesLibs.guava)
     implementation(appDependenciesLibs.spring.boot)
     implementation(appDependenciesLibs.spring.webmvc)
-    implementation(appDependenciesLibs.spring.data.jpa)
+    implementation(appDependenciesLibs.spring.data.commons)
     implementation(appDependenciesLibs.spring.security.config)
     implementation(appDependenciesLibs.spring.security.core)
     implementation(appDependenciesLibs.spring.security.web)
