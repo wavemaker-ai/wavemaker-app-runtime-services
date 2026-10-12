@@ -5,8 +5,14 @@ plugins {
 group ="ai.wavemaker.runtime"
 
 val loggingCapabilityConfiguration = configurations.create("loggingCapabilityConfiguration")
+// Core's runtime classpath plus runtime-db. Core does not depend on runtime-db, so it is added only here, for
+// runtimeLibDependencies and app-runtime-dependencies.txt.
+val runtimeDependencies = configurations.create("runtimeDependencies") {
+    isCanBeConsumed = false
+    extendsFrom(configurations.runtimeClasspath.get())
+}
 val runtimeLibDependencies = configurations.create("runtimeLibDependencies") {
-    extendsFrom(loggingCapabilityConfiguration)
+    extendsFrom(loggingCapabilityConfiguration, runtimeDependencies)
 }
 
 dependencies {
@@ -21,7 +27,6 @@ dependencies {
     implementation(projects.wavemakerAppRuntimeCommons)
     implementation(projects.wavemakerAppRuntimePrefab)
     implementation(projects.wavemakerAppRuntimeRest)
-    implementation(projects.wavemakerAppRuntimeDb)
     implementation(projects.wavemakerAppRuntimeDbApi)
     implementation(projects.wavemakerAppRuntimeConnectorAppIntegration)
     implementation(projects.wavemakerToolsApidocsCore)
@@ -70,16 +75,18 @@ dependencies {
     implementation(appDependenciesLibs.log4j.core)
     loggingCapabilityConfiguration(appDependenciesLibs.log4j.slf4j.impl)
 
+    runtimeDependencies(projects.wavemakerAppRuntimeDb)
+
     //runtime dependencies lib
     runtimeLibDependencies(projects.wavemakerAppRuntimeCore)
 }
 
 tasks {
     processResources {
-        inputs.files(configurations.runtimeClasspath.get().files)
+        inputs.files(runtimeDependencies.files)
         doLast {
             var content = ""
-            project.configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts.forEach {
+            project.configurations["runtimeDependencies"].resolvedConfiguration.resolvedArtifacts.forEach {
                 content+=it.moduleVersion.toString()+"\n"
             }
             val resourcesDir : File = sourceSets.main.get().output.resourcesDir!!
