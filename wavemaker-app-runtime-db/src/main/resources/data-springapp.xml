@@ -6,4 +6,26 @@
                             http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="mySqlCloudTokenResolver" class="com.wavemaker.runtime.data.props.MySqlCloudTokenResolver"/>
+
+    <bean id="dbExceptionResolver" class="com.wavemaker.runtime.data.exception.resolver.DbExceptionResolver"/>
+
+    <bean id="nonHistoryEntitiesFilter" class="com.wavemaker.runtime.data.util.NegatingTypeFilter">
+        <constructor-arg ref="historyEntitiesFilter"/>
+    </bean>
+
+    <bean id="historyEntitiesFilter" class="org.springframework.core.type.filter.AssignableTypeFilter">
+        <constructor-arg value="com.wavemaker.runtime.data.model.TemporalHistoryEntity"/>
+    </bean>
+
+    <bean id="crudAspectManager" class="com.wavemaker.runtime.data.aop.CRUDAspectManager"/>
+    <bean id="createMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.CreateMethodInvocationHandler"/>
+    <bean id="updateMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.UpdateMethodInvocationHandler"/>
+    <bean id="findAllMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.FindAllMethodInvocationHandler"/>
+    <bean id="findMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.FindMethodInvocationHandler"/>
+    <bean id="deleteMethodInvocationHandler" class="com.wavemaker.runtime.data.aop.DeleteMethodInvocationHandler"/>
+
+    <beans profile="wm_preview">
+        <bean id="querycontroller" class="com.wavemaker.runtime.data.controller.QueryTestRunController"/>
+        <bean id="queryDesignService" class="com.wavemaker.runtime.data.service.QueryDesignServiceImpl"/>
+    </beans>
 </beans>
