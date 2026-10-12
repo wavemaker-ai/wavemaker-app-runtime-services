@@ -24,6 +24,7 @@ dependencies {
     implementation(appDependenciesLibs.spring.data.commons)
     implementation(appDependenciesLibs.jackson.annotations)
     implementation(appDependenciesLibs.hibernate.core)
+    implementation(appDependenciesLibs.jackson.datatype.hibernate)
     implementation(appDependenciesLibs.jakarta.persistenceApi) {
         because("This is explicitly added even if the module is not directly depending on this dependency. hibernate-core depends on " +
                 "javax.persistence-api but it is not available as it is declared as scope provided in parent_pom.xml." +
