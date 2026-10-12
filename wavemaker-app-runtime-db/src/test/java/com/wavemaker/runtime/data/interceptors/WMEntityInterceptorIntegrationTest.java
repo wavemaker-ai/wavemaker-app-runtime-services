@@ -18,9 +18,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.SessionHolder;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
+import org.springframework.orm.jpa.hibernate.SessionHolder;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class WMEntityInterceptorIntegrationTest {
 
     private static SessionFactory sessionFactory;
-    private static HibernateTemplate hibernateTemplate;
+    private static WMHibernateTemplate hibernateTemplate;
     private static HibernateTransactionManager transactionManager;
 
     private static String currentUser;
@@ -62,14 +62,14 @@ class WMEntityInterceptorIntegrationTest {
             .setProperty("hibernate.dialect", WMHSQLDialect.class.getName())
             .setProperty("hibernate.hbm2ddl.auto", "create-drop")
             .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.hibernate5.SpringSessionContext")
+                "org.springframework.orm.jpa.hibernate.SpringSessionContext")
             .setInterceptor(new WMEntityInterceptor())
             .addAnnotatedClass(InterceptedEntity.class)
             .addAnnotatedClass(AuditedEntity.class);
         configuration.getProperties().put("hibernate.connection.datasource", dataSource);
 
         sessionFactory = configuration.buildSessionFactory();
-        hibernateTemplate = new HibernateTemplate(sessionFactory);
+        hibernateTemplate = new WMHibernateTemplate(sessionFactory);
         transactionManager = new HibernateTransactionManager(sessionFactory);
     }
 

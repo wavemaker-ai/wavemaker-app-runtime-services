@@ -30,8 +30,8 @@
         <property name="writeAcceptCharset" value="false"/>
     </bean>
 
-    <bean id="mappingJackson2HttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-        <property name="objectMapper" ref="wmObjectMapper"/>
+    <bean id="mappingJackson2HttpMessageConverter" class="org.springframework.http.converter.json.JacksonJsonHttpMessageConverter">
+        <constructor-arg ref="wmObjectMapper"/>
     </bean>
 
     <bean id="wmCompositeHttpMessageConverter" class="com.wavemaker.runtime.converters.WMCompositeHttpMessageConverter"/>

@@ -37,9 +37,8 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
+import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
 import org.springframework.util.StringUtils;
 
 import com.wavemaker.app.db.constants.DBType;
@@ -47,6 +46,7 @@ import com.wavemaker.app.db.util.DBUtils;
 import com.wavemaker.runtime.data.dao.DaoBeanDefinitions;
 import com.wavemaker.runtime.data.dao.HqlQueryExecutor;
 import com.wavemaker.runtime.data.dao.NativeSqlQueryExecutor;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.procedure.WMProcedureExecutorImpl;
 import com.wavemaker.runtime.data.dao.query.WMQueryExecutorImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -222,7 +222,7 @@ public class DataServiceBeansRegistrar implements BeanDefinitionRegistryPostProc
                 .addPropertyValue("defaultTimeout", "${" + timeoutProperty + "}")
                 .getBeanDefinition());
         registerIfAbsent(registry, serviceId + infix + "Template",
-            BeanDefinitionBuilder.genericBeanDefinition(HibernateTemplate.class)
+            BeanDefinitionBuilder.genericBeanDefinition(WMHibernateTemplate.class)
                 .addPropertyReference("sessionFactory", serviceId + sessionFactoryName)
                 .getBeanDefinition());
     }

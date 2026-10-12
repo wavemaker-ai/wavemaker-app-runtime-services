@@ -27,13 +27,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
-import org.springframework.orm.hibernate5.HibernateQueryException;
 
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
@@ -183,7 +182,7 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
         neverPersisted.setId(999999L);
         long rowsBefore = dao.count();
 
-        assertThrows(HibernateOptimisticLockingFailureException.class,
+        assertThrows(ObjectOptimisticLockingFailureException.class,
             () -> dao.update(neverPersisted));
         // The failed flush leaves the session unusable; clear it before reading again.
         hibernateTemplate.clear();
@@ -499,7 +498,7 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
         dao.create(dave);
         flushAndClear();
 
-        HibernateQueryException thrown = assertThrows(HibernateQueryException.class, () -> dao.getAssociatedObjects(
+        InvalidDataAccessResourceUsageException thrown = assertThrows(InvalidDataAccessResourceUsageException.class, () -> dao.getAssociatedObjects(
             engineering.getId(), "department", "id", PageRequest.of(0, 10, Sort.by("salary"))));
         assertTrue(thrown.getMessage().contains("salary of: " + Department.class.getName()), thrown.getMessage());
     }

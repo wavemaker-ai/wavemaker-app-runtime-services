@@ -14,13 +14,12 @@
  ******************************************************************************/
 package com.wavemaker.runtime.json;
 
-import java.io.IOException;
-
 import org.springframework.data.domain.Sort;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.SerializationContext;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 
@@ -29,15 +28,15 @@ import com.wavemaker.commons.WMRuntimeException;
  * Created on : 8/10/18
  */
 
-public class SortJsonSerializer extends JsonSerializer<Sort> {
+public class SortJsonSerializer extends ValueSerializer<Sort> {
 
     @Override
-    public void serialize(Sort orders, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(Sort orders, JsonGenerator jsonGenerator, SerializationContext serializerProvider) {
         jsonGenerator.writeStartArray();
         orders.iterator().forEachRemaining(o -> {
             try {
-                jsonGenerator.writeObject(o);
-            } catch (IOException e) {
+                jsonGenerator.writePOJO(o);
+            } catch (JacksonException e) {
                 throw new WMRuntimeException(MessageResource.INVALID_OBJECT, o.getClass().getName(), o);
             }
         });

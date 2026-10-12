@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.runtime.rest.service;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +23,7 @@ import java.util.WeakHashMap;
 
 import org.springframework.core.env.Environment;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.ClassPathFile;
@@ -54,7 +54,7 @@ public class RestRuntimeServiceCacheHelper {
                 Reader reader = propertyPlaceHolderReplacementHelper.getPropertyReplaceReader(apiTargetJsonFile, environment);
                 Swagger swaggerDoc = JSONUtils.toObject(reader, Swagger.class);
                 serviceIdVsSwaggerCache.put(serviceId, swaggerDoc);
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.failed.to.read.swagger"), e, serviceId);
             }
         }

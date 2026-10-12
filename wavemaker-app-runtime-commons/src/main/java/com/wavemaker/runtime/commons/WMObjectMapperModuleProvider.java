@@ -14,14 +14,14 @@
  ******************************************************************************/
 package com.wavemaker.runtime.commons;
 
-import com.fasterxml.jackson.databind.Module;
+import tools.jackson.databind.JacksonModule;
 
 /**
- * Contributes a Jackson {@link Module} to the serializer of {@link WMObjectMapper}. Implementations are discovered
+ * Contributes a Jackson {@link JacksonModule} to the serializer of {@link WMObjectMapper}. Implementations are discovered
  * through {@link java.util.ServiceLoader}, so modules that need optional libraries (like Hibernate) can live in the
  * jar that owns the library and are skipped when that jar is not present.
  */
 public interface WMObjectMapperModuleProvider {
 
-    Module getModule();
+    JacksonModule getModule();
 }

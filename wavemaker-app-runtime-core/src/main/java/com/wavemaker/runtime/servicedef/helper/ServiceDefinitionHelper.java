@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.runtime.servicedef.helper;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.json.JSONUtils;
@@ -60,7 +60,7 @@ public class ServiceDefinitionHelper {
                 });
             }
             return serviceDefMap;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.invalid.attempt.to.build.service.definition"), e, "json");
         }
     }

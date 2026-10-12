@@ -14,14 +14,14 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.util;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
 import com.wavemaker.runtime.commons.WMObjectMapperModuleProvider;
 
 public class HibernateObjectMapperModuleProvider implements WMObjectMapperModuleProvider {
 
     @Override
-    public Module getModule() {
+    public JacksonModule getModule() {
         Hibernate5JakartaModule module = new Hibernate5JakartaModule();
         // uninitialized lazy proxies are written as null instead of hitting the database
         module.disable(Hibernate5JakartaModule.Feature.FORCE_LAZY_LOADING);

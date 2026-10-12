@@ -18,8 +18,8 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.PaginatedQueryCallback;
 import com.wavemaker.runtime.data.dao.callbacks.QueryCallback;
 import com.wavemaker.runtime.data.dao.query.providers.AppRuntimeParameterProvider;
@@ -36,7 +36,7 @@ import com.wavemaker.runtime.data.hql.SelectQueryBuilder;
 public class HqlQueryHelper {
 
     public static <R> Page<R> execute(
-        HibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder,
+        WMHibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder,
         Pageable pageable, WMQLTypeHelper wmqlTypeHelper) {
 
         final WMQueryInfo queryInfo = builder.build();
@@ -49,7 +49,7 @@ public class HqlQueryHelper {
     }
 
     public static <R> Optional<R> execute(
-        HibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder, WMQLTypeHelper wmqlTypeHelper) {
+        WMHibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder, WMQLTypeHelper wmqlTypeHelper) {
 
         final WMQueryInfo queryInfo = builder.build();
 

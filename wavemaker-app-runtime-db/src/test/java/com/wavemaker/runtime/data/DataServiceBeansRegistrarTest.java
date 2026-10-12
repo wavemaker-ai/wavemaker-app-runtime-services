@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
 import com.wavemaker.runtime.data.dao.WMGenericDao;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLSqlServerTypeHelper;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
@@ -73,7 +73,7 @@ public class DataServiceBeansRegistrarTest {
         assertNotNull(created.getId());
         assertEquals("w1", service.get(created.getId()).getName());
         assertEquals(1, context.getBean("svc1.WidgetDao", WMGenericDao.class).count());
-        assertNotNull(context.getBean("svc1Template", HibernateTemplate.class));
+        assertNotNull(context.getBean("svc1Template", WMHibernateTemplate.class));
     }
 
     @Test

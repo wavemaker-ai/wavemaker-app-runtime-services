@@ -30,9 +30,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.web.wrapper.ReactPreviewServletResponseWrapper;
 
 public class UiBuildTypeSectionToggleFilter extends GenericFilterBean {

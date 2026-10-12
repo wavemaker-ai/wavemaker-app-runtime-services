@@ -25,11 +25,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.wavemaker.commons.web.filter.EtagFilter;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.web.SkipEtagHttpServletResponseWrapper;
 
 /**

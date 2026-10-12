@@ -16,7 +16,7 @@ package com.wavemaker.app.security.models.config.rolemapping;
 
 import jakarta.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

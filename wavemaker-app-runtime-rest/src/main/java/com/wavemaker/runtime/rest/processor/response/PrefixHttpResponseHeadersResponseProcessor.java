@@ -16,9 +16,9 @@ package com.wavemaker.runtime.rest.processor.response;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.wavemaker.commons.MessageResource;
@@ -44,8 +44,8 @@ public class PrefixHttpResponseHeadersResponseProcessor extends AbstractHttpResp
     @Override
     public void doProcess(HttpResponseProcessorContext httpResponseProcessorContext) {
         HttpResponseDetails httpResponseDetails = httpResponseProcessorContext.getHttpResponseDetails();
-        Map<String, List<String>> responseHeaders = httpResponseDetails.getHeaders();
-        List<String> keys = new ArrayList<>(responseHeaders.keySet());
+        HttpHeaders responseHeaders = httpResponseDetails.getHeaders();
+        List<String> keys = new ArrayList<>(responseHeaders.headerNames());
         for (String responseHeaderKey : keys) {
             boolean matched = false;
             if (excludeList != null) {

@@ -17,6 +17,7 @@ package com.wavemaker.runtime.security.enabled.configuration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -47,14 +53,16 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.authentication.AuthenticationManagerBeanDefinitionParser;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.access.expression.ExpressionBasedFilterInvocationSecurityMetadataSource;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -79,7 +87,6 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.session.DisableEncodeUrlFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
@@ -126,6 +133,7 @@ import com.wavemaker.runtime.security.handler.WMAuthenticationRedirectionHandler
 import com.wavemaker.runtime.security.handler.WMAuthenticationSuccessRedirectionHandler;
 import com.wavemaker.runtime.security.handler.logout.LogoutSuccessHandlerRegistry;
 import com.wavemaker.runtime.security.handler.logout.WMApplicationLogoutSuccessHandler;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.security.provider.saml.BrowserDelegatingLogoutFilter;
 import com.wavemaker.runtime.security.token.WMTokenBasedAuthenticationService;
 import com.wavemaker.runtime.security.token.repository.TokenRepository;
@@ -452,7 +460,7 @@ public class SecurityEnabledBaseConfiguration {
             .securityContext(securityContext -> securityContext.
                 securityContextRepository(securityContextRepository()))
             .authenticationManager(authenticationManager())
-            .authorizeRequests(this::authorizeHttpRequests)
+            .addFilter(createFilterSecurityInterceptor())
             .logout(AbstractHttpConfigurer::disable)
             .addFilterAt(sessionRepositoryFilter(), DisableEncodeUrlFilter.class)
             .addFilterAt(wmRequestResponseHolderFiler(), DisableEncodeUrlFilter.class)
@@ -495,7 +503,40 @@ public class SecurityEnabledBaseConfiguration {
         return new LogoutSuccessHandlerRegistry();
     }
 
-    private void authorizeHttpRequests(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry) {
+    private FilterSecurityInterceptor createFilterSecurityInterceptor() {
+        SecurityExpressionHandler<FilterInvocation> expressionHandler = createWebSecurityExpressionHandler();
+        WebExpressionVoter webExpressionVoter = new WebExpressionVoter();
+        webExpressionVoter.setExpressionHandler(expressionHandler);
+
+        FilterSecurityInterceptor filterSecurityInterceptor = new FilterSecurityInterceptor();
+        filterSecurityInterceptor.setSecurityMetadataSource(
+            new ExpressionBasedFilterInvocationSecurityMetadataSource(authorizeHttpRequests(), expressionHandler));
+        filterSecurityInterceptor.setAccessDecisionManager(new AffirmativeBased(List.of(webExpressionVoter)));
+        filterSecurityInterceptor.setAuthenticationManager(authenticationManager());
+        filterSecurityInterceptor.setApplicationEventPublisher(applicationContext);
+        return filterSecurityInterceptor;
+    }
+
+    private SecurityExpressionHandler<FilterInvocation> createWebSecurityExpressionHandler() {
+        DefaultWebSecurityExpressionHandler expressionHandler = new DefaultWebSecurityExpressionHandler();
+        expressionHandler.setApplicationContext(applicationContext);
+        applicationContext.getBeanProvider(RoleHierarchy.class).ifUnique(expressionHandler::setRoleHierarchy);
+        applicationContext.getBeanProvider(GrantedAuthorityDefaults.class)
+            .ifUnique(grantedAuthorityDefaults -> expressionHandler.setDefaultRolePrefix(grantedAuthorityDefaults.getRolePrefix()));
+        applicationContext.getBeanProvider(PermissionEvaluator.class).ifUnique(expressionHandler::setPermissionEvaluator);
+        return expressionHandler;
+    }
+
+    private String getRolePrefix() {
+        String[] grantedAuthorityDefaultsBeanNames = applicationContext.getBeanNamesForType(GrantedAuthorityDefaults.class);
+        if (grantedAuthorityDefaultsBeanNames.length == 1) {
+            return applicationContext.getBean(grantedAuthorityDefaultsBeanNames[0], GrantedAuthorityDefaults.class).getRolePrefix();
+        }
+        return "ROLE_";
+    }
+
+    private LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> authorizeHttpRequests() {
+        LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap = new LinkedHashMap<>();
         List<SecurityInterceptUrlEntry> securityInterceptUrlEntryList = new ArrayList<>();
         for (WMSecurityConfiguration wmSecurityConfiguration : wmSecurityConfigurationList) {
             securityInterceptUrlEntryList.addAll(wmSecurityConfiguration.getSecurityInterceptUrls());
@@ -505,8 +546,9 @@ public class SecurityEnabledBaseConfiguration {
         securityInterceptUrlEntryList.sort(new InterceptUrlComparator());
         securityInterceptUrlEntryList.sort(new InterceptUrlStringComparator());
         for (SecurityInterceptUrlEntry securityInterceptUrlEntry : securityInterceptUrlEntryList) {
-            setAntMatchers(registry, securityInterceptUrlEntry);
+            setAntMatchers(requestMap, securityInterceptUrlEntry);
         }
+        return requestMap;
     }
 
     private List<SecurityInterceptUrlEntry> getDefaultSecurityInterceptUrlEntryList() {
@@ -537,51 +579,39 @@ public class SecurityEnabledBaseConfiguration {
         return ignoreSecurityAntMatchersFileContent.split("\n");
     }
 
-    private void setAntMatchers(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry,
+    private void setAntMatchers(LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap,
                                 SecurityInterceptUrlEntry securityInterceptUrlEntry) {
         if (securityInterceptUrlEntry.getHttpMethod() != null) {
-            selectAntMatcherWithHttpMethod(registry, securityInterceptUrlEntry);
+            selectAntMatcherWithHttpMethod(requestMap, securityInterceptUrlEntry);
         } else {
-            selectAntMatcherWithNoHttpMethod(registry, securityInterceptUrlEntry);
+            selectAntMatcherWithNoHttpMethod(requestMap, securityInterceptUrlEntry);
         }
     }
 
-    private void selectAntMatcherWithHttpMethod(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry,
+    private void selectAntMatcherWithHttpMethod(LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap,
                                                 SecurityInterceptUrlEntry securityInterceptUrlEntry) {
-        switch (securityInterceptUrlEntry.getPermission()) {
-            case Authenticated:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(
-                    Objects.requireNonNull(HttpMethod.valueOf(securityInterceptUrlEntry.getHttpMethod().name())),
-                    securityInterceptUrlEntry.getUrlPattern())).authenticated();
-                break;
-            case Role:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(
-                    Objects.requireNonNull(HttpMethod.valueOf(securityInterceptUrlEntry.getHttpMethod().name())),
-                    securityInterceptUrlEntry.getUrlPattern())).hasAnyRole(securityInterceptUrlEntry.getRoles());
-                break;
-            case PermitAll:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(
-                    Objects.requireNonNull(HttpMethod.valueOf(securityInterceptUrlEntry.getHttpMethod().name())),
-                    securityInterceptUrlEntry.getUrlPattern())).permitAll();
-                break;
-            default:
-                throw new IllegalStateException("Expected any one of permissions for intercept url : " +
-                    securityInterceptUrlEntry.getUrlPattern() + " as Authenticated/PermitAll/Role");
-        }
+        requestMap.put(AntPathRequestMatcher.antMatcher(
+                Objects.requireNonNull(HttpMethod.valueOf(securityInterceptUrlEntry.getHttpMethod().name())),
+                securityInterceptUrlEntry.getUrlPattern()),
+            SecurityConfig.createList(getAccessExpression(securityInterceptUrlEntry)));
     }
 
-    private void selectAntMatcherWithNoHttpMethod(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry,
+    private void selectAntMatcherWithNoHttpMethod(LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap,
                                                   SecurityInterceptUrlEntry securityInterceptUrlEntry) {
+        requestMap.put(AntPathRequestMatcher.antMatcher(securityInterceptUrlEntry.getUrlPattern()),
+            SecurityConfig.createList(getAccessExpression(securityInterceptUrlEntry)));
+    }
+
+    private String getAccessExpression(SecurityInterceptUrlEntry securityInterceptUrlEntry) {
         switch (securityInterceptUrlEntry.getPermission()) {
             case Authenticated:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(securityInterceptUrlEntry.getUrlPattern())).authenticated();
-                break;
+                return "authenticated";
             case Role:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(securityInterceptUrlEntry.getUrlPattern())).hasAnyRole(securityInterceptUrlEntry.getRoles());
-                break;
+                String rolePrefix = getRolePrefix();
+                return "hasAnyRole('" + rolePrefix
+                    + String.join("','" + rolePrefix, securityInterceptUrlEntry.getRoles()) + "')";
             case PermitAll:
-                registry.requestMatchers(AntPathRequestMatcher.antMatcher(securityInterceptUrlEntry.getUrlPattern())).permitAll();
-                break;
+                return "permitAll";
             default:
                 throw new IllegalStateException("Expected any one of permissions for intercept url : " +
                     securityInterceptUrlEntry.getUrlPattern() + " as Authenticated/PermitAll/Role");

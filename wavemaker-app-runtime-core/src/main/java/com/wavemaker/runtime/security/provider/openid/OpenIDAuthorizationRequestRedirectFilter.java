@@ -34,7 +34,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -43,6 +42,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.wavemaker.commons.auth.oauth2.OAuth2Helper;
 import com.wavemaker.commons.util.HttpRequestUtils;
 import com.wavemaker.runtime.RuntimeEnvironment;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.security.provider.openid.util.OpenIdUtils;
 
 /**

@@ -17,10 +17,10 @@ package com.wavemaker.runtime.rest.util;
 import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import com.wavemaker.runtime.rest.model.HttpResponseDetails;
@@ -37,7 +37,7 @@ public class HttpResponseUtils {
 
     public static List<HttpCookie> getCookies(HttpResponseDetails httpResponseDetails) {
         List<HttpCookie> httpCookieList = new ArrayList<>();
-        Map<String, List<String>> responseHeaders = httpResponseDetails.getHeaders();
+        HttpHeaders responseHeaders = httpResponseDetails.getHeaders();
         if (responseHeaders != null) {
             List<String> setCookieHeaderValues = responseHeaders.get(SET_COOKIE_HEADER);
             if (CollectionUtils.isNotEmpty(setCookieHeaderValues)) {
@@ -52,7 +52,7 @@ public class HttpResponseUtils {
     }
 
     public static void setCookies(HttpResponseDetails httpResponseDetails, List<HttpCookie> httpCookieList) {
-        Map<String, List<String>> responseHeaders = httpResponseDetails.getHeaders();
+        HttpHeaders responseHeaders = httpResponseDetails.getHeaders();
         responseHeaders.remove(SET_COOKIE_HEADER);
         List<String> setCookieHeaderValues = new ArrayList<>();
         for (HttpCookie httpCookie : httpCookieList) {

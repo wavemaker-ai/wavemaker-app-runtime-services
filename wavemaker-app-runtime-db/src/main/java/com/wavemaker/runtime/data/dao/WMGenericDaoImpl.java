@@ -35,8 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.orm.hibernate5.HibernateCallback;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -71,7 +69,7 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     WMGenericDao<E, I> {
 
     protected final Class<E> entityClass;
-    protected final HibernateTemplate template;
+    protected final WMHibernateTemplate template;
     protected final WMQLTypeHelper wmqlTypeHelper;
     protected EntityQueryGenerator<E, I> queryGenerator;
 
@@ -80,13 +78,13 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     @Autowired
     private ExportedFileManager exportedFileManager;
 
-    public WMGenericDaoImpl(Class<E> entityClass, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+    public WMGenericDaoImpl(Class<E> entityClass, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
         this.entityClass = entityClass;
         this.template = template;
         this.wmqlTypeHelper = wmqlTypeHelper;
     }
 
-    public HibernateTemplate getTemplate() {
+    public WMHibernateTemplate getTemplate() {
         return this.template;
     }
 
@@ -185,7 +183,7 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
         Pageable validPageable = PageUtils.defaultIfNull(pageable);
         this.sortValidator.validate(validPageable, entityClass);
         DaoUtils.validateQueryFilters(queryFilters);
-        return getTemplate().execute((HibernateCallback<Page>) session -> {
+        return getTemplate().execute((WMHibernateCallback<Page>) session -> {
             Criteria criteria = session.createCriteria(entityClass);
             Set<String> aliases = new HashSet<>();
             if (ArrayUtils.isNotEmpty(queryFilters)) {

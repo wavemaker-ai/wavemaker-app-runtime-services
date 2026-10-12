@@ -32,7 +32,6 @@ import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -59,14 +58,14 @@ import com.wavemaker.runtime.data.util.PropertyDescription;
 public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializable>
     extends WMGenericDaoImpl<E, I> implements WMGenericTemporalDao<E, I> {
 
-    private final HibernateTemplate historyTemplate;
+    private final WMHibernateTemplate historyTemplate;
 
     private Class<TemporalHistoryEntity<E>> historyClass;
 
     private List<PropertyDescriptor> updatableProperties;
 
-    public WMGenericTemporalDaoImpl(Class<E> entityClass, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper,
-                                    HibernateTemplate historyTemplate) {
+    public WMGenericTemporalDaoImpl(Class<E> entityClass, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper,
+                                    WMHibernateTemplate historyTemplate) {
         super(entityClass, template, wmqlTypeHelper);
         this.historyTemplate = historyTemplate;
     }
@@ -105,7 +104,7 @@ public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializ
         }
     }
 
-    protected HibernateTemplate getHistoryTemplate() {
+    protected WMHibernateTemplate getHistoryTemplate() {
         return this.historyTemplate;
     }
 

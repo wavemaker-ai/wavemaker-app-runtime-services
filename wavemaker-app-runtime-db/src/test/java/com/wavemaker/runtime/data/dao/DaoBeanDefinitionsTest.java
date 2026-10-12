@@ -14,9 +14,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
+import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
@@ -52,8 +51,8 @@ public class DaoBeanDefinitionsTest {
 
         tx = new TransactionTemplate(new HibernateTransactionManager(sessionFactory.getObject()));
         context = new AnnotationConfigApplicationContext();
-        context.registerBean(SERVICE_ID + "Template", HibernateTemplate.class,
-            () -> new HibernateTemplate(sessionFactory.getObject()));
+        context.registerBean(SERVICE_ID + "Template", WMHibernateTemplate.class,
+            () -> new WMHibernateTemplate(sessionFactory.getObject()));
         context.registerBean(SERVICE_ID + "WMQLTypeHelper", WMQLTypeHelper.class, WMQLDefaultTypeHelper::new);
         context.registerBean(ExportedFileManager.class, () -> Mockito.mock(ExportedFileManager.class));
         context.registerBean("daoRegistration", BeanDefinitionRegistryPostProcessor.class,

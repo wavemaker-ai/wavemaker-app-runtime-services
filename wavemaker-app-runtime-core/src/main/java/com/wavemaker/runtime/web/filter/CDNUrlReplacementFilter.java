@@ -31,11 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.wavemaker.commons.proxy.AppPropertiesConstants;
 import com.wavemaker.runtime.RuntimeEnvironment;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.web.wrapper.CDNUrlReplacementServletResponseWrapper;
 
 public class CDNUrlReplacementFilter extends GenericFilterBean {

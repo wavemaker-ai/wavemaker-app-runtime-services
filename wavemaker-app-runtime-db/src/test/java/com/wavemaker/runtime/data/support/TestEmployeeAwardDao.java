@@ -7,7 +7,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.support;
 
-import org.springframework.orm.hibernate5.HibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 
 import com.wavemaker.runtime.data.dao.WMGenericDaoImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -19,7 +19,7 @@ import com.wavemaker.runtime.data.support.entity.EmployeeAwardId;
  */
 public class TestEmployeeAwardDao extends WMGenericDaoImpl<EmployeeAward, EmployeeAwardId> {
 
-    public TestEmployeeAwardDao(final HibernateTemplate template) {
+    public TestEmployeeAwardDao(final WMHibernateTemplate template) {
         super(EmployeeAward.class, template, new WMQLDefaultTypeHelper());
         init();
     }

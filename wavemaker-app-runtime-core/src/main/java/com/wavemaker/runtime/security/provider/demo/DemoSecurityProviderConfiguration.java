@@ -65,8 +65,7 @@ public class DemoSecurityProviderConfiguration {
 
     @Bean(name = "demoAuthenticationProvider")
     public AuthenticationProvider demoAuthenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(demoUserDetailsService());
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(demoUserDetailsService());
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
     }

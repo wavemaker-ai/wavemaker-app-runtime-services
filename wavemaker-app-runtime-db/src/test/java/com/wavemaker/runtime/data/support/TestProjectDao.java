@@ -7,7 +7,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.support;
 
-import org.springframework.orm.hibernate5.HibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 
 import com.wavemaker.runtime.data.dao.WMGenericDaoImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -18,7 +18,7 @@ import com.wavemaker.runtime.data.support.entity.Project;
  */
 public class TestProjectDao extends WMGenericDaoImpl<Project, Long> {
 
-    public TestProjectDao(final HibernateTemplate template) {
+    public TestProjectDao(final WMHibernateTemplate template) {
         super(Project.class, template, new WMQLDefaultTypeHelper());
         init();
     }

@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.runtime.auth.oauth2;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ResourceLoader;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.auth.oauth2.OAuth2Flow;
 import com.wavemaker.commons.auth.oauth2.OAuth2ProviderConfig;
@@ -85,7 +85,7 @@ public class OAuthProvidersManager {
         try {
             return JSONUtils.toObject(reader, new TypeReference<>() {
             });
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(e);
         }
     }

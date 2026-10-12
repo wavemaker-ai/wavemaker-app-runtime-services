@@ -23,7 +23,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.SQLGrammarException;
-import org.springframework.orm.hibernate5.HibernateQueryException;
+import org.hibernate.QueryException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.MessageResourceHolder;
@@ -51,7 +52,7 @@ public class DbExceptionResolver implements ErrorResponseResolver {
             return Optional.of(handleRuntimeException((RuntimeException) ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
         } else if (ex instanceof QueryParameterMismatchException) {
             return Optional.of(handleRuntimeException((RuntimeException) ex, HttpServletResponse.SC_BAD_REQUEST));
-        } else if (ex instanceof HibernateQueryException) {
+        } else if (ex instanceof InvalidDataAccessResourceUsageException && ex.getCause() instanceof QueryException) {
             // Not using the root cause for now.
             return Optional.of(new ErrorResolution(HttpServletResponse.SC_BAD_REQUEST, MessageResource.INVALID_INPUT, INPUT_INVALID_MESSAGE));
         } else if (ex instanceof EntityNotFoundException || ex instanceof BlobContentNotFoundException) {

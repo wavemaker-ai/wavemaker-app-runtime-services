@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateCallback;
 
+import com.wavemaker.runtime.data.dao.WMHibernateCallback;
 import com.wavemaker.runtime.data.dao.query.providers.PaginatedQueryProvider;
 import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
 
@@ -35,7 +35,7 @@ import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/8/17
  */
-public class PaginatedQueryCallback<R> implements HibernateCallback<Page<R>> {
+public class PaginatedQueryCallback<R> implements WMHibernateCallback<Page<R>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedQueryCallback.class);
     private final PaginatedQueryProvider<R> queryProvider;

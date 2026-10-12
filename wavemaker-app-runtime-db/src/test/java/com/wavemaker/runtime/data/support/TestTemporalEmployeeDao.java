@@ -7,7 +7,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.support;
 
-import org.springframework.orm.hibernate5.HibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 
 import com.wavemaker.runtime.data.dao.WMGenericTemporalDaoImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -21,7 +21,7 @@ import com.wavemaker.runtime.data.support.entity.TemporalEmployee;
  */
 public class TestTemporalEmployeeDao extends WMGenericTemporalDaoImpl<TemporalEmployee, Long> {
 
-    public TestTemporalEmployeeDao(final HibernateTemplate template) {
+    public TestTemporalEmployeeDao(final WMHibernateTemplate template) {
         super(TemporalEmployee.class, template, new WMQLDefaultTypeHelper(), template);
         init();
     }

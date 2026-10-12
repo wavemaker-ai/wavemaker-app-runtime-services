@@ -28,9 +28,9 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.runtime.data.converters.JavaTypeConverters;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.query.types.RuntimeParameterTypeResolver;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
@@ -138,12 +138,12 @@ public class QueryHelper {
         return (isNative) ? session.createNativeQuery(query) : session.createQuery(query);
     }
 
-    public static Long getQueryResultCount(WMQueryInfo wmQueryInfo, boolean isNative, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+    public static Long getQueryResultCount(WMQueryInfo wmQueryInfo, boolean isNative, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
         return getCountFromCountStringQuery(wmQueryInfo, isNative, template, wmqlTypeHelper);
     }
 
     private static Long getCountFromCountStringQuery(WMQueryInfo wmQueryInfo, final boolean isNative,
-                                                     final HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+                                                     final WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
         try {
             final String strQuery = getCountQuery(wmQueryInfo.getQuery(), isNative);
             if (strQuery == null) {

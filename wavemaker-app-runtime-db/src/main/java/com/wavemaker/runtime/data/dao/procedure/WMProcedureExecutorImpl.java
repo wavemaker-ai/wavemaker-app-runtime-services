@@ -23,13 +23,13 @@ import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.util.WMIOUtils;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.NativeProcedureExecutor;
 import com.wavemaker.runtime.data.dao.procedure.parameters.ResolvableParam;
 import com.wavemaker.runtime.data.dao.procedure.parameters.RuntimeParameter;
@@ -41,14 +41,14 @@ public class WMProcedureExecutorImpl implements WMProcedureExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(WMProcedureExecutorImpl.class);
     private Map<String, RuntimeProcedure> procedureMap;
 
-    private HibernateTemplate template;
+    private WMHibernateTemplate template;
     private String serviceId;
 
-    public HibernateTemplate getTemplate() {
+    public WMHibernateTemplate getTemplate() {
         return template;
     }
 
-    public void setTemplate(HibernateTemplate template) {
+    public void setTemplate(WMHibernateTemplate template) {
         this.template = template;
     }
 

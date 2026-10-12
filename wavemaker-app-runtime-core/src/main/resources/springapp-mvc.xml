@@ -31,8 +31,8 @@
     </bean>
 
     <bean id="mappingJackson2HttpMessageConverter"
-          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-        <property name="objectMapper" ref="wmAppObjectMapper"/>
+          class="org.springframework.http.converter.json.JacksonJsonHttpMessageConverter">
+        <constructor-arg ref="wmAppObjectMapper"/>
     </bean>
 
     <bean id="wmAppObjectMapper" class="com.wavemaker.runtime.commons.WMAppObjectMapper" factory-method="getInstance"/>

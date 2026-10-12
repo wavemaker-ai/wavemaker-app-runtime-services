@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.runtime.service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.i18n.LocaleData;
@@ -100,7 +100,7 @@ public class AppRuntimeServiceImpl implements AppRuntimeService {
             if (resourceAsStream != null) {
                 try {
                     activeTheme = new ObjectMapper().readTree(resourceAsStream).get("activeTheme").asText();
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     logger.error("Error while reading themes-config.json file", e);
                     throw new WMRuntimeException(e);
                 }
@@ -153,7 +153,7 @@ public class AppRuntimeServiceImpl implements AppRuntimeService {
         try {
             LocaleData userLocaleData = JSONUtils.toObject(localeFileInputStream, LocaleData.class);
             map.put(fileName, userLocaleData.getFiles());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.app.build.filenotfound"));
         }
     }

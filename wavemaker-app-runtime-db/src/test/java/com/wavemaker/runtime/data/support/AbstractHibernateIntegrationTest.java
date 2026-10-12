@@ -22,9 +22,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.postgresql.ds.PGSimpleDataSource;
-import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.SessionHolder;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
+import org.springframework.orm.jpa.hibernate.SessionHolder;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -80,7 +80,7 @@ public abstract class AbstractHibernateIntegrationTest {
     }
 
     protected static SessionFactory sessionFactory;
-    protected static HibernateTemplate hibernateTemplate;
+    protected static WMHibernateTemplate hibernateTemplate;
     protected static HibernateTransactionManager transactionManager;
 
     // Deliberately NOT a JUnit-managed @Container (which would restart it per test class) - one container is
@@ -114,7 +114,7 @@ public abstract class AbstractHibernateIntegrationTest {
             .addAnnotatedClass(TypedRecord.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        hibernateTemplate = new HibernateTemplate(sessionFactory);
+        hibernateTemplate = new WMHibernateTemplate(sessionFactory);
         transactionManager = new HibernateTransactionManager(sessionFactory);
     }
 
@@ -140,7 +140,7 @@ public abstract class AbstractHibernateIntegrationTest {
             // LocalSessionFactoryBean wiring this automatically, which our bare Configuration bootstrap must do
             // itself.
             .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.hibernate5.SpringSessionContext");
+                "org.springframework.orm.jpa.hibernate.SpringSessionContext");
         configuration.getProperties().put("hibernate.connection.datasource", dataSource);
         return configuration;
     }
@@ -194,7 +194,7 @@ public abstract class AbstractHibernateIntegrationTest {
             .setProperty("hibernate.hbm2ddl.auto", "create-drop")
             .setProperty("hibernate.default_schema", postgresSchemaName)
             .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.hibernate5.SpringSessionContext");
+                "org.springframework.orm.jpa.hibernate.SpringSessionContext");
         configuration.getProperties().put("hibernate.connection.datasource", dataSource);
         return configuration;
     }

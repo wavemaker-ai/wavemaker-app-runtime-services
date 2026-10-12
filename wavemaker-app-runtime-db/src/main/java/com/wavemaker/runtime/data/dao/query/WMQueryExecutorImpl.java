@@ -21,9 +21,9 @@ import jakarta.annotation.PostConstruct;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.commons.MessageResource;
+import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.NamedQueryExporterCallback;
 import com.wavemaker.runtime.data.dao.callbacks.PaginatedQueryCallback;
 import com.wavemaker.runtime.data.dao.callbacks.QueryCallback;
@@ -44,7 +44,7 @@ import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
 
 public class WMQueryExecutorImpl implements WMQueryExecutor {
 
-    private HibernateTemplate template;
+    private WMHibernateTemplate template;
     private SessionBackedParameterResolver parameterResolvers;
 
     @PostConstruct
@@ -136,11 +136,11 @@ public class WMQueryExecutorImpl implements WMQueryExecutor {
         template.executeWithNativeSession(callback);
     }
 
-    public HibernateTemplate getTemplate() {
+    public WMHibernateTemplate getTemplate() {
         return template;
     }
 
-    public void setTemplate(HibernateTemplate template) {
+    public void setTemplate(WMHibernateTemplate template) {
         this.template = template;
     }
 }

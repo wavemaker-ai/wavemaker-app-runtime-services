@@ -32,10 +32,10 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -61,11 +61,11 @@ public class WMRestTemplate extends RestTemplate {
         ClassUtils.isPresent("jakarta.xml.bind.Binder", WMRestTemplate.class.getClassLoader());
 
     private static final boolean JACKSON_2_PRESENT =
-        ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WMRestTemplate.class.getClassLoader()) &&
-            ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WMRestTemplate.class.getClassLoader());
+        ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", WMRestTemplate.class.getClassLoader()) &&
+            ClassUtils.isPresent("tools.jackson.core.JsonGenerator", WMRestTemplate.class.getClassLoader());
 
     private static final boolean JACKSON_2_XML_PRESENT =
-        ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", WMRestTemplate.class.getClassLoader());
+        ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", WMRestTemplate.class.getClassLoader());
 
     private static final boolean GSON_PRESENT =
         ClassUtils.isPresent("com.google.gson.Gson", WMRestTemplate.class.getClassLoader());
@@ -85,13 +85,13 @@ public class WMRestTemplate extends RestTemplate {
             messageConverters.add(new RssChannelHttpMessageConverter());
         }
         if (JACKSON_2_XML_PRESENT) {
-            messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+            messageConverters.add(new JacksonXmlHttpMessageConverter());
         }
         if (JAXB_2_PRESENT) {
             messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
         }
         if (JACKSON_2_PRESENT) {
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(new JacksonJsonHttpMessageConverter());
         } else if (GSON_PRESENT) {
             messageConverters.add(new GsonHttpMessageConverter());
         }
