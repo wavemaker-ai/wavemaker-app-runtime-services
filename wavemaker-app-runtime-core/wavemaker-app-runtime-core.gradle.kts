@@ -40,7 +40,6 @@ dependencies {
     implementation(appDependenciesLibs.hibernate.validator)
     implementation(appDependenciesLibs.jackson.dataformat.yaml)
     implementation(appDependenciesLibs.jackson.datatype.jsr310)
-    implementation(appDependenciesLibs.jackson.datatype.hibernate)
     implementation(appDependenciesLibs.apache.httpclient)
     implementation(appDependenciesLibs.tika.core)
     compileOnly(appDependenciesLibs.opensaml.saml.impl)
@@ -63,10 +62,6 @@ dependencies {
     compileOnly(appDependenciesLibs.mongodb.driver.sync)
     compileOnly(appDependenciesLibs.spring.session.data.mongodb)
     compileOnly(appDependenciesLibs.spring.session.data.redis)
-    compileOnly(appDependenciesLibs.hibernate.core) {
-        because("Used for getting roles for logged in user. Used in conjuction with database service in the project." +
-                "TODO need to remove this dependency.")
-    }
     implementation(appDependenciesLibs.jakarta.xml.bind.api) {
         because("Used for getting jakarta xml bind packages, but previously javax bind api used to be loaded in app runtime core")
     }
