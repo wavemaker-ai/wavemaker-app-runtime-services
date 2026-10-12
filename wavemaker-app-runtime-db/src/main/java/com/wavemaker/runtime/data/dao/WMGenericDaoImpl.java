@@ -36,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.orm.hibernate5.HibernateCallback;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -79,7 +77,7 @@ public abstract class WMGenericDaoImpl<E extends Serializable, I extends Seriali
     @Autowired
     private ExportedFileManager exportedFileManager;
 
-    public abstract HibernateTemplate getTemplate();
+    public abstract WMHibernateTemplate getTemplate();
 
     public abstract WMQLTypeHelper getWMQLTypeHelper();
 
@@ -178,7 +176,7 @@ public abstract class WMGenericDaoImpl<E extends Serializable, I extends Seriali
         Pageable validPageable = PageUtils.defaultIfNull(pageable);
         this.sortValidator.validate(validPageable, entityClass);
         DaoUtils.validateQueryFilters(queryFilters);
-        return getTemplate().execute((HibernateCallback<Page>) session -> {
+        return getTemplate().execute((WMHibernateCallback<Page>) session -> {
             Criteria criteria = session.createCriteria(entityClass);
             Set<String> aliases = new HashSet<>();
             if (ArrayUtils.isNotEmpty(queryFilters)) {
@@ -271,7 +269,7 @@ public abstract class WMGenericDaoImpl<E extends Serializable, I extends Seriali
     }
 
     @Override
-    public <T> T execute(final HibernateCallback<T> callback) {
+    public <T> T execute(final WMHibernateCallback<T> callback) {
         return getTemplate().execute(callback);
     }
 }

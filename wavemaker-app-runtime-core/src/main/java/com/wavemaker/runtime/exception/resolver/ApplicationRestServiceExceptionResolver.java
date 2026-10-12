@@ -44,10 +44,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.databind.json.JsonMapper;
 import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.MessageResourceHolder;
@@ -235,7 +236,7 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
             if (exCause instanceof UnrecognizedPropertyException) {
                 errorResponse = getErrorResponse(MessageResource.UNRECOGNIZED_FIELD,
                     ((UnrecognizedPropertyException) exCause).getPropertyName());
-            } else if (exCause instanceof JsonMappingException) {
+            } else if (exCause instanceof DatabindException) {
                 errorResponse = getErrorResponse(MessageResource.INVALID_JSON, exCause.getMessage());
             }
         }
@@ -275,7 +276,7 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
     }
 
     private ModelAndView getModelAndView(ErrorResponses errorResponses) {
-        ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView());
+        ModelAndView modelAndView = new ModelAndView(new JacksonJsonView(JsonMapper.builderWithJackson2Defaults()));
         modelAndView.addObject("errors", errorResponses);
         return modelAndView;
     }

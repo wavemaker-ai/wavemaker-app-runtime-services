@@ -27,7 +27,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class WMObjectMapperTest {
 
     @Test
-    public void pageSerializationTest() throws JsonProcessingException, JSONException {
+    public void pageSerializationTest() throws JacksonException, JSONException {
         WMObjectMapper objectMapper = new WMObjectMapper();
         Page<User> users = new PageImpl<>(Arrays.asList(new User("user1"), new User("user2")), PageRequest.of(0, 2),
             100);
@@ -48,7 +48,7 @@ public class WMObjectMapperTest {
     }
 
     @Test
-    public void pageSerializationTest2() throws JsonProcessingException, JSONException {
+    public void pageSerializationTest2() throws JacksonException, JSONException {
         WMObjectMapper objectMapper = new WMObjectMapper();
         Page<User> users = new PageImpl<>(Arrays.asList(new User("user1"), new User("user2")), PageRequest.of(0, 2,
             Sort.by(new Sort.Order(Sort.Direction.DESC, "name"))),
@@ -62,7 +62,7 @@ public class WMObjectMapperTest {
     }
 
     @Test
-    public void testDate() throws JsonProcessingException, JSONException {
+    public void testDate() throws JacksonException, JSONException {
         DateTypes types = new DateTypes();
 
         WMObjectMapper objectMapper = new WMObjectMapper();

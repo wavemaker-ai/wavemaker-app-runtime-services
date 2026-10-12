@@ -50,7 +50,7 @@ public class PassDefaultHeadersRequestProcessor extends AbstractHttpRequestProce
         HttpHeaders httpRequestHeaders = httpRequestDetails.getHeaders();
 
         for (String headerKey : this.defaultHeaders) {
-            if (!httpRequestHeaders.containsKey(headerKey)) {
+            if (!httpRequestHeaders.containsHeader(headerKey)) {
                 List<String> headersValue = httpRequestData.getHttpHeaders().get(headerKey);
                 if (CollectionUtils.isNotEmpty(headersValue)) {
                     httpRequestHeaders.put(headerKey, new ArrayList<>(headersValue));

@@ -18,7 +18,6 @@ dependencies {
     implementation(appDependenciesLibs.spring.webmvc)
     implementation(appDependenciesLibs.spring.data.commons)
     implementation(appDependenciesLibs.jackson.dataformat.yaml)
-    implementation(appDependenciesLibs.jackson.datatype.jsr310)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
     testImplementation(appDependenciesLibs.test.jsonassert)
 }

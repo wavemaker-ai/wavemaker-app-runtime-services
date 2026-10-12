@@ -41,6 +41,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.rest.WmFileSystemResource;
 import com.wavemaker.runtime.commons.WMObjectMapper;
@@ -144,7 +145,9 @@ public class RestInvocationHandler implements InvocationHandler {
                 if (headerValue.startsWith("{") && headerValue.endsWith("}")) {
                     headerValue = headerVariableMap.getOrDefault(headerValue.substring(1, headerValue.length() - 1), headerValue);
                 }
-                httpRequestData.getHttpHeaders().addIfAbsent(headerName, headerValue);
+                if (!httpRequestData.getHttpHeaders().containsHeader(headerName)) {
+                    httpRequestData.getHttpHeaders().add(headerName, headerValue);
+                }
             });
         String[] split = method.getAnnotation(RequestLine.class).value().split(" ");
         String path = "";
@@ -178,7 +181,7 @@ public class RestInvocationHandler implements InvocationHandler {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new WMRuntimeException(e);
         }
         return null;

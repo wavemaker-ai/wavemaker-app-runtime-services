@@ -40,7 +40,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.endpoint.AbstractOAuth2AuthorizationGrantRequest;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeAuthenticationProvider;
@@ -221,7 +221,7 @@ public class OpenIdSecurityProviderConfiguration implements WMSecurityConfigurat
 
     @Bean(name = "oAuth2AccessTokenResponseClient")
     public OAuth2AccessTokenResponseClient<? extends AbstractOAuth2AuthorizationGrantRequest> defaultAuthorizationCodeTokenResponseClient() {
-        return new DefaultAuthorizationCodeTokenResponseClient();
+        return new RestClientAuthorizationCodeTokenResponseClient();
     }
 
     @Bean(name = "openIdAuthenticationProvider")

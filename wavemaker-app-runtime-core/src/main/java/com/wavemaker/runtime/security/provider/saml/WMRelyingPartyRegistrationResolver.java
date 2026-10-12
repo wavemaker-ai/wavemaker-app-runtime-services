@@ -29,7 +29,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -37,6 +36,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 
 public class WMRelyingPartyRegistrationResolver implements Converter<HttpServletRequest, RelyingPartyRegistration>, RelyingPartyRegistrationResolver {
 
@@ -62,10 +62,10 @@ public class WMRelyingPartyRegistrationResolver implements Converter<HttpServlet
     }
 
     private static String resolveUrlTemplate(String template, String baseUrl, RelyingPartyRegistration relyingParty) {
-        String entityId = relyingParty.getAssertingPartyDetails().getEntityId();
+        String entityId = relyingParty.getAssertingPartyMetadata().getEntityId();
         String registrationId = relyingParty.getRegistrationId();
         Map<String, String> uriVariables = new HashMap<>();
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(baseUrl).replaceQuery(null).fragment(null)
+        UriComponents uriComponents = UriComponentsBuilder.fromUriString(baseUrl).replaceQuery(null).fragment(null)
             .build();
         String scheme = uriComponents.getScheme();
         uriVariables.put("baseScheme", (scheme != null) ? scheme : "");

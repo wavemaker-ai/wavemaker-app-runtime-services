@@ -32,14 +32,14 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal;
-import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
+import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
-import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml4AuthenticationRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml5AuthenticationRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2AuthenticationRequestResolver;
-import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml4LogoutRequestResolver;
-import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml4LogoutResponseResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml5LogoutRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml5LogoutResponseResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.logout.Saml2LogoutRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.logout.Saml2LogoutResponseResolver;
 
@@ -77,7 +77,7 @@ public class OpenSaml4Config {
 
     @Bean("saml2AuthenticationRequestResolver")
     public Saml2AuthenticationRequestResolver saml2AuthenticationRequestResolver(RelyingPartyRegistrationResolver relyingPartyRegistrationResolver) {
-        OpenSaml4AuthenticationRequestResolver openSaml4AuthenticationRequestResolver = new OpenSaml4AuthenticationRequestResolver(relyingPartyRegistrationResolver);
+        OpenSaml5AuthenticationRequestResolver openSaml4AuthenticationRequestResolver = new OpenSaml5AuthenticationRequestResolver(relyingPartyRegistrationResolver);
         openSaml4AuthenticationRequestResolver.setRelayStateResolver(SamlUtils::resolveRelayState);
         return openSaml4AuthenticationRequestResolver;
     }
@@ -85,17 +85,17 @@ public class OpenSaml4Config {
     @Bean("saml2LogoutRequestResolver")
     public Saml2LogoutRequestResolver saml2LogoutRequestResolver(RelyingPartyRegistrationResolver relyingPartyRegistrationResolver) {
         return new WMSaml2LogoutRequestResolver(relyingPartyRegistrationResolver,
-            new OpenSaml4LogoutRequestResolver(relyingPartyRegistrationResolver));
+            new OpenSaml5LogoutRequestResolver(relyingPartyRegistrationResolver));
     }
 
     @Bean("openSamlLogoutResponseResolver")
     public Saml2LogoutResponseResolver openSamlLogoutResponseResolver(RelyingPartyRegistrationResolver relyingPartyRegistrationResolver) {
-        return new OpenSaml4LogoutResponseResolver(relyingPartyRegistrationResolver);
+        return new OpenSaml5LogoutResponseResolver(relyingPartyRegistrationResolver);
     }
 
     @Bean("samlAuthenticationProvider")
     public AuthenticationProvider samlAuthenticationProvider() {
-        OpenSaml4AuthenticationProvider openSaml4AuthenticationProvider = new OpenSaml4AuthenticationProvider();
+        OpenSaml5AuthenticationProvider openSaml4AuthenticationProvider = new OpenSaml5AuthenticationProvider();
         openSaml4AuthenticationProvider.setResponseAuthenticationConverter(customAuthenticationConverter());
         return openSaml4AuthenticationProvider;
     }
@@ -106,9 +106,9 @@ public class OpenSaml4Config {
         return new WMDelegatingAuthenticationProvider(samlAuthenticationProvider, AuthProviderType.SAML);
     }
 
-    private Converter<OpenSaml4AuthenticationProvider.ResponseToken, ? extends AbstractAuthenticationToken> customAuthenticationConverter() {
+    private Converter<OpenSaml5AuthenticationProvider.ResponseToken, ? extends AbstractAuthenticationToken> customAuthenticationConverter() {
         return responseToken -> {
-            Saml2Authentication saml2Authentication = OpenSaml4AuthenticationProvider.createDefaultResponseAuthenticationConverter().convert(responseToken);
+            Saml2Authentication saml2Authentication = OpenSaml5AuthenticationProvider.createDefaultResponseAuthenticationConverter().convert(responseToken);
             Object principal = saml2Authentication.getPrincipal();
             if (principal instanceof Saml2AuthenticatedPrincipal saml2Principal) {
                 List<GrantedAuthority> grantedAuthorities = resolveGrantedAuthorities(saml2Principal);

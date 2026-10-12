@@ -25,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -57,7 +58,7 @@ public class MultipartQueryUtils {
             } else {
                 instance = JSONUtils.toObject(multipartFile.getInputStream(), type);
             }
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.wm.data.body.read.error"), e);
         }
         return instance;

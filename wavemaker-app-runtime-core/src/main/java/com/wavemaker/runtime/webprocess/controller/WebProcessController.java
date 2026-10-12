@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.auth.oauth2.OAuth2Constants;
 import com.wavemaker.commons.crypto.CryptoUtils;
@@ -127,7 +128,7 @@ public class WebProcessController {
                     inputStream = appFileSystem.getWebappResource("config.json");
                     Map<String, String> configJsonObject = JSONUtils.toObject(inputStream, Map.class);
                     customUrlScheme = configJsonObject.get(OAuth2Constants.CUSTOM_URL_SCHEME);
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     throw new WMRuntimeException(e);
                 } finally {
                     WMIOUtils.closeSilently(inputStream);

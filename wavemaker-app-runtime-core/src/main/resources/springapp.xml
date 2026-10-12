@@ -27,9 +27,7 @@
     </bean>
 
     <bean id="contentNegotiationManager"
-          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-        <property name="favorPathExtension" value="false"/>
-    </bean>
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"/>
 
     <bean class="com.wavemaker.runtime.spring.converters.ApplicationConversionServiceFactoryBean"
           id="applicationConversionService">

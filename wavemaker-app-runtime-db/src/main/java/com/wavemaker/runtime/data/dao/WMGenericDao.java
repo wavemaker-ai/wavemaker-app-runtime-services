@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateCallback;
 
 import com.wavemaker.runtime.commons.file.model.Downloadable;
 import com.wavemaker.runtime.commons.file.model.ExportType;
@@ -69,5 +68,5 @@ public interface WMGenericDao<E, I> {
 
     void evict(E entity);
 
-    <T> T execute(HibernateCallback<T> callback);
+    <T> T execute(WMHibernateCallback<T> callback);
 }

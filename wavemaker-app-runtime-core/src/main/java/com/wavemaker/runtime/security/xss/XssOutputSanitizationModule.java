@@ -15,7 +15,7 @@
 
 package com.wavemaker.runtime.security.xss;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.module.SimpleModule;
 
 public class XssOutputSanitizationModule extends SimpleModule {
     public XssOutputSanitizationModule() {

@@ -32,7 +32,6 @@ import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -96,7 +95,7 @@ public abstract class WMGenericTemporalDaoImpl<E extends Serializable, I extends
         }
     }
 
-    protected abstract HibernateTemplate getHistoryTemplate();
+    protected abstract WMHibernateTemplate getHistoryTemplate();
 
     @Override
     public Page<E> findByPeriod(

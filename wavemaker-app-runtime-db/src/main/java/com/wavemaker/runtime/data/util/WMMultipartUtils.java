@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
@@ -86,7 +87,7 @@ public class WMMultipartUtils {
                 t = toObject(multipartFile, instance);
             }
             setMultipartsToObject(multipartHttpServletRequest.getFileMap(), t, serviceId);
-        } catch (IOException | IllegalAccessException | InvocationTargetException | NoSuchFieldException | NoSuchMethodException e) {
+        } catch (IOException | JacksonException | IllegalAccessException | InvocationTargetException | NoSuchFieldException | NoSuchMethodException e) {
             LOGGER.error("Exception while creating a new Instance with information: {}", t);
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.multipart.request.exception"), e);
         }

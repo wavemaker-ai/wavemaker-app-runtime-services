@@ -46,7 +46,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
-import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import net.shibboleth.shared.xml.SerializeSupport;
 
 public class WMSaml2MetadataResolver implements Saml2MetadataResolver {
 
@@ -94,7 +94,7 @@ public class WMSaml2MetadataResolver implements Saml2MetadataResolver {
 
     private NameIDFormat getNameIDFormat(String nameIdFormat) {
         NameIDFormat nameID = build(NameIDFormat.DEFAULT_ELEMENT_NAME);
-        nameID.setFormat(nameIdFormat);
+        nameID.setURI(nameIdFormat);
         return nameID;
     }
 

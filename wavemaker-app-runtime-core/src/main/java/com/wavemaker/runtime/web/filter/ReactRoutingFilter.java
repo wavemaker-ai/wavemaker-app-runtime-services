@@ -27,9 +27,10 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
+
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 
 public class ReactRoutingFilter extends GenericFilterBean {
 

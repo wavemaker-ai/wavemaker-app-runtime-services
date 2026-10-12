@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.i18n.LocaleData;
 import com.wavemaker.commons.i18n.LocaleMessageProviderImpl;
@@ -43,7 +44,7 @@ public class WMAppLocaleMessageProviderImpl extends LocaleMessageProviderImpl {
             try {
                 LocaleData localeData = JSONUtils.toObject(resource.getInputStream(), LocaleData.class);
                 localeMessages.putAll(localeData.getMessages());
-            } catch (IOException e) {
+            } catch (IOException | JacksonException e) {
                 throw new WMRuntimeException("Failed to read locale resources for locale " + locale, e);
             }
         }

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -34,10 +33,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public abstract class AbstractDatabaseQueryExecutor implements DatabaseQueryExecutor {
 
-    private final HibernateOperations hibernateTemplate;
+    private final WMHibernateTemplate hibernateTemplate;
     private final PlatformTransactionManager transactionManager;
 
-    protected AbstractDatabaseQueryExecutor(final HibernateOperations hibernateTemplate, final PlatformTransactionManager transactionManager) {
+    protected AbstractDatabaseQueryExecutor(final WMHibernateTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
         this.hibernateTemplate = hibernateTemplate;
         this.transactionManager = transactionManager;
     }

@@ -21,8 +21,8 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateCallback;
 
+import com.wavemaker.runtime.data.dao.WMHibernateCallback;
 import com.wavemaker.runtime.data.dao.query.providers.PaginatedQueryProvider;
 import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
 import com.wavemaker.runtime.data.export.DataExporter;
@@ -37,7 +37,7 @@ import com.wavemaker.runtime.data.transform.Transformers;
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>
  * @since 16/11/16
  */
-public class NamedQueryExporterCallback<R> implements HibernateCallback<Void> {
+public class NamedQueryExporterCallback<R> implements WMHibernateCallback<Void> {
 
     private final PaginatedQueryProvider<R> queryProvider;
     private final ParametersProvider parametersProvider;

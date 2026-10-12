@@ -54,8 +54,8 @@ public class HttpRequestUtils {
 
     public static void writeResponse(HttpResponseDetails httpResponseDetails, HttpServletResponse httpServletResponse) throws IOException {
         httpServletResponse.setStatus(httpResponseDetails.getStatusCode());
-        Map<String, List<String>> responseHeaders = httpResponseDetails.getHeaders();
-        for (Map.Entry<String, List<String>> responseHeaderEntry : responseHeaders.entrySet()) {
+        HttpHeaders responseHeaders = httpResponseDetails.getHeaders();
+        for (Map.Entry<String, List<String>> responseHeaderEntry : responseHeaders.headerSet()) {
             for (String responseHeaderValue : responseHeaderEntry.getValue()) {
                 httpServletResponse.setHeader(responseHeaderEntry.getKey(), responseHeaderValue);
             }

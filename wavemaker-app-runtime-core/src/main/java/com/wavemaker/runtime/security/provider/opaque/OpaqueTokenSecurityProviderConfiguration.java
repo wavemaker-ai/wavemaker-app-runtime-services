@@ -29,7 +29,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
-import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
@@ -55,9 +55,10 @@ public class OpaqueTokenSecurityProviderConfiguration implements WMSecurityConfi
     @Bean(name = "nimbusOpaqueTokenIntrospector")
     public OpaqueTokenIntrospector nimbusOpaqueTokenIntrospector() {
         OpaqueTokenProviderConfig opaqueTokenProviderConfig = opaqueTokenProviderConfig();
-        return new NimbusOpaqueTokenIntrospector(Objects.requireNonNull(opaqueTokenProviderConfig.getIntrospectionUrl()),
-            Objects.requireNonNull(opaqueTokenProviderConfig.getClientId()),
-            Objects.requireNonNull(opaqueTokenProviderConfig.getClientSecret()));
+        return SpringOpaqueTokenIntrospector.withIntrospectionUri(Objects.requireNonNull(opaqueTokenProviderConfig.getIntrospectionUrl()))
+            .clientId(Objects.requireNonNull(opaqueTokenProviderConfig.getClientId()))
+            .clientSecret(Objects.requireNonNull(opaqueTokenProviderConfig.getClientSecret()))
+            .build();
     }
 
     @Bean(name = "opaqueAuthenticationConverter")

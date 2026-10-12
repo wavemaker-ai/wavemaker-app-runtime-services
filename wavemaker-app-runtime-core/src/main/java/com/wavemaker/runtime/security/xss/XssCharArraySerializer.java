@@ -15,11 +15,10 @@
 
 package com.wavemaker.runtime.security.xss;
 
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.wavemaker.runtime.security.xss.handler.XSSSecurityHandler;
 
 public class XssCharArraySerializer extends StdSerializer<char[]> {
@@ -28,7 +27,7 @@ public class XssCharArraySerializer extends StdSerializer<char[]> {
     }
 
     @Override
-    public void serialize(char[] value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(char[] value, JsonGenerator gen, SerializationContext provider) {
         XSSSecurityHandler xssSecurityHandler = XSSSecurityHandler.getInstance();
         if (xssSecurityHandler.isOutputSanitizationEnabled() && XssContext.isXssEnabled()) {
             gen.writeString(xssSecurityHandler.sanitizeOutgoingData(new String(value)));

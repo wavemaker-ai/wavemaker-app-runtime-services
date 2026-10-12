@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.wavemaker.runtime.auth.oauth2.service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.ResourceNotFoundException;
 import com.wavemaker.commons.WMRuntimeException;
@@ -78,7 +77,7 @@ public class OAuth2RuntimeServiceManager {
             stateObject.put(OAuth2Constants.REQUEST_SOURCE_TYPE, requestSourceType);
             String stateParameter = WMObjectMapper.getInstance().writeValueAsString(stateObject);
             return OAuth2Helper.getAuthorizationUrl(oAuth2ProviderConfig, redirectUrl, stateParameter);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new WMRuntimeException(e);
         }
     }
@@ -154,7 +153,7 @@ public class OAuth2RuntimeServiceManager {
                 inputStream = appFileSystem.getWebappResource("config.json");
                 Map<String, String> configJsonObject = JSONUtils.toObject(inputStream, Map.class);
                 customUrlScheme = configJsonObject.get(OAuth2Constants.CUSTOM_URL_SCHEME);
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 throw new WMRuntimeException(e);
             } finally {
                 WMIOUtils.closeSilently(inputStream);

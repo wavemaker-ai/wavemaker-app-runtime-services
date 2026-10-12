@@ -16,7 +16,6 @@ package com.wavemaker.runtime.data.dao;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -24,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class NativeSqlQueryExecutor extends AbstractDatabaseQueryExecutor {
 
-    public NativeSqlQueryExecutor(final HibernateOperations hibernateTemplate, final PlatformTransactionManager transactionManager) {
+    public NativeSqlQueryExecutor(final WMHibernateTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
         super(hibernateTemplate, transactionManager);
     }
 

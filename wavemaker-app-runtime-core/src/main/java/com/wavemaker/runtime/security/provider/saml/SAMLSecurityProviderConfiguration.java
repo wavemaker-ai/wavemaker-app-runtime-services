@@ -35,8 +35,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml2.provider.service.authentication.logout.OpenSamlLogoutRequestValidator;
-import org.springframework.security.saml2.provider.service.authentication.logout.OpenSamlLogoutResponseValidator;
+import org.springframework.security.saml2.provider.service.authentication.logout.OpenSaml5LogoutRequestValidator;
+import org.springframework.security.saml2.provider.service.authentication.logout.OpenSaml5LogoutResponseValidator;
 import org.springframework.security.saml2.provider.service.authentication.logout.Saml2LogoutRequestValidator;
 import org.springframework.security.saml2.provider.service.authentication.logout.Saml2LogoutResponseValidator;
 import org.springframework.security.saml2.provider.service.metadata.Saml2MetadataResolver;
@@ -61,7 +61,6 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.wavemaker.app.security.models.SecurityInterceptUrlEntry;
 import com.wavemaker.app.security.models.config.rolemapping.RoleQueryType;
@@ -75,6 +74,7 @@ import com.wavemaker.runtime.security.enabled.configuration.SecurityEnabledCondi
 import com.wavemaker.runtime.security.entrypoint.AuthenticationEntryPointRegistry;
 import com.wavemaker.runtime.security.handler.WMAuthenticationSuccessHandler;
 import com.wavemaker.runtime.security.handler.logout.LogoutSuccessHandlerRegistry;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 import com.wavemaker.runtime.security.model.AuthProvider;
 import com.wavemaker.runtime.security.model.AuthProviderType;
 import com.wavemaker.runtime.security.provider.database.authorities.DefaultAuthoritiesProviderImpl;
@@ -225,7 +225,7 @@ public class SAMLSecurityProviderConfiguration implements WMSecurityConfiguratio
 
     @Bean(name = "openSamlLogoutResponseValidator")
     public Saml2LogoutResponseValidator openSamlLogoutResponseValidator() {
-        return new OpenSamlLogoutResponseValidator();
+        return new OpenSaml5LogoutResponseValidator();
     }
 
     @Bean(name = "saml2LogoutResponseFilter")
@@ -235,7 +235,7 @@ public class SAMLSecurityProviderConfiguration implements WMSecurityConfiguratio
 
     @Bean(name = "openSamlLogoutRequestValidator")
     public Saml2LogoutRequestValidator getOpenSamlLogoutRequestValidator() {
-        return new OpenSamlLogoutRequestValidator();
+        return new OpenSaml5LogoutRequestValidator();
     }
 
     @Bean(name = "saml2WebSsoAuthenticationFilter")

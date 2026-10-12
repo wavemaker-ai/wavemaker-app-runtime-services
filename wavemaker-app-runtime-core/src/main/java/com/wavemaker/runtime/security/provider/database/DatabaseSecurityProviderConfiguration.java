@@ -45,8 +45,8 @@ public class DatabaseSecurityProviderConfiguration {
 
     @Bean(name = "databaseAuthenticationProvider")
     public AuthenticationProvider daoAuthenticationProvider(DatabaseQueryExecutorFactory databaseQueryExecutorFactory) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(databaseUserDetailsService(databaseProviderConfig(), databaseQueryExecutorFactory));
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(
+            databaseUserDetailsService(databaseProviderConfig(), databaseQueryExecutorFactory));
         authenticationProvider.setPasswordEncoder(noOpPasswordEncoder());
         return authenticationProvider;
     }

@@ -30,10 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.wavemaker.commons.util.HttpRequestUtils;
+import com.wavemaker.runtime.security.matcher.AntPathRequestMatcher;
 
 public class ContentSecurityPolicyFilter extends GenericFilterBean {
 

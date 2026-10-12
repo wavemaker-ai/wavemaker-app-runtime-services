@@ -15,11 +15,10 @@
 
 package com.wavemaker.runtime.security.xss;
 
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.wavemaker.runtime.security.xss.handler.XSSSecurityHandler;
 
 public class XssStringDeserializer extends StdDeserializer<String> {
@@ -28,7 +27,7 @@ public class XssStringDeserializer extends StdDeserializer<String> {
     }
 
     @Override
-    public String deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
+    public String deserialize(JsonParser jsonParser, DeserializationContext ctxt) {
         XSSSecurityHandler xssSecurityHandler = XSSSecurityHandler.getInstance();
         String value = jsonParser.getText();
         if (xssSecurityHandler.isInputSanitizationEnabled() && XssContext.isXssEnabled()) {

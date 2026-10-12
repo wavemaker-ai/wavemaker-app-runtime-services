@@ -14,6 +14,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.rest.processor.data;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,17 +47,13 @@ public class XWMPrefixDataProcessor implements HttpRequestDataProcessor {
     }
 
     private void processXWMHeaders(HttpRequestData httpRequestData) {
-        MultiValueMap<String, String> headers = httpRequestData.getHttpHeaders();
-        Iterator<Map.Entry<String, List<String>>> iterator = headers.entrySet().iterator();
+        HttpHeaders headers = httpRequestData.getHttpHeaders();
         MultiValueMap<String, String> newHeaders = new LinkedMultiValueMap<>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, List<String>> next = iterator.next();
-            String queryParamKey = next.getKey();
+        for (String queryParamKey : new ArrayList<>(headers.headerNames())) {
             if (queryParamKey.toUpperCase().startsWith(RestConstants.X_WM_HEADER_PREFIX)) {
                 String substring = queryParamKey.substring(RestConstants.X_WM_HEADER_PREFIX.length());
                 if (!substring.isEmpty()) {
-                    iterator.remove();
-                    newHeaders.put(substring, next.getValue());
+                    newHeaders.put(substring, headers.remove(queryParamKey));
                 }
             }
         }
