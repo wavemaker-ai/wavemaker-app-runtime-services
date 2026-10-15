@@ -63,8 +63,8 @@ import com.wavemaker.runtime.data.model.TemporalHistoryEntity;
  * {@code ${db.<serviceId>.<key>}} placeholders, not read here, so the property placeholder configurer keeps resolving,
  * decrypting and token-replacing them as it did for the XML.
  * <p>
- * A service that already has a {@code <serviceId>SessionFactory} bean definition, which is a project generated with
- * the XML, is left as it is.
+ * A bean the project already defines under the same name, for example in project-user-spring.xml, is kept as the
+ * user's override. It is listed in the WMAutoConfiguration.imports file, with {@link DataServiceAutoConfiguration}.
  */
 public class DataServiceBeansRegistrar implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 

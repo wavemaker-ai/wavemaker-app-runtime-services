@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.hibernate5.HibernateCallback;
 
 import com.wavemaker.runtime.commons.file.model.Downloadable;
 import com.wavemaker.runtime.commons.file.model.ExportType;
@@ -68,13 +67,6 @@ public interface WMGenericDao<E, I> {
     E refresh(E entity);
 
     void evict(E entity);
-
-    /**
-     * @deprecated use {@link #findAllChildren(Class, String, Object)} or
-     * {@link #findRemainingChildren(Class, String, Object, List)} instead.
-     */
-    @Deprecated
-    <T> T execute(HibernateCallback<T> callback);
 
     <T> List<T> findAllChildren(Class<T> childClass, String parentFieldName, Object parent);
 

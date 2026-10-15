@@ -25,7 +25,7 @@ import com.wavemaker.runtime.data.event.EntityPostFetchListEvent;
 import com.wavemaker.runtime.data.event.EntityPreFetchListEvent;
 import com.wavemaker.runtime.data.model.FetchQuery;
 
-class FindAllMethodInvocationHandler implements CRUDMethodInvocationHandler {
+public class FindAllMethodInvocationHandler implements CRUDMethodInvocationHandler {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;

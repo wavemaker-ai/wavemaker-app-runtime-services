@@ -1,0 +1,2 @@
+com.wavemaker.runtime.data.DataServiceAutoConfiguration
+com.wavemaker.runtime.data.DataServiceBeansRegistrar

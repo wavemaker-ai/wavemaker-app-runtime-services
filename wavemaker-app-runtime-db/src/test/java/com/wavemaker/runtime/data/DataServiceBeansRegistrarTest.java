@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
 import com.wavemaker.runtime.data.dao.WMGenericDao;
@@ -21,9 +20,6 @@ import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLSqlServerTypeHelper;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.regsvc.Widget;
 import com.wavemaker.runtime.data.regsvc.service.WidgetService;
-import com.wavemaker.runtime.data.util.NegatingTypeFilter;
-
-import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,7 +31,6 @@ public class DataServiceBeansRegistrarTest {
     private AnnotationConfigApplicationContext context;
 
     @Configuration
-    @EnableTransactionManagement
     static class Infra {
         @Bean
         static PropertySourcesPlaceholderConfigurer placeholders() {
@@ -43,23 +38,8 @@ public class DataServiceBeansRegistrarTest {
         }
 
         @Bean
-        static DataServiceBeansRegistrar registrar() {
-            return new DataServiceBeansRegistrar();
-        }
-
-        @Bean
         ExportedFileManager exportedFileManager() {
             return Mockito.mock(ExportedFileManager.class);
-        }
-
-        @Bean
-        AssignableTypeFilter historyEntitiesFilter() {
-            return new AssignableTypeFilter(com.wavemaker.runtime.data.model.TemporalHistoryEntity.class);
-        }
-
-        @Bean
-        NegatingTypeFilter nonHistoryEntitiesFilter() {
-            return new NegatingTypeFilter(historyEntitiesFilter());
         }
     }
 
@@ -103,19 +83,6 @@ public class DataServiceBeansRegistrarTest {
     }
 
     @Test
-    public void leavesAServiceAlreadyDeclaredInXmlAlone() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.svc1.url", "jdbc:hsqldb:mem:x");
-        props.put("db.svc1.packages", "com.wavemaker.runtime.data.regsvc");
-        context = new AnnotationConfigApplicationContext();
-        context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", props));
-        context.registerBean("svc1SessionFactory", Object.class, Object::new);
-        context.register(Infra.class);
-        context.refresh();
-        assertFalse(context.containsBean("svc1Template"));
-    }
-
-    @Test
     public void keepsABeanTheProjectAlreadyDefines() {
         Map<String, Object> props = new HashMap<>();
         props.put("db.svc1.url", "jdbc:hsqldb:mem:override" + System.nanoTime());
@@ -136,13 +103,13 @@ public class DataServiceBeansRegistrarTest {
         // as project-user-spring.xml would define them, before the registrar runs
         context.registerBean("svc1WMQLTypeHelper", WMQLTypeHelper.class, WMQLSqlServerTypeHelper::new);
         context.registerBean("svc1.WidgetService", WidgetService.class, WidgetService::new);
-        context.register(Infra.class);
+        context.register(Infra.class, DataServiceAutoConfiguration.class, DataServiceBeansRegistrar.class);
         context.refresh();
         assertTrue(context.getBean("svc1WMQLTypeHelper") instanceof WMQLSqlServerTypeHelper);
         assertTrue(context.containsBean("svc1Template"), "the other beans are still registered");
     }
 
-    private void start(Map<String, Object> extra) {
+    private Map<String, Object> serviceProperties() {
         Map<String, Object> props = new HashMap<>();
         props.put("db.svc1.url", "jdbc:hsqldb:mem:registrar" + System.nanoTime());
         props.put("db.svc1.driverClass", "org.hsqldb.jdbc.JDBCDriver");
@@ -157,10 +124,59 @@ public class DataServiceBeansRegistrarTest {
         props.put("db.svc1.dialect", "org.hibernate.dialect.HSQLDialect");
         props.put("db.svc1.hbm2ddl", "create");
         props.put("db.svc1.packages", "com.wavemaker.runtime.data.regsvc");
+        return props;
+    }
+
+    private void start(Map<String, Object> extra) {
+        Map<String, Object> props = serviceProperties();
         props.putAll(extra);
         context = new AnnotationConfigApplicationContext();
         context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", props));
-        context.register(Infra.class);
+        context.register(Infra.class, DataServiceAutoConfiguration.class, DataServiceBeansRegistrar.class);
         context.refresh();
+    }
+
+    @Test
+    public void registersTheCommonBeans() {
+        start(Map.of());
+        for (String name : new String[]{"mySqlCloudTokenResolver", "dbExceptionResolver", "historyEntitiesFilter",
+            "nonHistoryEntitiesFilter", "databaseQueryExecutorFactory", "crudAspectManager", "createMethodInvocationHandler", "updateMethodInvocationHandler",
+            "findAllMethodInvocationHandler", "findMethodInvocationHandler", "deleteMethodInvocationHandler"}) {
+            assertTrue(context.containsBean(name), "missing bean " + name);
+        }
+        assertFalse(context.containsBean("querycontroller"), "the preview beans are only for the wm_preview profile");
+    }
+
+    @Test
+    public void registersThePreviewBeansForThePreviewProfile() {
+        Map<String, Object> props = serviceProperties();
+        context = new AnnotationConfigApplicationContext();
+        context.getEnvironment().setActiveProfiles("wm_preview");
+        context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", props));
+        context.register(Infra.class, DataServiceAutoConfiguration.class, DataServiceBeansRegistrar.class);
+        context.refresh();
+        assertTrue(context.containsBean("querycontroller"));
+        assertTrue(context.containsBean("queryDesignService"));
+    }
+
+    @Test
+    public void keepsACommonBeanTheProjectDefines() {
+        Map<String, Object> props = serviceProperties();
+        context = new AnnotationConfigApplicationContext();
+        context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("test", props));
+        context.registerBean("dbExceptionResolver", String.class, () -> "user-defined");
+        context.register(Infra.class, DataServiceAutoConfiguration.class, DataServiceBeansRegistrar.class);
+        context.refresh();
+        assertEquals("user-defined", context.getBean("dbExceptionResolver"));
+    }
+
+    @Test
+    public void listsItsConfigurationInAnImportsFile() throws Exception {
+        org.springframework.core.io.Resource[] files = new org.springframework.core.io.support.PathMatchingResourcePatternResolver()
+            .getResources("classpath*:META-INF/spring/*WMAutoConfiguration.imports");
+        assertEquals(1, files.length);
+        String content = new String(files[0].getInputStream().readAllBytes());
+        assertTrue(content.contains(DataServiceAutoConfiguration.class.getName()));
+        assertTrue(content.contains(DataServiceBeansRegistrar.class.getName()));
     }
 }

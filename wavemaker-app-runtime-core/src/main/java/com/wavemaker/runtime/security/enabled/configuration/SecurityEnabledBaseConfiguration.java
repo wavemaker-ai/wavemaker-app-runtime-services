@@ -103,8 +103,6 @@ import com.wavemaker.app.security.models.SessionTimeoutConfig;
 import com.wavemaker.app.security.models.TokenAuthConfig;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.util.WMIOUtils;
-import com.wavemaker.runtime.data.dao.DatabaseQueryExecutorFactory;
-import com.wavemaker.runtime.data.dao.DefaultDatabaseQueryExecutorFactory;
 import com.wavemaker.runtime.security.WMAppAccessDeniedHandler;
 import com.wavemaker.runtime.security.WMApplicationAuthenticationFailureHandler;
 import com.wavemaker.runtime.security.authenticationprovider.WMDelegatingAuthenticationProvider;
@@ -170,17 +168,6 @@ public class SecurityEnabledBaseConfiguration {
     @Bean(name = "defaultWebSecurityExpressionHandler")
     public SecurityExpressionHandler<FilterInvocation> defaultWebSecurityExpressionHandler() {
         return new DefaultWebSecurityExpressionHandler();
-    }
-
-    /*
-     * Registered here rather than in DatabaseSecurityProviderConfiguration (guarded by
-     * DatabaseSecurityProviderCondition, which only matches when DATABASE is the active auth provider) since
-     * every provider's own database-backed role/authority mapping (AD, CAS, JWS, LDAP, Opaque, SAML) needs this
-     * bean regardless of which provider is actually authenticating the user.
-     */
-    @Bean(name = "databaseQueryExecutorFactory")
-    public DatabaseQueryExecutorFactory databaseQueryExecutorFactory() {
-        return new DefaultDatabaseQueryExecutorFactory();
     }
 
     @Bean(name = "authenticationManager")

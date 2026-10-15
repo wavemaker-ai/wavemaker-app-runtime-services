@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.wavemaker.runtime.data.event.EntityPostDeleteEvent;
 import com.wavemaker.runtime.data.event.EntityPreDeleteEvent;
 
-class DeleteMethodInvocationHandler implements CRUDMethodInvocationHandler {
+public class DeleteMethodInvocationHandler implements CRUDMethodInvocationHandler {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;

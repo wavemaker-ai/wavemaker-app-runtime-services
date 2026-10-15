@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.wavemaker.runtime.data.event.EntityPostUpdateEvent;
 import com.wavemaker.runtime.data.event.EntityPreUpdateEvent;
 
-class UpdateMethodInvocationHandler implements CRUDMethodInvocationHandler {
+public class UpdateMethodInvocationHandler implements CRUDMethodInvocationHandler {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;

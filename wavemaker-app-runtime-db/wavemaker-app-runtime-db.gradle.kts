@@ -52,7 +52,7 @@ dependencies {
     testImplementation(appDependenciesLibs.commons.text)
     testImplementation(appDependenciesLibs.jdbc.driver.hsqldb)
     testImplementation(appDependenciesLibs.test.mockito.core)
-    testImplementation(projects.wavemakerAppRuntimeCore)
+    testImplementation(appDependenciesLibs.jakarta.servlet.api)
 
     //TODO: To support DB2 implementation, the custom code needs to be updated as per the new hibernate library code
     /*runtimeLibDependencies(appDependenciesLibs.hibernate.core) {

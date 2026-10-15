@@ -278,11 +278,6 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     }
 
     @Override
-    public <T> T execute(final HibernateCallback<T> callback) {
-        return getTemplate().execute(callback);
-    }
-
-    @Override
     public <T> List<T> findAllChildren(final Class<T> childClass, final String parentFieldName, final Object parent) {
         return getTemplate().execute(session ->
             DaoUtils.findAllChildren(session, childClass, new DaoUtils.ChildrenFilter<>(parentFieldName, parent)));

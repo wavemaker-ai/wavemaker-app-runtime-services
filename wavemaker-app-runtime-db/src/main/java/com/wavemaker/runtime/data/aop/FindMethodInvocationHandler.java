@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.wavemaker.runtime.data.event.EntityPostFetchEvent;
 import com.wavemaker.runtime.data.event.EntityPreFetchEvent;
 
-class FindMethodInvocationHandler implements CRUDMethodInvocationHandler {
+public class FindMethodInvocationHandler implements CRUDMethodInvocationHandler {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
