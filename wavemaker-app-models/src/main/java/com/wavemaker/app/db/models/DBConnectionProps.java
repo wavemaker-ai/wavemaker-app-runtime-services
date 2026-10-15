@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.wavemaker.app.db.constants.DataSourceType;
 import com.wavemaker.app.db.util.DBUtils;
 import com.wavemaker.app.security.models.annotation.FrameworkProfileProperty;
+import com.wavemaker.app.security.models.annotation.NonProfilizableProperty;
 import com.wavemaker.app.security.models.annotation.ProfilizableProperty;
 import com.wavemaker.app.db.constants.DBType;
 
@@ -43,9 +44,11 @@ public class DBConnectionProps extends DBTestConnectionProps {
 
     private String serviceId;
     @NotBlank
+    @NonProfilizableProperty("packages")
     private String packageName;
 
     @NotNull
+    @NonProfilizableProperty("dbType")
     private DBType dbType;
 
     private String host;

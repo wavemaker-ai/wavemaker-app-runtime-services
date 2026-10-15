@@ -39,6 +39,7 @@ import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.annotations.TableTemporal;
 import com.wavemaker.runtime.data.dao.generators.TemporalQueryGenerator;
 import com.wavemaker.runtime.data.dao.query.types.RuntimeParameterTypeResolver;
+import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.dao.util.PageUtils;
 import com.wavemaker.runtime.data.dao.util.ParametersConfigurator;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
@@ -55,12 +56,20 @@ import com.wavemaker.runtime.data.util.PropertyDescription;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/1/18
  */
-public abstract class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializable>
+public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializable>
     extends WMGenericDaoImpl<E, I> implements WMGenericTemporalDao<E, I> {
+
+    private final HibernateTemplate historyTemplate;
 
     private Class<TemporalHistoryEntity<E>> historyClass;
 
     private List<PropertyDescriptor> updatableProperties;
+
+    public WMGenericTemporalDaoImpl(Class<E> entityClass, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper,
+                                    HibernateTemplate historyTemplate) {
+        super(entityClass, template, wmqlTypeHelper);
+        this.historyTemplate = historyTemplate;
+    }
 
     @SuppressWarnings("unchecked")
     @PostConstruct
@@ -96,7 +105,9 @@ public abstract class WMGenericTemporalDaoImpl<E extends Serializable, I extends
         }
     }
 
-    protected abstract HibernateTemplate getHistoryTemplate();
+    protected HibernateTemplate getHistoryTemplate() {
+        return this.historyTemplate;
+    }
 
     @Override
     public Page<E> findByPeriod(

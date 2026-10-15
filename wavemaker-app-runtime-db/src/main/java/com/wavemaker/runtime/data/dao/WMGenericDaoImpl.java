@@ -16,7 +16,6 @@ package com.wavemaker.runtime.data.dao;
 
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,10 +67,12 @@ import com.wavemaker.runtime.data.util.CriteriaUtils;
 import com.wavemaker.runtime.data.util.DaoUtils;
 import com.wavemaker.runtime.data.util.HqlQueryHelper;
 
-public abstract class WMGenericDaoImpl<E extends Serializable, I extends Serializable> implements
+public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> implements
     WMGenericDao<E, I> {
 
-    protected Class<E> entityClass;
+    protected final Class<E> entityClass;
+    protected final HibernateTemplate template;
+    protected final WMQLTypeHelper wmqlTypeHelper;
     protected EntityQueryGenerator<E, I> queryGenerator;
 
     protected SortValidator sortValidator;
@@ -79,21 +80,27 @@ public abstract class WMGenericDaoImpl<E extends Serializable, I extends Seriali
     @Autowired
     private ExportedFileManager exportedFileManager;
 
-    public abstract HibernateTemplate getTemplate();
+    public WMGenericDaoImpl(Class<E> entityClass, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+        this.entityClass = entityClass;
+        this.template = template;
+        this.wmqlTypeHelper = wmqlTypeHelper;
+    }
 
-    public abstract WMQLTypeHelper getWMQLTypeHelper();
+    public HibernateTemplate getTemplate() {
+        return this.template;
+    }
 
-    @SuppressWarnings("unchecked")
+    public WMQLTypeHelper getWMQLTypeHelper() {
+        return this.wmqlTypeHelper;
+    }
+
     @PostConstruct
     public void init() {
         if (getTemplate() == null) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.hibernateTemplate.not.set"));
         }
 
-        ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericSuperclass();
-        this.entityClass = (Class<E>) genericSuperclass.getActualTypeArguments()[0];
         this.sortValidator = new SortValidator();
-
         queryGenerator = new SimpleEntitiyQueryGenerator<>(entityClass);
     }
 
@@ -273,5 +280,19 @@ public abstract class WMGenericDaoImpl<E extends Serializable, I extends Seriali
     @Override
     public <T> T execute(final HibernateCallback<T> callback) {
         return getTemplate().execute(callback);
+    }
+
+    @Override
+    public <T> List<T> findAllChildren(final Class<T> childClass, final String parentFieldName, final Object parent) {
+        return getTemplate().execute(session ->
+            DaoUtils.findAllChildren(session, childClass, new DaoUtils.ChildrenFilter<>(parentFieldName, parent)));
+    }
+
+    @Override
+    public <T> List<T> findRemainingChildren(final Class<T> childClass, final String parentFieldName, final Object parent,
+                                             final List<T> existingChildren) {
+        return getTemplate().execute(session ->
+            DaoUtils.findAllRemainingChildren(session, childClass,
+                new DaoUtils.ChildrenFilter<>(parentFieldName, parent, existingChildren)));
     }
 }
