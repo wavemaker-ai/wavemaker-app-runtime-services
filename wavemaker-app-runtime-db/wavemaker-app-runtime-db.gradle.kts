@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.wavemakerCommonsUtil)
     implementation(projects.wavemakerAppRuntimeCommons)
     implementation(projects.wavemakerAppModels)
+    api(projects.wavemakerAppRuntimeDbCore)
     api(projects.wavemakerAppRuntimeDbApi)
     implementation(appDependenciesLibs.slf4j.api)
     implementation(appDependenciesLibs.commons.lang3)

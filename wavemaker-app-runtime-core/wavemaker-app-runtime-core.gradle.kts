@@ -101,6 +101,7 @@ tasks {
         dependsOn(":wavemaker-app-runtime-prefab:jar")
         dependsOn(":wavemaker-app-runtime-db:jar")
         dependsOn(":wavemaker-app-runtime-db-api:jar")
+        dependsOn(":wavemaker-app-runtime-db-core:jar")
         dependsOn(":wavemaker-app-runtime-rest:jar")
         dependsOn(":wavemaker-tools-apidocs-core:jar")
         dependsOn(":wavemaker-app-runtime-connector-app-integration:jar")
