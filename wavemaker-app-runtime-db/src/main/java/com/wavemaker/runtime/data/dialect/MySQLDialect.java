@@ -16,26 +16,47 @@ package com.wavemaker.runtime.data.dialect;
 
 import java.sql.Types;
 
+import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.dialect.InnoDBStorageEngine;
-import org.hibernate.dialect.MySQL5Dialect;
 import org.hibernate.dialect.MySQLStorageEngine;
-import org.hibernate.dialect.function.NoArgSQLFunction;
-import org.hibernate.type.StringType;
+import org.hibernate.type.StandardBasicTypes;
 
 import com.wavemaker.commons.CommonConstants;
 
 /**
- * @author Simon Toens
+ * hibernate7: copied from wavemaker-app-runtime-db and ported (the original builds on Hibernate 5 APIs removed in 6.0):
+ * <ul>
+ *   <li>{@code MySQL5Dialect} was removed in 6.0; {@code org.hibernate.dialect.MySQLDialect} is the version-aware one;</li>
+ *   <li>{@code registerFunction(.., new NoArgSQLFunction(..))} -&gt; {@link #initializeFunctionRegistry};</li>
+ *   <li>{@code registerColumnType(..)} -&gt; {@link #columnType(int)}.</li>
+ * </ul>
+ * DDL type names ({@link #columnType(int)}) only matter to Hibernate's own schema export, which Studio does not use
+ * (Studio's DDL comes from its SchemaUpdater).
  */
-public class MySQLDialect extends MySQL5Dialect {
+public class MySQLDialect extends org.hibernate.dialect.MySQLDialect {
 
     public MySQLDialect() {
         super();
-        registerFunction("uuid", new NoArgSQLFunction("uuid", StringType.INSTANCE));
+    }
 
-        //as hibernate timestamp is mapping to sql datetime in mysql,So forcing hibernate timestamp to map sql timestamp.
-        registerColumnType(Types.TIMESTAMP, "timestamp");
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "datetime");
+    @Override
+    public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+        super.initializeFunctionRegistry(functionContributions);
+        functionContributions.getFunctionRegistry().noArgsBuilder("uuid")
+            .setInvariantType(functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.STRING))
+            .register();
+    }
+
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        // as hibernate timestamp is mapping to sql datetime in mysql, so forcing hibernate timestamp to map sql timestamp.
+        if (sqlTypeCode == Types.TIMESTAMP) {
+            return "timestamp";
+        }
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "datetime";
+        }
+        return super.columnType(sqlTypeCode);
     }
 
     @Override

@@ -16,23 +16,33 @@ package com.wavemaker.runtime.data.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.dialect.SQLServer2012Dialect;
-import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.dialect.SQLServerDialect;
 
 import com.wavemaker.commons.CommonConstants;
 
 /**
  * Created by sunilp on 4/2/15.
  */
-public class WMSQLServerDialect extends SQLServer2012Dialect {
+// hibernate7: SQLServer2012Dialect was deprecated in 6 and removed in 7; SQLServerDialect is version-aware
+public class WMSQLServerDialect extends SQLServerDialect {
 
     public WMSQLServerDialect() {
         super();
-        registerHibernateType(Types.NCHAR, StandardBasicTypes.STRING.getName());
-        registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.TEXT.getName());
-        registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
+    }
 
-        registerColumnType(Types.CHAR, "nchar(1)");
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "datetime");
+    // hibernate7: registerColumnType(..) was removed in 6.0; DDL type names come from columnType(int).
+    // 5.6 also called registerHibernateType(NCHAR / NVARCHAR -> string, LONGNVARCHAR -> text) for native-query result
+    // typing; 6/7 read these JDBC types as String (or Character for length 1) themselves, and the query test-run converts
+    // every value to the column's Java type, giving the same output for both. Not run against SQL Server. DDL type
+    // names only matter to Hibernate's own schema export, which Studio does not use.
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == Types.CHAR) {
+            return "nchar(1)";
+        }
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "datetime";
+        }
+        return super.columnType(sqlTypeCode);
     }
 }

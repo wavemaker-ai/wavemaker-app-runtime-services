@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.util;
 
 import java.util.Optional;
 
-import org.hibernate.TypeHelper;
+import org.hibernate.type.spi.TypeConfiguration;
 import org.hibernate.type.Type;
 
 /**
@@ -25,13 +25,11 @@ import org.hibernate.type.Type;
  */
 public class HibernateUtils {
 
-    public static Optional<Type> findType(TypeHelper typeHelper, String classOrType) {
-        Optional<Type> typeOptional = Optional.ofNullable(typeHelper.basic(classOrType));
-
-        if (!typeOptional.isPresent()) {
-            typeOptional = Optional.ofNullable(typeHelper.heuristicType(classOrType));
-        }
-
-        return typeOptional;
+    // hibernate7: TypeHelper (basic / heuristicType) was removed in 6.0; basic types are looked up by name or class name
+    // in the BasicTypeRegistry.
+    // heuristicType also fell back to Serializable / custom-type resolution for unregistered names; callers only pass
+    // JavaType class names, all of which are registered in 5.6 and 7.x alike (checked), so that fallback is never used.
+    public static Optional<Type> findType(TypeConfiguration typeConfiguration, String classOrType) {
+        return Optional.ofNullable(typeConfiguration.getBasicTypeRegistry().getRegisteredType(classOrType));
     }
 }

@@ -16,18 +16,22 @@ package com.wavemaker.runtime.data.converters;
 
 import java.sql.Time;
 
-import org.hibernate.type.TimeType;
-
 import com.wavemaker.commons.json.deserializer.WMDateDeSerializer;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 12/1/17
  */
-public class TimeTypeConverter extends HibernateBackedJavaTypeConverter {
+// hibernate7: extends JdbcDateTimeTypeConverter (5.6's TimeType descriptor conversions) instead of wrapping JdbcTimeJavaType
+public class TimeTypeConverter extends JdbcDateTimeTypeConverter {
 
     public TimeTypeConverter() {
-        super(TimeType.INSTANCE.getJavaTypeDescriptor());
+        super(Time.class);
+    }
+
+    @Override
+    protected java.util.Date create(final long millis) {
+        return new Time(millis);
     }
 
     @Override

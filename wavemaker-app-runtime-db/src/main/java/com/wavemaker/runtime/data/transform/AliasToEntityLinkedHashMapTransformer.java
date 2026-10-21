@@ -17,14 +17,12 @@ package com.wavemaker.runtime.data.transform;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
 
 /**
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>
  * @since 27/6/16
  */
-public class AliasToEntityLinkedHashMapTransformer extends AliasedTupleSubsetResultTransformer implements
-    WMResultTransformer {
+public class AliasToEntityLinkedHashMapTransformer implements WMResultTransformer { // hibernate7: AliasedTupleSubsetResultTransformer removed in 6.0
 
     public static final AliasToEntityLinkedHashMapTransformer INSTANCE = new AliasToEntityLinkedHashMapTransformer();
 
@@ -64,7 +62,8 @@ public class AliasToEntityLinkedHashMapTransformer extends AliasedTupleSubsetRes
         return true;
     }
 
-    @Override
+    // hibernate7: no longer part of the transformer contract in 6/7, so never called. 5.6 only asked it when caching query
+    // results, which Studio does not do. Kept for the move back to the app side.
     public boolean isTransformedValueATupleElement(String[] aliases, int tupleLength) {
         return false;
     }

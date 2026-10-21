@@ -14,21 +14,28 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dialect;
 
-import org.hibernate.dialect.PostgreSQL82Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
 
 import com.wavemaker.commons.CommonConstants;
 
 /**
- * @author Dilip Kumar
- * @since 19/4/16
+ * hibernate7: copied from wavemaker-app-runtime-db (projects store this class name as their dialect) and ported:
+ * PostgreSQL82Dialect moved to hibernate-community-dialects in 6.0, the core, version-aware PostgreSQLDialect is used
+ * (as for WMRedshiftSQLDialect); {@code registerColumnType(..)} -&gt; {@link #columnType(int)}.
  */
-public class WMPostgresSQLDialect extends PostgreSQL82Dialect {
+public class WMPostgresSQLDialect extends PostgreSQLDialect {
 
     public WMPostgresSQLDialect() {
         super();
+    }
 
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "timestamp without time zone");
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "timestamp without time zone";
+        }
+        return super.columnType(sqlTypeCode);
     }
 
     @Override

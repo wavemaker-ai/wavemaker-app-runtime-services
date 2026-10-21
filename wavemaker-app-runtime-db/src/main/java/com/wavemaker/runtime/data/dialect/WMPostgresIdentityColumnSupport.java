@@ -15,13 +15,14 @@
 package com.wavemaker.runtime.data.dialect;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.dialect.identity.PostgreSQL81IdentityColumnSupport;
+import org.hibernate.dialect.identity.PostgreSQLIdentityColumnSupport;
 
 /**
  * @author Dilip Kumar
  * @since 19/4/16
  */
-public class WMPostgresIdentityColumnSupport extends PostgreSQL81IdentityColumnSupport {
+// hibernate7: copied from wavemaker-app-runtime-db; PostgreSQL81IdentityColumnSupport was renamed PostgreSQLIdentityColumnSupport in 6.0
+public class WMPostgresIdentityColumnSupport extends PostgreSQLIdentityColumnSupport {
 
     public WMPostgresIdentityColumnSupport() {
         super();

@@ -16,32 +16,54 @@ package com.wavemaker.runtime.data.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.type.descriptor.sql.CharTypeDescriptor;
-import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
+import org.hibernate.boot.model.TypeContributions;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.descriptor.jdbc.CharJdbcType;
+import org.hibernate.type.descriptor.jdbc.JdbcType;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 
 import com.wavemaker.commons.CommonConstants;
 
 /**
- * Created by sunilp on 21/7/15.
+ * hibernate7: copied from wavemaker-app-runtime-db (projects store this class name as their dialect) and ported; the
+ * original builds on Hibernate 5 APIs removed in 6.0:
+ * <ul>
+ *   <li>{@code registerColumnType(..)} -&gt; {@link #columnType(int)};</li>
+ *   <li>{@code registerHibernateType(TIMESTAMP WITH (LOCAL) TIME ZONE, timestamp)} -&gt; {@link #resolveSqlTypeDescriptor};</li>
+ *   <li>{@code getSqlTypeDescriptorOverride(BOOLEAN) = CharTypeDescriptor} -&gt; {@link #contributeTypes}.</li>
+ * </ul>
+ * Not run against Oracle here (no Oracle database in the test setup).
  */
 public class OracleDialect extends org.hibernate.dialect.OracleDialect {
 
     public OracleDialect() {
         super();
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "date");
-        registerColumnType(Types.TIMESTAMP, "timestamp");
-
-        registerHibernateType(CommonConstants.TIMESTAMP_WITH_TIMEZONE_SQL_CODE, StandardBasicTypes.TIMESTAMP.getName());
-        registerHibernateType(CommonConstants.TIMESTAMP_WITH_LOCAL_TIMEZONE_SQL_CODE, StandardBasicTypes.TIMESTAMP.getName());
     }
 
     @Override
-    protected SqlTypeDescriptor getSqlTypeDescriptorOverride(int sqlCode) {
-        SqlTypeDescriptor sqlTypeDescriptor = super.getSqlTypeDescriptorOverride(sqlCode);
-        if (sqlCode == Types.BOOLEAN) {
-            sqlTypeDescriptor = new CharTypeDescriptor();
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "date";
         }
-        return sqlTypeDescriptor;
+        if (sqlTypeCode == Types.TIMESTAMP) {
+            return "timestamp";
+        }
+        return super.columnType(sqlTypeCode);
+    }
+
+    @Override
+    public JdbcType resolveSqlTypeDescriptor(String columnTypeName, int jdbcTypeCode, int precision, int scale,
+                                             JdbcTypeRegistry jdbcTypeRegistry) {
+        if (jdbcTypeCode == CommonConstants.TIMESTAMP_WITH_TIMEZONE_SQL_CODE
+            || jdbcTypeCode == CommonConstants.TIMESTAMP_WITH_LOCAL_TIMEZONE_SQL_CODE) {
+            return jdbcTypeRegistry.getDescriptor(Types.TIMESTAMP);
+        }
+        return super.resolveSqlTypeDescriptor(columnTypeName, jdbcTypeCode, precision, scale, jdbcTypeRegistry);
+    }
+
+    @Override
+    public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+        super.contributeTypes(typeContributions, serviceRegistry);
+        typeContributions.getTypeConfiguration().getJdbcTypeRegistry().addDescriptor(Types.BOOLEAN, CharJdbcType.INSTANCE);
     }
 }

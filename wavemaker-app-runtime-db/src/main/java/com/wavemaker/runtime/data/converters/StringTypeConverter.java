@@ -15,7 +15,7 @@
 package com.wavemaker.runtime.data.converters;
 
 import org.hibernate.HibernateException;
-import org.hibernate.type.StringType;
+import org.hibernate.type.descriptor.java.StringJavaType; // hibernate7: was org.hibernate.type.StringType (removed in 6.0)
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class StringTypeConverter extends HibernateBackedJavaTypeConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StringTypeConverter.class);
 
     public StringTypeConverter() {
-        super(StringType.INSTANCE.getJavaTypeDescriptor());
+        super(StringJavaType.INSTANCE);
     }
 
     @Override

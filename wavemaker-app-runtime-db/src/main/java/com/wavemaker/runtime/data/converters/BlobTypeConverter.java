@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.converters;
 
 import java.sql.Blob;
 
-import org.hibernate.type.BlobType;
+import org.hibernate.type.descriptor.java.BlobJavaType; // hibernate7: was org.hibernate.type.BlobType (removed in 6.0)
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -24,7 +24,25 @@ import org.hibernate.type.BlobType;
  */
 public class BlobTypeConverter extends HibernateBackedJavaTypeConverter {
     public BlobTypeConverter() {
-        super(BlobType.INSTANCE.getJavaTypeDescriptor());
+        super(BlobJavaType.INSTANCE);
+    }
+
+    // hibernate7: 5.6 read the string as hex pairs, each shifted by Byte.MIN_VALUE (PrimitiveByteArrayTypeDescriptor);
+    // 7.x's BlobJavaType.fromString reads plain hex pairs. The 5.6 bytes are decoded here and handed to it as plain hex.
+    @Override
+    public Object fromString(final String value) {
+        if (value == null) {
+            return super.fromString(null);
+        }
+        if (value.length() % 2 != 0) {
+            throw new IllegalArgumentException("The string is not a valid string representation of a binary content.");
+        }
+        final StringBuilder hex = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i += 2) {
+            final int shifted = (byte) (Integer.parseInt(value.substring(i, i + 2), 16) + Byte.MIN_VALUE);
+            hex.append(String.format("%02x", shifted & 0xff));
+        }
+        return super.fromString(hex.toString());
     }
 
     @Override

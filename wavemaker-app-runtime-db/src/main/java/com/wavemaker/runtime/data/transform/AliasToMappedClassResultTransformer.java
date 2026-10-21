@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -44,8 +43,7 @@ import com.wavemaker.runtime.data.util.JavaTypeUtils;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 15/11/16
  */
-public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResultTransformer implements
-    WMResultTransformer {
+public class AliasToMappedClassResultTransformer implements WMResultTransformer { // hibernate7: AliasedTupleSubsetResultTransformer removed in 6.0
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AliasToMappedClassResultTransformer.class);
 
@@ -80,7 +78,8 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
         }
     }
 
-    @Override
+    // hibernate7: no longer part of the transformer contract in 6/7, so never called. 5.6 only asked it when caching query
+    // results, which Studio does not do. Kept for the move back to the app side.
     public boolean isTransformedValueATupleElement(final String[] aliases, final int tupleLength) {
         return false;
     }

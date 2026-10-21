@@ -15,8 +15,10 @@
 package com.wavemaker.runtime.data.converters;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
-import org.hibernate.type.TimestampType;
+import org.hibernate.HibernateException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -24,12 +26,22 @@ import org.springframework.util.ReflectionUtils;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 12/1/17
  */
-public class TimestampTypeConverter extends HibernateBackedJavaTypeConverter {
+// hibernate7: extends JdbcDateTimeTypeConverter (5.6's TimestampType descriptor conversions) instead of wrapping
+// JdbcTimestampJavaType
+public class TimestampTypeConverter extends JdbcDateTimeTypeConverter {
 
     public static final String ORACLE_SQL_TIMESTAMP = "oracle.sql.TIMESTAMP";
 
+    // hibernate7: the format 5.6's JdbcTimestampTypeDescriptor.fromString parsed; 7.x's parses ISO-8601 instead
+    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     public TimestampTypeConverter() {
-        super(TimestampType.INSTANCE.getJavaTypeDescriptor());
+        super(Timestamp.class);
+    }
+
+    @Override
+    protected java.util.Date create(final long millis) {
+        return new Timestamp(millis);
     }
 
     @Override
@@ -39,7 +51,11 @@ public class TimestampTypeConverter extends HibernateBackedJavaTypeConverter {
         if (numberValue instanceof Long) {
             return new Timestamp((Long) numberValue);
         } else {
-            return super.fromString(value);
+            try {
+                return new Timestamp(new SimpleDateFormat(TIMESTAMP_FORMAT).parse(value).getTime());
+            } catch (ParseException e) {
+                throw new HibernateException("could not parse timestamp string" + value, e);
+            }
         }
     }
 

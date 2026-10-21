@@ -21,7 +21,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
-import org.hibernate.TypeHelper;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.type.spi.TypeConfiguration;
 import org.hibernate.type.Type;
 
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
@@ -38,13 +39,15 @@ public class RuntimeParameterTypeResolver implements ParameterTypeResolver {
 
     private final Map<String, Type> typesMap;
 
-    public RuntimeParameterTypeResolver(List<QueryParameter> parameters, TypeHelper typeHelper) {
+    // hibernate7: TypeHelper was removed in 6.0; types come from the TypeConfiguration's BasicTypeRegistry
+    // (see HibernateUtils.findType for what heuristicType did beyond that).
+    public RuntimeParameterTypeResolver(List<QueryParameter> parameters, TypeConfiguration typeConfiguration) {
         typesMap = parameters.stream()
             .collect(Collectors.toMap(QueryParameter::getName,
-                queryParameter -> typeHelper.heuristicType(queryParameter.getType().getClassName())));
+                queryParameter -> typeConfiguration.getBasicTypeRegistry().getRegisteredType(queryParameter.getType().getClassName())));
     }
 
-    public RuntimeParameterTypeResolver(Map<String, WMQueryParamInfo> parameters, TypeHelper typeHelper, WMQLTypeHelper wmqlTypeHelper) {
+    public RuntimeParameterTypeResolver(Map<String, WMQueryParamInfo> parameters, TypeConfiguration typeConfiguration, WMQLTypeHelper wmqlTypeHelper) {
         typesMap = new HashMap<>();
         for (Map.Entry<String, WMQueryParamInfo> queryParamInfoEntry : parameters.entrySet()) {
             String key = queryParamInfoEntry.getKey();
@@ -54,14 +57,14 @@ public class RuntimeParameterTypeResolver implements ParameterTypeResolver {
                 if (wmqlTypeHelper != null) {
                     javaType = wmqlTypeHelper.aliasFor(javaType);
                 }
-                typesMap.put(key, typeHelper.heuristicType(javaType.getClassName()));
+                typesMap.put(key, typeConfiguration.getBasicTypeRegistry().getRegisteredType(javaType.getClassName()));
             }
 
         }
     }
 
     public static RuntimeParameterTypeResolver from(Session session, RuntimeQuery query) {
-        return new RuntimeParameterTypeResolver(query.getParameters(), session.getSessionFactory().getTypeHelper());
+        return new RuntimeParameterTypeResolver(query.getParameters(), session.getSessionFactory().unwrap(SessionFactoryImplementor.class).getTypeConfiguration());
     }
 
     @Override

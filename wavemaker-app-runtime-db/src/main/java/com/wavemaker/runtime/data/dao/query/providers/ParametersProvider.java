@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.hibernate.type.BasicType;
 import org.hibernate.type.Type;
 
 /**
@@ -61,11 +62,15 @@ public interface ParametersProvider {
 
             boolean listType = Collection.class.isInstance(value);
 
-            if (typeOptional.isPresent()) {
+            // hibernate7: setParameter / setParameterList(.., org.hibernate.type.Type) were removed in 6.0; typed binding now
+            // takes a jakarta.persistence.metamodel.Type, which Hibernate's BasicType implements.
+            // Every resolver (RuntimeParameterTypeResolver, HibernateUtils.findType) returns a registered BasicType or
+            // nothing, so the untyped branch is only taken where 5.6 also bound the value untyped.
+            if (typeOptional.isPresent() && typeOptional.get() instanceof BasicType<?> basicType) {
                 if (listType) {
-                    query.setParameterList(parameterName, (Collection) value, typeOptional.get());
+                    query.setParameterList(parameterName, (Collection) value, (BasicType) basicType);
                 } else {
-                    query.setParameter(parameterName, value, typeOptional.get());
+                    query.setParameter(parameterName, value, (BasicType) basicType);
                 }
             } else {
                 if (listType) {

@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.type.Type;
 
 import com.wavemaker.runtime.data.dao.util.QueryHelper;
@@ -55,7 +56,8 @@ public class RuntimeParametersProvider implements ParametersProvider {
     public Optional<Type> getType(final Session session, final String name) {
         if (parameterMap.containsKey(name)) {
             final JavaType javaType = parameterMap.get(name).getType();
-            return HibernateUtils.findType(session.getTypeHelper(), javaType.getClassName());
+            // hibernate7: was HibernateUtils.findType(session.getTypeHelper(), ..)
+            return HibernateUtils.findType(session.getSessionFactory().unwrap(SessionFactoryImplementor.class).getTypeConfiguration(), javaType.getClassName());
         }
 
         return Optional.empty();

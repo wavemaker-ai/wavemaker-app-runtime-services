@@ -14,10 +14,12 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dialect;
 
-import org.hibernate.dialect.PostgreSQL82Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
 
-public class WMRedshiftSQLDialect extends PostgreSQL82Dialect {
+// hibernate7: PostgreSQL82Dialect moved to hibernate-community-dialects in 6.0; the core, version-aware
+// PostgreSQLDialect is the closest core class (Redshift is not a supported Hibernate database). Not run against Redshift.
+public class WMRedshiftSQLDialect extends PostgreSQLDialect {
 
     public WMRedshiftSQLDialect() {
         super();

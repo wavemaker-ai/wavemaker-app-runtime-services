@@ -16,17 +16,21 @@ package com.wavemaker.runtime.data.converters;
 
 import java.sql.Date;
 
-import org.hibernate.type.DateType;
-
 import com.wavemaker.commons.json.deserializer.WMDateDeSerializer;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 12/1/17
  */
-public class DateTypeConverter extends HibernateBackedJavaTypeConverter {
+// hibernate7: extends JdbcDateTimeTypeConverter (5.6's DateType descriptor conversions) instead of wrapping JdbcDateJavaType
+public class DateTypeConverter extends JdbcDateTimeTypeConverter {
     public DateTypeConverter() {
-        super(DateType.INSTANCE.getJavaTypeDescriptor());
+        super(Date.class);
+    }
+
+    @Override
+    protected java.util.Date create(final long millis) {
+        return new Date(millis);
     }
 
     @Override

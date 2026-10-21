@@ -48,6 +48,10 @@ public class NativeProcedureExecutor {
 
     public static final String CONTENT_FIELD = "content";
 
+    // hibernate7: not used by Studio (it only uses the static helpers below); kept identical to upstream runtime-db so the
+    // fork's move-back stays a clean diff. Spring 6.2's HibernateTemplate links to APIs Hibernate 7 removed (Criteria,
+    // save/update/delete); only execute(..) works, as here. Spring 7 drops HibernateTemplate: use
+    // SessionFactory.getCurrentSession() instead when Studio moves to Spring 7.
     public static <T> T execute(HibernateOperations hibernateOperations, String jdbcQuery, List<ResolvableParam> params, Class<T> type) {
         return hibernateOperations.execute(session -> session.doReturningWork(connection -> {
             CallableStatement statement = prepareStatement(connection, jdbcQuery, params);

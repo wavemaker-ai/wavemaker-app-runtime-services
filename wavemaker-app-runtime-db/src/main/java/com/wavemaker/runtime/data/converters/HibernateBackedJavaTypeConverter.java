@@ -14,7 +14,8 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.converters;
 
-import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
+// hibernate7: JavaTypeDescriptor was renamed org.hibernate.type.descriptor.java.JavaType in 6.0 (same fromString/wrap/unwrap)
+import org.hibernate.type.descriptor.java.JavaType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -22,9 +23,10 @@ import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
  */
 public class HibernateBackedJavaTypeConverter implements JavaTypeConverter {
 
-    private JavaTypeDescriptor descriptor;
+    @SuppressWarnings("rawtypes")
+    private JavaType descriptor;
 
-    public HibernateBackedJavaTypeConverter(final JavaTypeDescriptor descriptor) {
+    public HibernateBackedJavaTypeConverter(final JavaType<?> descriptor) {
         this.descriptor = descriptor;
     }
 
@@ -33,6 +35,10 @@ public class HibernateBackedJavaTypeConverter implements JavaTypeConverter {
         return descriptor.fromString(value);
     }
 
+    // hibernate7: wrap / unwrap are called with null WrapperOptions as in 5.6. For the descriptors still used here (byte to
+    // double, big decimal / integer, string, blob) the 7.x results were compared with 5.6's on the same inputs; the
+    // differences are handled by the subclasses / the WM converters JavaTypeConverters picks instead.
+    @SuppressWarnings("unchecked")
     @Override
     public Object fromDbValue(final Object value) {
         return descriptor.wrap(value, null);

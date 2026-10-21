@@ -22,6 +22,10 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.hibernate.query.spi.SqmQuery;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
@@ -128,8 +132,8 @@ public class QueryHelper {
 
     public static void setResultTransformer(Query query, Class<?> type) {
 //        TODO replace deprecated methods
-        if (query instanceof NativeQuery || (query.getReturnAliases() != null && query
-            .getReturnAliases().length != 0)) {
+        String[] returnAliases = getReturnAliases(query);
+        if (query instanceof NativeQuery || (returnAliases != null && returnAliases.length != 0)) {
             query.setResultTransformer(Transformers.aliasToMappedClass(type));
         }
     }
@@ -138,6 +142,10 @@ public class QueryHelper {
         return (isNative) ? session.createNativeQuery(query) : session.createQuery(query);
     }
 
+    // hibernate7: not used by Studio (it never creates a HibernateTemplate); kept identical to upstream runtime-db so the
+    // fork's move-back stays a clean diff. Spring 6.2's HibernateTemplate links to APIs Hibernate 7 removed (Criteria,
+    // save/update/delete); only execute(..) works, as here. Spring 7 drops HibernateTemplate: use
+    // SessionFactory.getCurrentSession() instead when Studio moves to Spring 7.
     public static Long getQueryResultCount(WMQueryInfo wmQueryInfo, boolean isNative, HibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
         return getCountFromCountStringQuery(wmQueryInfo, isNative, template, wmqlTypeHelper);
     }
@@ -161,7 +169,7 @@ public class QueryHelper {
         final Session session, final boolean isNative, final String strQuery, final WMQueryInfo wmQueryInfo, WMQLTypeHelper wmqlTypeHelper) {
         Query<Integer> query = isNative ? session.createNativeQuery(strQuery) : session.createQuery(strQuery);
         ParametersConfigurator.configure(query, wmQueryInfo.getParameterValueMap(wmqlTypeHelper),
-            new RuntimeParameterTypeResolver(wmQueryInfo.getParameters(), session.getTypeHelper(), wmqlTypeHelper));
+            new RuntimeParameterTypeResolver(wmQueryInfo.getParameters(), session.getSessionFactory().unwrap(SessionFactoryImplementor.class).getTypeConfiguration(), wmqlTypeHelper));
         Object result = query.uniqueResult();
         return result == null ? 0 : ((Number) result).longValue();
     }
@@ -261,5 +269,21 @@ public class QueryHelper {
         QueryHelper.setResultTransformer(hqlQuery, Map.class);
         ParametersConfigurator.configure(hqlQuery, params);
         return hqlQuery;
+    }
+
+    /**
+     * hibernate7: Query.getReturnAliases() was removed in 6.0. The aliases of an HQL select are read from the parsed
+     * (SQM) statement instead: one entry per selection, null where the selection has no alias.
+     * Callers only test for null / empty, i.e. "is this a select": 5.6 returned null for insert / update / delete
+     * (HQLQueryPlan has no return metadata for them) and one alias per selection otherwise, which this matches. There is
+     * no public API for the selection list of an HQL query, hence the SPI org.hibernate.query.spi.SqmQuery.
+     */
+    public static String[] getReturnAliases(Query<?> query) {
+        if (query instanceof SqmQuery<?> sqmQuery && sqmQuery.getSqmStatement() instanceof SqmSelectStatement<?> select) {
+            return select.getQuerySpec().getSelectClause().getSelections().stream()
+                .map(SqmSelection::getAlias)
+                .toArray(String[]::new);
+        }
+        return null;
     }
 }
