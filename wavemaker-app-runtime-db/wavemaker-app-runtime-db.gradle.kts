@@ -54,6 +54,8 @@ dependencies {
     testImplementation(appDependenciesLibs.jdbc.driver.hsqldb)
     testImplementation(appDependenciesLibs.test.mockito.core)
     testImplementation(appDependenciesLibs.jakarta.servlet.api)
+    testImplementation(appDependenciesLibs.jdbc.driver.postgresql)
+    testImplementation(appDependenciesLibs.testcontainers.postgresql)
 
     //TODO: To support DB2 implementation, the custom code needs to be updated as per the new hibernate library code
     /*runtimeLibDependencies(appDependenciesLibs.hibernate.core) {
@@ -84,5 +86,10 @@ javaLibraryMavenPublish {
 tasks {
     withType<Jar>().configureEach { // This is added to make sourcesJar task depend on generateGrammarSource task
         dependsOn(generateGrammarSource)
+    }
+
+    // Forwards -Dwm.test.db=postgres to the test JVM to run integration tests against Postgres (default: hsqldb)
+    withType<Test>().configureEach {
+        systemProperty("wm.test.db", System.getProperty("wm.test.db", "hsqldb"))
     }
 }

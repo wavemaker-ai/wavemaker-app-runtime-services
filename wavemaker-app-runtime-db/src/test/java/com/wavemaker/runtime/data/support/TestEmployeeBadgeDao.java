@@ -1,0 +1,25 @@
+/*******************************************************************************
+ * Copyright (C) 2025-2026 WaveMaker, Inc. All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of WaveMaker, Inc.
+ * You shall not disclose such Confidential Information and shall use it only in accordance with the
+ * terms of the source code license agreement you entered into with WaveMaker, Inc.
+ ******************************************************************************/
+package com.wavemaker.runtime.data.support;
+
+import org.springframework.orm.hibernate5.HibernateTemplate;
+
+import com.wavemaker.runtime.data.dao.WMGenericDaoImpl;
+import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
+import com.wavemaker.runtime.data.support.entity.EmployeeBadge;
+
+/**
+ * Minimal concrete {@code WMGenericDaoImpl} for {@link EmployeeBadge} (separate-unique-FK one-to-one).
+ */
+public class TestEmployeeBadgeDao extends WMGenericDaoImpl<EmployeeBadge, Long> {
+
+    public TestEmployeeBadgeDao(final HibernateTemplate template) {
+        super(EmployeeBadge.class, template, new WMQLDefaultTypeHelper());
+        init();
+    }
+}
