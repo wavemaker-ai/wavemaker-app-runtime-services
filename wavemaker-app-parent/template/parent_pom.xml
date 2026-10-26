@@ -227,7 +227,7 @@
             </plugin>
             <plugin>
                 <groupId>ai.wavemaker.app.build</groupId>
-                <artifactId>wavemaker-app-build-maven-plugin</artifactId>
+                <artifactId>wavemaker-app-maven-plugin</artifactId>
                 <version>${wavemaker.app.build.version}</version>
                 <executions>
                     <execution>
@@ -258,13 +258,6 @@
                             <goal>generate-resources</goal>
                         </goals>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>ai.wavemaker.app.build</groupId>
-                <artifactId>wavemaker-app-package-maven-plugin</artifactId>
-                <version>${wavemaker.app.build.version}</version>
-                <executions>
                     <execution>
                         <id>package app sources</id>
                         <phase>package</phase>
