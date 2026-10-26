@@ -136,8 +136,4 @@ public class PrefabUtils {
         return (dirs == null) ? PrefabConstants.ZERO_FILES : dirs;
     }
 
-    public static String sanitizePrefabName(String prefabName) {
-        return prefabName.trim().replaceAll("\\s+", "_");
-    }
-
 }
