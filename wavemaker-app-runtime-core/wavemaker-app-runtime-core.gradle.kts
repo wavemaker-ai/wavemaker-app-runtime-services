@@ -22,7 +22,7 @@ dependencies {
     implementation(projects.wavemakerAppRuntimePrefab)
     implementation(projects.wavemakerAppRuntimeRest)
     implementation(projects.wavemakerAppRuntimeDb)
-    implementation(projects.wavemakerAppRuntimeConnectorAppIntegration)
+    implementation(projects.wavemakerAppRuntimeConnectorApi)
     implementation(projects.wavemakerToolsApidocsCore)
     implementation(projects.wavemakerAppModels)
     implementation(projects.wavemakerAppMemoryManagement)
@@ -99,7 +99,6 @@ tasks {
         dependsOn(":wavemaker-app-runtime-db:jar")
         dependsOn(":wavemaker-app-runtime-rest:jar")
         dependsOn(":wavemaker-tools-apidocs-core:jar")
-        dependsOn(":wavemaker-app-runtime-connector-app-integration:jar")
         dependsOn(":wavemaker-app-runtime-connector-api:jar")
         dependsOn(":wavemaker-app-memory-management:jar")
     }
