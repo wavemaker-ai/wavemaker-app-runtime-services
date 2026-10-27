@@ -361,16 +361,6 @@
             </dependencies>
         </profile>
         <profile>
-            <id>wmcloud-target-deployment</id>
-            <dependencies>
-                <dependency>
-                    <groupId>ai.wavemaker.studio</groupId>
-                    <artifactId>wavemaker-logging-extensions</artifactId>
-                    <version>${wavemaker.app.runtime.services.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
             <id>generate-report</id>
             <reporting>
                 <plugins>
