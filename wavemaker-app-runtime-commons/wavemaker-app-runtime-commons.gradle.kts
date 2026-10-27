@@ -8,6 +8,7 @@ dependencies {
     implementation(enforcedPlatform(appDependenciesLibs.boms.springFramework.get().toString()))
     implementation(enforcedPlatform(appDependenciesLibs.boms.springData.get().toString()))
     implementation(enforcedPlatform(appDependenciesLibs.boms.jackson.get().toString()))
+    implementation(enforcedPlatform(appDependenciesLibs.boms.slf4j.get().toString()))
     implementation(projects.wavemakerCommonsUtil)
     implementation(projects.wavemakerAppRuntimePrefab)
     implementation(projects.wavemakerAppModels)
@@ -22,6 +23,7 @@ dependencies {
     implementation(appDependenciesLibs.jackson.dataformat.yaml)
     implementation(appDependenciesLibs.jackson.datatype.jsr310)
     implementation(appDependenciesLibs.jackson.datatype.hibernate)
+    implementation(appDependenciesLibs.slf4j.api)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
     testImplementation(appDependenciesLibs.test.jsonassert)
     testRuntimeOnly(appDependenciesLibs.hibernate.core) {

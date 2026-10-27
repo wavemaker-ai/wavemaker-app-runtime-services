@@ -25,7 +25,6 @@ dependencies {
     implementation(projects.wavemakerAppRuntimeConnectorApi)
     implementation(projects.wavemakerToolsApidocsCore)
     implementation(projects.wavemakerAppModels)
-    implementation(projects.wavemakerAppMemoryManagement)
     implementation(appDependenciesLibs.commons.collections4)
     implementation(appDependenciesLibs.commons.text)
     implementation(appDependenciesLibs.guava)
@@ -100,7 +99,6 @@ tasks {
         dependsOn(":wavemaker-app-runtime-rest:jar")
         dependsOn(":wavemaker-tools-apidocs-core:jar")
         dependsOn(":wavemaker-app-runtime-connector-api:jar")
-        dependsOn(":wavemaker-app-memory-management:jar")
     }
 }
 
