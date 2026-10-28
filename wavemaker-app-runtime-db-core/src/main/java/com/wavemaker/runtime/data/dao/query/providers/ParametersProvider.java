@@ -19,7 +19,10 @@ import java.util.Optional;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.BindableType;
+
+import com.wavemaker.runtime.data.dao.util.ParametersConfigurator;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -43,7 +46,7 @@ public interface ParametersProvider {
      *
      * @return returns class name, {@link Optional#empty()} if not present.
      */
-    Optional<Type> getType(Session session, String name);
+    Optional<BasicType<?>> getType(Session session, String name);
 
     /**
      * Utility method to configure parameters to given query.
@@ -56,16 +59,18 @@ public interface ParametersProvider {
      */
     default <R> Query<R> configure(Session session, Query<R> query) {
         query.getParameterMetadata().getNamedParameterNames().forEach(parameterName -> {
-            final Object value = getValue(session, parameterName);
-            final Optional<Type> typeOptional = getType(session, parameterName);
+            final Object rawValue = getValue(session, parameterName);
+            final Object value = ParametersConfigurator.coerce(query, parameterName, rawValue);
+            // a converted value has the type the query expects, so the explicit type of the parameter is not used for it
+            final Optional<BasicType<?>> typeOptional = value == rawValue ? getType(session, parameterName) : Optional.empty();
 
             boolean listType = Collection.class.isInstance(value);
 
             if (typeOptional.isPresent()) {
                 if (listType) {
-                    query.setParameterList(parameterName, (Collection) value, typeOptional.get());
+                    query.setParameterList(parameterName, (Collection) value, (BindableType) typeOptional.get());
                 } else {
-                    query.setParameter(parameterName, value, typeOptional.get());
+                    query.setParameter(parameterName, value, (BindableType) typeOptional.get());
                 }
             } else {
                 if (listType) {

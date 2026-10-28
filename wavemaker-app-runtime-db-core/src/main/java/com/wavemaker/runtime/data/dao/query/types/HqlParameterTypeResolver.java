@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.dao.query.types;
 
 import java.util.Optional;
 
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -26,7 +26,7 @@ public class HqlParameterTypeResolver implements ParameterTypeResolver {
 
     // Hibernate internally resolves the type.
     @Override
-    public Optional<Type> resolveType(final String name) {
+    public Optional<BasicType<?>> resolveType(final String name) {
         return Optional.empty();
     }
 }

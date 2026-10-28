@@ -30,7 +30,7 @@ class HqlQueryExtractorIntegrationTest extends AbstractHibernateIntegrationTest 
     private Employee bob;
 
     private HqlQueryExtractor extractorOverEmployeesOrderedById() {
-        Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
+        Session session = currentSession();
         alice = new Employee();
         alice.setName("Alice");
         session.persist(alice);

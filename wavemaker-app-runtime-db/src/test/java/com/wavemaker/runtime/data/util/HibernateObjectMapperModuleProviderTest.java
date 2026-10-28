@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.util;
 
 import java.util.List;
 
-import org.hibernate.collection.internal.PersistentBag;
+import org.hibernate.collection.spi.PersistentBag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

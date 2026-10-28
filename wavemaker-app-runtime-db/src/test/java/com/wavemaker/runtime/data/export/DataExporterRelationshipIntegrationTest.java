@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DataExporterRelationshipIntegrationTest extends AbstractHibernateIntegrationTest {
 
     private HqlQueryExtractor extractorOver(String hql) {
-        Query<Employee> query = sessionFactory.getCurrentSession().createQuery(hql, Employee.class);
+        Query<Employee> query = currentSession().createQuery(hql, Employee.class);
         return new HqlQueryExtractor(query.scroll());
     }
 
@@ -52,7 +52,7 @@ class DataExporterRelationshipIntegrationTest extends AbstractHibernateIntegrati
         Department department = new Department();
         department.setName(name);
         department.setLocation(location);
-        sessionFactory.getCurrentSession().persist(department);
+        currentSession().persist(department);
         return department;
     }
 
@@ -65,8 +65,8 @@ class DataExporterRelationshipIntegrationTest extends AbstractHibernateIntegrati
         employee.setName("Dave");
         employee.setSalary(new BigDecimal("3000"));
         employee.setDepartment(engineering);
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ExportOptions options = optionsWithFields(ExportType.CSV, "name", "department.name");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -86,15 +86,15 @@ class DataExporterRelationshipIntegrationTest extends AbstractHibernateIntegrati
         manager.setName("Eve");
         manager.setSalary(new BigDecimal("9000"));
         manager.setDepartment(engineering);
-        sessionFactory.getCurrentSession().persist(manager);
+        currentSession().persist(manager);
 
         Employee employee = new Employee();
         employee.setName("Dave");
         employee.setSalary(new BigDecimal("3000"));
         employee.setDepartment(engineering);
         employee.setManager(manager);
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ExportOptions options = new ExportOptions(ExportType.CSV); // no fields -> includeAllFields(...)
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -126,8 +126,8 @@ class DataExporterRelationshipIntegrationTest extends AbstractHibernateIntegrati
         employee.setName("Dave");
         employee.setSalary(new BigDecimal("3000"));
         employee.setDepartment(engineering);
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ExportOptions options = optionsWithFields(ExportType.CSV, "name", "department.doesNotExist");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

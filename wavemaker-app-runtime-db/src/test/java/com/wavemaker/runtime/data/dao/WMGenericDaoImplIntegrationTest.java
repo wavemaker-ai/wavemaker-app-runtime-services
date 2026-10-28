@@ -19,20 +19,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.commons.file.manager.ExportedFileManager;
@@ -162,16 +163,19 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
     }
 
     @Test
-    void updateOfASecondCopyOfAnAlreadyLoadedEntityThrows() {
+    void updateOfASecondCopyOfAnAlreadyLoadedEntityWritesTheSecondCopy() {
+        // Hibernate 5 rejected a second instance with the id of the loaded one (NonUniqueObjectException, reported as a
+        // DuplicateKeyException). The update now merges the state of the second copy into the loaded one, as Hibernate 7 has no
+        // update() that attaches a detached instance.
         Long id = dao.create(employee("Bob", new BigDecimal("40000"), true)).getId();
         flushAndClear();
         dao.findById(id);
         Employee secondCopy = employee("Bob", new BigDecimal("45000"), true);
         secondCopy.setId(id);
 
-        assertThrows(DuplicateKeyException.class, () -> dao.update(secondCopy));
-        hibernateTemplate.clear();
-        assertEquals(0, new BigDecimal("40000").compareTo(dao.findById(id).getSalary()), "nothing was written");
+        dao.update(secondCopy);
+        flushAndClear();
+        assertEquals(0, new BigDecimal("45000").compareTo(dao.findById(id).getSalary()), "the second copy was written");
     }
 
     @Test
@@ -213,10 +217,12 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
         Employee neverPersisted = employee("Ghost", BigDecimal.TEN, true);
         neverPersisted.setId(999_999L);
 
-        dao.delete(neverPersisted);
-
-        // Hibernate checks the affected row count of the DELETE and reports 0 rows as a stale object.
-        assertThrows(ObjectOptimisticLockingFailureException.class, () -> hibernateTemplate.flush());
+        // Hibernate 7 reports a detached entity without a row as a stale object when it is merged for the delete, where
+        // Hibernate 5 reported it when the DELETE was flushed and affected 0 rows.
+        assertThrows(ObjectOptimisticLockingFailureException.class, () -> {
+            dao.delete(neverPersisted);
+            hibernateTemplate.flush();
+        });
         // The existing row is untouched.
         hibernateTemplate.clear();
         assertEquals("Alice", dao.findById(aliceId).getName());
@@ -277,7 +283,9 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
 
         List<Employee> result = dao.findByMultipleIds(Arrays.asList(carol.getId(), alice.getId(), bob.getId()), false);
 
-        assertEquals(List.of("Alice", "Bob", "Carol"), result.stream().map(Employee::getName).toList());
+        // The order of an unordered load is not defined: Hibernate 5 and 7 and the databases differ, so only the entities
+        // are compared here, not their positions.
+        assertEquals(Set.of("Alice", "Bob", "Carol"), result.stream().map(Employee::getName).collect(Collectors.toSet()));
     }
 
     @Test
@@ -498,9 +506,9 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
         dao.create(dave);
         flushAndClear();
 
-        InvalidDataAccessResourceUsageException thrown = assertThrows(InvalidDataAccessResourceUsageException.class, () -> dao.getAssociatedObjects(
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> dao.getAssociatedObjects(
             engineering.getId(), "department", "id", PageRequest.of(0, 10, Sort.by("salary"))));
-        assertTrue(thrown.getMessage().contains("salary of: " + Department.class.getName()), thrown.getMessage());
+        assertTrue(thrown.getMessage().contains("salary") && thrown.getMessage().contains(Department.class.getName()), thrown.getMessage());
     }
 
     @Test
@@ -608,6 +616,31 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
     }
 
     @Test
+    void refreshAfterUpdateOfADetachedEntityLoadsTheStoredValuesIntoThatEntity() {
+        // The generated service update is dao.update(entity) then dao.refresh(entity) on the same detached instance.
+        Long id = dao.create(employee("Bob", new BigDecimal("40000"), true)).getId();
+        flushAndClear();
+        Employee detached = employee("Bobby", new BigDecimal("45000"), true);
+        detached.setId(id);
+
+        dao.update(detached);
+        // a value which only the database has, as a default or a trigger would give it
+        hibernateTemplate.bulkUpdate("update Employee set salary = 99 where id = " + id);
+        dao.refresh(detached);
+
+        assertEquals("Bobby", detached.getName());
+        assertEquals(0, new BigDecimal("99").compareTo(detached.getSalary()), "the stored salary was loaded into the entity");
+    }
+
+    @Test
+    void refreshOfAnEntityWithNoRowThrowsAnObjectRetrievalFailure() {
+        Employee ghost = employee("Ghost", BigDecimal.TEN, true);
+        ghost.setId(999999L);
+
+        assertThrows(JpaObjectRetrievalFailureException.class, () -> dao.refresh(ghost));
+    }
+
+    @Test
     void evictDetachesTheEntityFromTheSessionsFirstLevelCache() {
         Employee employee = dao.create(employee("Alice", BigDecimal.ONE, true));
 
@@ -622,7 +655,7 @@ class WMGenericDaoImplIntegrationTest extends AbstractHibernateIntegrationTest {
     }
 
     @Test
-    void initThrowsWhenNoHibernateTemplateIsConfigured() {
+    void initThrowsWhenNoWMSessionTemplateIsConfigured() {
         // init()'s very first check - getTemplate() == null - was never exercised; every other test in this
         // suite uses a DAO that already has a template wired in by construction.
         WMGenericDaoImpl<Employee, Long> daoWithNoTemplate = new WMGenericDaoImpl<>(Employee.class, null,

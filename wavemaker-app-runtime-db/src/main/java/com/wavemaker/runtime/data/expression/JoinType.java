@@ -17,26 +17,25 @@ package com.wavemaker.runtime.data.expression;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.LogicalExpression;
-import org.hibernate.criterion.Restrictions;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>
  * @since 19/5/16
  */
-public enum JoinType {
+public enum JoinType implements Joins {
 
     AND("and") {
         @Override
-        public LogicalExpression criterion(Criterion lhs, Criterion rhs) {
-            return Restrictions.and(lhs, rhs);
+        public Predicate predicate(CriteriaBuilder builder, Predicate lhs, Predicate rhs) {
+            return builder.and(lhs, rhs);
         }
     },
     OR("or") {
         @Override
-        public LogicalExpression criterion(Criterion lhs, Criterion rhs) {
-            return Restrictions.or(lhs, rhs);
+        public Predicate predicate(CriteriaBuilder builder, Predicate lhs, Predicate rhs) {
+            return builder.or(lhs, rhs);
         }
     };
 
@@ -57,8 +56,6 @@ public enum JoinType {
     public String getName() {
         return name;
     }
-
-    public abstract LogicalExpression criterion(Criterion lhs, Criterion rhs);
 
     public static JoinType valueFor(String typeName) {
         return nameVsJoinType.get(typeName.toLowerCase());

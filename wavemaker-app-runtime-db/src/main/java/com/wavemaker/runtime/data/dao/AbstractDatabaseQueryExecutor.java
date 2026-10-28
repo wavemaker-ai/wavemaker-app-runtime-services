@@ -33,10 +33,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public abstract class AbstractDatabaseQueryExecutor implements DatabaseQueryExecutor {
 
-    private final WMHibernateTemplate hibernateTemplate;
+    private final WMSessionTemplate hibernateTemplate;
     private final PlatformTransactionManager transactionManager;
 
-    protected AbstractDatabaseQueryExecutor(final WMHibernateTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
+    protected AbstractDatabaseQueryExecutor(final WMSessionTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
         this.hibernateTemplate = hibernateTemplate;
         this.transactionManager = transactionManager;
     }

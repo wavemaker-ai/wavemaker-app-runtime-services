@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -44,8 +44,7 @@ import com.wavemaker.runtime.data.util.JavaTypeUtils;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 15/11/16
  */
-public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResultTransformer implements
-    WMResultTransformer {
+public class AliasToMappedClassResultTransformer implements WMResultTransformer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AliasToMappedClassResultTransformer.class);
 
@@ -53,6 +52,9 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
 
     private final Class resultClass;
     private Map<String, PropertyDescriptor> aliasVsDescriptorMap;
+
+    // Hibernate 7 gives the column labels in the case of the database, like ID for a column declared as id.
+    private Map<String, PropertyDescriptor> lowerCaseAliasVsDescriptorMap;
 
     private Map<String, String> fieldVsAliasMap;
 
@@ -78,11 +80,6 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
         } catch (InstantiationException | IllegalAccessException e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.cannot.instantiate.class"), e, resultClass);
         }
-    }
-
-    @Override
-    public boolean isTransformedValueATupleElement(final String[] aliases, final int tupleLength) {
-        return false;
     }
 
     @Override
@@ -119,8 +116,8 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
 
     private void applyValue(
         Object object, String alias, Object value) {
-        if (aliasVsDescriptorMap.containsKey(alias)) {
-            final PropertyDescriptor descriptor = aliasVsDescriptorMap.get(alias);
+        final PropertyDescriptor descriptor = findDescriptor(alias);
+        if (descriptor != null) {
             Object transformedValue = transformField(descriptor, value);
             try {
                 descriptor.getWriteMethod().invoke(object, transformedValue);
@@ -133,6 +130,14 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
                 LOGGER.warn("Column: {} not found in type:{}, ignoring", alias, resultClass.getName());
             }
         }
+    }
+
+    private PropertyDescriptor findDescriptor(final String alias) {
+        PropertyDescriptor descriptor = aliasVsDescriptorMap.get(alias);
+        if (descriptor == null && alias != null) {
+            descriptor = lowerCaseAliasVsDescriptorMap.get(alias.toLowerCase(Locale.ROOT));
+        }
+        return descriptor;
     }
 
     @SuppressWarnings("unchecked")
@@ -161,6 +166,7 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
     private void initialize() {
         final Field[] fields = resultClass.getDeclaredFields();
         aliasVsDescriptorMap = new HashMap<>();
+        lowerCaseAliasVsDescriptorMap = new HashMap<>();
         fieldVsAliasMap = new HashMap<>();
         for (final Field field : fields) {
             final PropertyDescriptor descriptor = BeanUtils.getPropertyDescriptor(resultClass, field.getName());
@@ -179,6 +185,7 @@ public class AliasToMappedClassResultTransformer extends AliasedTupleSubsetResul
                 }
 
                 aliasVsDescriptorMap.put(columnName.get(), descriptor);
+                lowerCaseAliasVsDescriptorMap.putIfAbsent(columnName.get().toLowerCase(Locale.ROOT), descriptor);
                 fieldVsAliasMap.put(descriptor.getName(), columnName.get());
             } else {
                 LOGGER.warn("Property descriptor not found for field:{}", field.getName());

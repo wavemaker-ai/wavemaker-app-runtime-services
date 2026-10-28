@@ -14,19 +14,11 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.export.util;
 
-import java.lang.reflect.Method;
 import java.sql.Date;
-import java.sql.ResultSet;
 import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.hibernate.ScrollableResults;
-import org.hibernate.internal.AbstractScrollableResults;
-import org.springframework.util.ReflectionUtils;
-
-import com.wavemaker.commons.MessageResource;
-import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.converters.JavaTypeConverters;
 import com.wavemaker.runtime.data.export.ExportCellStyles;
 import com.wavemaker.runtime.data.model.JavaType;
@@ -39,16 +31,6 @@ import com.wavemaker.runtime.data.util.JavaTypeUtils;
 public class DataSourceExporterUtil {
 
     private DataSourceExporterUtil() {
-    }
-
-    public static ResultSet constructResultSet(ScrollableResults scroll) {
-        try {
-            Method resultSetMethod = AbstractScrollableResults.class.getDeclaredMethod("getResultSet");
-            ReflectionUtils.makeAccessible(resultSetMethod);
-            return (ResultSet) resultSetMethod.invoke(scroll);
-        } catch (Exception e) {
-            throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.failed.to.fetch.resultset"), e);
-        }
     }
 
     public static void setCellValue(Object data, final Cell cell, ExportCellStyles cellStyles) {

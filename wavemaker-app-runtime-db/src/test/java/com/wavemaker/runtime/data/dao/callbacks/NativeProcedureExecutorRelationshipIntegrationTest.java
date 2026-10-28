@@ -127,8 +127,7 @@ class NativeProcedureExecutorRelationshipIntegrationTest extends AbstractHiberna
             new RuntimeParameter(inParam, Map.of("project_name", "Platform Migration")),
             new RuntimeParameter(outParam, Map.of()));
 
-        Map result = NativeProcedureExecutor.execute(
-            hibernateTemplate, "{call count_tasks_for_project(?, ?)}", params, Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call count_tasks_for_project(?, ?)}", params, Map.class);
 
         assertEquals(2, result.get("task_count"));
     }
@@ -148,7 +147,7 @@ class NativeProcedureExecutorRelationshipIntegrationTest extends AbstractHiberna
         List<ResolvableParam> params = List.of(
             new RuntimeParameter(inParam, Map.of("project_name", "Platform Migration")));
 
-        NativeProcedureExecutor.execute(hibernateTemplate, "{call mark_project_tasks_done(?)}", params, Map.class);
+        NativeProcedureExecutor.execute(currentSession(), "{call mark_project_tasks_done(?)}", params, Map.class);
 
         hibernateTemplate.clear();
         long doneCount = ((Number) hibernateTemplate.execute(session -> session

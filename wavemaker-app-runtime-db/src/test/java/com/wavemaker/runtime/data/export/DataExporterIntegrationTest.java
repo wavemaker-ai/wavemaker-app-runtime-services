@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
 
     private HqlQueryExtractor extractorOver(String hql) {
-        Query<Employee> query = sessionFactory.getCurrentSession().createQuery(hql, Employee.class);
+        Query<Employee> query = currentSession().createQuery(hql, Employee.class);
         return new HqlQueryExtractor(query.scroll());
     }
 
@@ -63,9 +63,9 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
             employee.setName("Employee" + i);
             employee.setSalary(new BigDecimal("1000"));
             employee.setActive(true);
-            sessionFactory.getCurrentSession().persist(employee);
+            currentSession().persist(employee);
         }
-        sessionFactory.getCurrentSession().flush();
+        currentSession().flush();
     }
 
     private static ExportOptions optionsWithFields(ExportType type, String... fieldNames) {
@@ -95,8 +95,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         employee.setName("Alice");
         employee.setSalary(new BigDecimal("50000"));
         employee.setHireDate(LocalDate.of(2024, 3, 15));
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ExportOptions options = optionsWithFields(ExportType.EXCEL, "name", "salary", "hireDate");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -129,8 +129,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         employee.setName("Bob");
         employee.setSalary(new BigDecimal("1000"));
         employee.setActive(true);
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         // "All" fields would be name/salary/active - the selection below only asks for one of them.
         ExportOptions options = optionsWithFields(ExportType.CSV, "name");
@@ -162,8 +162,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         Employee employee = new Employee();
         employee.setName("Carol");
         employee.setSalary(new BigDecimal("2000"));
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ExportOptions options = new ExportOptions(ExportType.CSV);
         FieldInfo nameField = new FieldInfo("name");
@@ -201,8 +201,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         TypedRecord record = new TypedRecord();
         record.setText("x");
         record.setPayload(new byte[]{1, 2, 3});
-        sessionFactory.getCurrentSession().persist(record);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(record);
+        currentSession().flush();
 
         ByteArrayOutputStream excel = new ByteArrayOutputStream();
         DataExporter.export(extractorOver("from TypedRecord", TypedRecord.class),
@@ -226,8 +226,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         Employee employee = new Employee();
         employee.setName("Alice");
         employee.setHireDate(LocalDate.of(2024, 3, 15));
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         WMRuntimeException failure = assertThrows(WMRuntimeException.class, () -> DataExporter.export(
             extractorOver("from Employee e"), new ExportOptions(ExportType.CSV), Employee.class,
@@ -242,8 +242,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         Employee employee = new Employee();
         employee.setName("Alice");
         employee.setSalary(new BigDecimal("123456789012.34"));
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataExporter.export(extractorOver("from Employee e"), optionsWithFields(ExportType.CSV, "salary"),
@@ -257,8 +257,8 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
         // Excel keeps the spaces; the CSV conversion trims every value.
         Employee employee = new Employee();
         employee.setName("  Alice  ");
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataExporter.export(extractorOver("from Employee e"), optionsWithFields(ExportType.CSV, "name"),
@@ -268,7 +268,7 @@ class DataExporterIntegrationTest extends AbstractHibernateIntegrationTest {
     }
 
     private HqlQueryExtractor extractorOver(String hql, Class<?> entityClass) {
-        return new HqlQueryExtractor(sessionFactory.getCurrentSession().createQuery(hql, entityClass).scroll());
+        return new HqlQueryExtractor(currentSession().createQuery(hql, entityClass).scroll());
     }
 
     private static List<String> csvLines(ByteArrayOutputStream outputStream) {

@@ -14,15 +14,22 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.transform;
 
+import java.util.List;
 import java.util.Map;
 
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.ResultListTransformer;
+import org.hibernate.query.TupleTransformer;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 17/11/16
  */
-public interface WMResultTransformer extends ResultTransformer {
+public interface WMResultTransformer extends TupleTransformer<Object>, ResultListTransformer<Object> {
+
+    @Override
+    default List<Object> transformList(List<Object> resultList) {
+        return resultList;
+    }
 
     Object transformFromMap(Map<String, Object> resultMap);
 
@@ -34,7 +41,7 @@ public interface WMResultTransformer extends ResultTransformer {
 
     static String getAlias(String[] aliases, int index) {
         String alias = Integer.toString(index);
-        // fix for hibernate 5, aliases returning null for HQL if no alias specified in query.
+        // aliases are null for HQL if no alias is specified in the query.
         if (aliases != null && aliases[index] != null) {
             alias = aliases[index];
         }

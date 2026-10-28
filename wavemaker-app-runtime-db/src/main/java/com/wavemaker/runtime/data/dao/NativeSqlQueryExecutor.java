@@ -23,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class NativeSqlQueryExecutor extends AbstractDatabaseQueryExecutor {
 
-    public NativeSqlQueryExecutor(final WMHibernateTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
+    public NativeSqlQueryExecutor(final WMSessionTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
         super(hibernateTemplate, transactionManager);
     }
 

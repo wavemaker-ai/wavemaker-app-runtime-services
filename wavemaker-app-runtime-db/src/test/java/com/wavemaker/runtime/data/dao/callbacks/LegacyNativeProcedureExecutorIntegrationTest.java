@@ -101,7 +101,7 @@ class LegacyNativeProcedureExecutorIntegrationTest extends AbstractHibernateInte
             new RuntimeParameter(integerParam("x", ProcedureParameterType.IN), Map.of("x", 21)),
             new RuntimeParameter(integerParam("y", ProcedureParameterType.OUT), Map.of()));
         return NativeProcedureExecutor.convertToOldResponse(
-            NativeProcedureExecutor.execute(hibernateTemplate, "{call double_value_legacy(?, ?)}", params, Map.class));
+            NativeProcedureExecutor.execute(currentSession(), "{call double_value_legacy(?, ?)}", params, Map.class));
     }
 
     private static ProcedureParameter integerParam(String name, ProcedureParameterType parameterType) {

@@ -16,6 +16,7 @@ package com.wavemaker.runtime.data.dao.callbacks;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import jakarta.persistence.PersistenceException;
 
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import com.wavemaker.runtime.data.dao.WMHibernateCallback;
 import com.wavemaker.runtime.data.dao.query.providers.PaginatedQueryProvider;
 import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
 
@@ -35,7 +35,7 @@ import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/8/17
  */
-public class PaginatedQueryCallback<R> implements WMHibernateCallback<Page<R>> {
+public class PaginatedQueryCallback<R> implements Function<Session, Page<R>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedQueryCallback.class);
     private final PaginatedQueryProvider<R> queryProvider;
@@ -51,7 +51,7 @@ public class PaginatedQueryCallback<R> implements WMHibernateCallback<Page<R>> {
     }
 
     @Override
-    public Page<R> doInHibernate(final Session session) {
+    public Page<R> apply(final Session session) {
         final Optional<Query<Number>> countQuery = queryProvider.getCountQuery(session, parametersProvider);
         long count = Integer.MAX_VALUE;
         try {

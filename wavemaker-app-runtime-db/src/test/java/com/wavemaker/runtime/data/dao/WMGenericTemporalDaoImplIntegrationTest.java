@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.hql.internal.ast.QuerySyntaxException;
+import org.hibernate.query.SyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>The period methods ({@code findByPeriod}, {@code findByIdAndPeriod} and the period {@code update}/{@code delete}
  *   overloads) generate {@code for business_time as of} / {@code for portion of} HQL. That syntax came from the
  *   custom Hibernate 5.2.17.WM build, which is no longer used; stock Hibernate rejects it with a
- *   {@link QuerySyntaxException}.</li>
+ *   {@link SyntaxException}.</li>
  *   <li>{@code count()} goes through the same HQL but swallows the error and returns {@code Integer.MAX_VALUE}.</li>
  * </ul>
  * If temporal support is fixed, these tests fail and should be rewritten to check the specified behaviour.
@@ -97,7 +97,7 @@ class WMGenericTemporalDaoImplIntegrationTest extends AbstractHibernateIntegrati
      */
     private static String assertTemporalSyntaxRejected(String offendingWord, Executable call) {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, call);
-        assertInstanceOf(QuerySyntaxException.class, thrown.getCause());
+        assertInstanceOf(SyntaxException.class, thrown.getCause());
         assertTrue(thrown.getMessage().contains(offendingWord), thrown.getMessage());
         return thrown.getMessage();
     }

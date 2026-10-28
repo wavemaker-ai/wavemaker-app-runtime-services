@@ -26,9 +26,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Session;
+
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.procedure.parameters.ResolvableParam;
 import com.wavemaker.runtime.data.model.JavaType;
 import com.wavemaker.runtime.data.model.procedures.ProcedureParameter;
@@ -47,13 +48,13 @@ public class NativeProcedureExecutor {
 
     public static final String CONTENT_FIELD = "content";
 
-    public static <T> T execute(WMHibernateTemplate hibernateOperations, String jdbcQuery, List<ResolvableParam> params, Class<T> type) {
-        return hibernateOperations.execute(session -> session.doReturningWork(connection -> {
+    public static <T> T execute(Session session, String jdbcQuery, List<ResolvableParam> params, Class<T> type) {
+        return session.doReturningWork(connection -> {
             CallableStatement statement = prepareStatement(connection, jdbcQuery, params);
             boolean resultSetType = statement.execute();
             Map<String, Object> result = getResultMap(statement, params, resultSetType, 0);
             return convert(result, type);
-        }));
+        });
     }
 
     public static CallableStatement prepareStatement(

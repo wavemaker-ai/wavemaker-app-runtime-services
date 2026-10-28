@@ -17,18 +17,15 @@ package com.wavemaker.runtime.data.converters;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.hibernate.type.BigDecimalType;
-import org.hibernate.type.BigIntegerType;
-import org.hibernate.type.BooleanType;
-import org.hibernate.type.ByteType;
-import org.hibernate.type.CharacterType;
-import org.hibernate.type.DoubleType;
-import org.hibernate.type.FloatType;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.ShortType;
-import org.hibernate.type.TrueFalseType;
-import org.hibernate.type.YesNoType;
+import org.hibernate.type.descriptor.java.BigDecimalJavaType;
+import org.hibernate.type.descriptor.java.BigIntegerJavaType;
+import org.hibernate.type.descriptor.java.ByteJavaType;
+import org.hibernate.type.descriptor.java.CharacterJavaType;
+import org.hibernate.type.descriptor.java.DoubleJavaType;
+import org.hibernate.type.descriptor.java.FloatJavaType;
+import org.hibernate.type.descriptor.java.IntegerJavaType;
+import org.hibernate.type.descriptor.java.LongJavaType;
+import org.hibernate.type.descriptor.java.ShortJavaType;
 
 import com.wavemaker.runtime.data.model.JavaType;
 
@@ -61,18 +58,18 @@ public final class JavaTypeConverters {
 
     private static JavaTypeConverter createConverter(final JavaType javaType) {
         return switch (javaType) {
-            case BYTE -> new HibernateBackedJavaTypeConverter(ByteType.INSTANCE.getJavaTypeDescriptor());
-            case SHORT -> new HibernateBackedJavaTypeConverter(ShortType.INSTANCE.getJavaTypeDescriptor());
-            case INTEGER -> new HibernateBackedJavaTypeConverter(IntegerType.INSTANCE.getJavaTypeDescriptor());
-            case LONG -> new HibernateBackedJavaTypeConverter(LongType.INSTANCE.getJavaTypeDescriptor());
-            case BIG_INTEGER -> new HibernateBackedJavaTypeConverter(BigIntegerType.INSTANCE.getJavaTypeDescriptor());
-            case FLOAT -> new HibernateBackedJavaTypeConverter(FloatType.INSTANCE.getJavaTypeDescriptor());
-            case DOUBLE -> new HibernateBackedJavaTypeConverter(DoubleType.INSTANCE.getJavaTypeDescriptor());
-            case BIG_DECIMAL -> new HibernateBackedJavaTypeConverter(BigDecimalType.INSTANCE.getJavaTypeDescriptor());
-            case BOOLEAN -> new HibernateBackedJavaTypeConverter(BooleanType.INSTANCE.getJavaTypeDescriptor());
-            case YES_OR_NO -> new HibernateBackedJavaTypeConverter(YesNoType.INSTANCE.getJavaTypeDescriptor());
-            case TRUE_OR_FALSE -> new HibernateBackedJavaTypeConverter(TrueFalseType.INSTANCE.getJavaTypeDescriptor());
-            case CHARACTER -> new HibernateBackedJavaTypeConverter(CharacterType.INSTANCE.getJavaTypeDescriptor());
+            case BYTE -> new HibernateBackedJavaTypeConverter(ByteJavaType.INSTANCE);
+            case SHORT -> new HibernateBackedJavaTypeConverter(ShortJavaType.INSTANCE);
+            case INTEGER -> new HibernateBackedJavaTypeConverter(IntegerJavaType.INSTANCE);
+            case LONG -> new HibernateBackedJavaTypeConverter(LongJavaType.INSTANCE);
+            case BIG_INTEGER -> new HibernateBackedJavaTypeConverter(BigIntegerJavaType.INSTANCE);
+            case FLOAT -> new HibernateBackedJavaTypeConverter(FloatJavaType.INSTANCE);
+            case DOUBLE -> new HibernateBackedJavaTypeConverter(DoubleJavaType.INSTANCE);
+            case BIG_DECIMAL -> new HibernateBackedJavaTypeConverter(BigDecimalJavaType.INSTANCE);
+            case BOOLEAN -> new BooleanCharacterTypeConverter('Y', 'N');
+            case YES_OR_NO -> new BooleanCharacterTypeConverter('Y', 'N');
+            case TRUE_OR_FALSE -> new BooleanCharacterTypeConverter('T', 'F');
+            case CHARACTER -> new HibernateBackedJavaTypeConverter(CharacterJavaType.INSTANCE);
             case STRING, TEXT, CLOB -> new StringTypeConverter();
             case BLOB -> new BlobTypeConverter();
             case DATE -> new DateTypeConverter();

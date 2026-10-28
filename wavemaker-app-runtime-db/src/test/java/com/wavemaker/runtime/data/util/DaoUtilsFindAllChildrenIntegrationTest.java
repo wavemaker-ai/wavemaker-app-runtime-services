@@ -29,17 +29,17 @@ class DaoUtilsFindAllChildrenIntegrationTest extends AbstractHibernateIntegratio
         List<Employee> result = hibernateTemplate.execute(session -> {
             Department engineering = new Department();
             engineering.setName("Engineering");
-            session.save(engineering);
+            session.persist(engineering);
 
             Employee alice = new Employee();
             alice.setName("Alice");
             alice.setDepartment(engineering);
-            session.save(alice);
+            session.persist(alice);
 
             Employee bob = new Employee();
             bob.setName("Bob");
             bob.setDepartment(engineering);
-            session.save(bob);
+            session.persist(bob);
 
             session.flush();
 
@@ -55,17 +55,17 @@ class DaoUtilsFindAllChildrenIntegrationTest extends AbstractHibernateIntegratio
         List<Employee> remaining = hibernateTemplate.execute(session -> {
             Department engineering = new Department();
             engineering.setName("Engineering");
-            session.save(engineering);
+            session.persist(engineering);
 
             Employee alice = new Employee();
             alice.setName("Alice");
             alice.setDepartment(engineering);
-            session.save(alice);
+            session.persist(alice);
 
             Employee bob = new Employee();
             bob.setName("Bob");
             bob.setDepartment(engineering);
-            session.save(bob);
+            session.persist(bob);
 
             session.flush();
 

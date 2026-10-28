@@ -20,10 +20,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.QueryException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.QueryException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 import com.wavemaker.commons.MessageResource;
@@ -52,7 +52,8 @@ public class DbExceptionResolver implements ErrorResponseResolver {
             return Optional.of(handleRuntimeException((RuntimeException) ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
         } else if (ex instanceof QueryParameterMismatchException) {
             return Optional.of(handleRuntimeException((RuntimeException) ex, HttpServletResponse.SC_BAD_REQUEST));
-        } else if (ex instanceof InvalidDataAccessResourceUsageException && ex.getCause() instanceof QueryException) {
+        } else if (ex instanceof QueryException
+            || ex instanceof InvalidDataAccessResourceUsageException && ex.getCause() instanceof QueryException) {
             // Not using the root cause for now.
             return Optional.of(new ErrorResolution(HttpServletResponse.SC_BAD_REQUEST, MessageResource.INVALID_INPUT, INPUT_INVALID_MESSAGE));
         } else if (ex instanceof EntityNotFoundException || ex instanceof BlobContentNotFoundException) {

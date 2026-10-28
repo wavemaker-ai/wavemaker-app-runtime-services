@@ -9,7 +9,7 @@ package com.wavemaker.runtime.data.converters;
 
 import java.sql.Blob;
 
-import org.hibernate.engine.jdbc.BlobProxy;
+import org.hibernate.engine.jdbc.proxy.BlobProxy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Covers use-case-spec scenario "conv-blob-to-bytes". A real {@code java.sql.Blob} can be built in-memory via
- * {@code org.hibernate.engine.jdbc.BlobProxy.generateProxy(byte[])} - no live JDBC connection/session needed to
+ * {@code org.hibernate.engine.jdbc.proxy.BlobProxy.generateProxy(byte[])} - no live JDBC connection/session needed to
  * exercise the unwrap-to-byte[] path, since {@code BlobJavaTypeDescriptor.unwrap} reads the blob's stream
  * directly rather than depending on {@code WrapperOptions}.
  */

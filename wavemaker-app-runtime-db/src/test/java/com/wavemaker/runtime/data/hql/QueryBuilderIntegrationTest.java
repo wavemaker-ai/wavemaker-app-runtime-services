@@ -58,7 +58,7 @@ class QueryBuilderIntegrationTest extends AbstractHibernateIntegrationTest {
 
     private static void configureParams(Session session, Query<?> query, WMQueryInfo queryInfo) {
         ParametersProvider provider =
-            new AppRuntimeParameterProvider(queryInfo, session.getTypeHelper(), new WMQLDefaultTypeHelper());
+            new AppRuntimeParameterProvider(queryInfo, sessionFactory.getTypeConfiguration(), new WMQLDefaultTypeHelper());
         provider.configure(session, query);
     }
 
@@ -161,14 +161,14 @@ class QueryBuilderIntegrationTest extends AbstractHibernateIntegrationTest {
     void aRelationshipFilterConditionCurrentlyCrashesInsideHibernate() {
         // Bug: withFilterCondition names the parameter "wm_filter_" + the field, so "project.name" gives the
         // placeholder :wm_filter_project.name, which is not a valid HQL parameter name, and Hibernate's parser fails
-        // with a NullPointerException. Select, update and delete share this code. No production caller passes a
+        // (a NullPointerException with Hibernate 5, an IllegalArgumentException with Hibernate 7). Select, update and delete share this code. No production caller passes a
         // dotted field today (findById, findBy and the temporal DAO pass plain fields).
         seedTwoProjectsWithATaskEach();
         WMQueryInfo queryInfo = SelectQueryBuilder.newBuilder(Task.class)
             .withFilterCondition("project.name", "Platform Migration")
             .build();
 
-        assertThrows(NullPointerException.class,
+        assertThrows(IllegalArgumentException.class,
             () -> hibernateTemplate.execute(session -> executeSelect(session, queryInfo, Task.class)));
     }
 

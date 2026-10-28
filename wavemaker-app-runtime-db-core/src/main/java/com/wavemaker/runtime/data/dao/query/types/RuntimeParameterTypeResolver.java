@@ -18,17 +18,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.hibernate.Session;
-import org.hibernate.TypeHelper;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.spi.TypeConfiguration;
 
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryParamInfo;
 import com.wavemaker.runtime.data.model.JavaType;
 import com.wavemaker.runtime.data.model.queries.QueryParameter;
 import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
+import com.wavemaker.runtime.data.util.HibernateUtils;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -36,15 +36,17 @@ import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
  */
 public class RuntimeParameterTypeResolver implements ParameterTypeResolver {
 
-    private final Map<String, Type> typesMap;
+    private final Map<String, BasicType<?>> typesMap;
 
-    public RuntimeParameterTypeResolver(List<QueryParameter> parameters, TypeHelper typeHelper) {
-        typesMap = parameters.stream()
-            .collect(Collectors.toMap(QueryParameter::getName,
-                queryParameter -> typeHelper.heuristicType(queryParameter.getType().getClassName())));
+    public RuntimeParameterTypeResolver(List<QueryParameter> parameters, TypeConfiguration typeConfiguration) {
+        typesMap = new HashMap<>();
+        for (QueryParameter queryParameter : parameters) {
+            HibernateUtils.findType(typeConfiguration, queryParameter.getType().getClassName())
+                .ifPresent(type -> typesMap.put(queryParameter.getName(), type));
+        }
     }
 
-    public RuntimeParameterTypeResolver(Map<String, WMQueryParamInfo> parameters, TypeHelper typeHelper, WMQLTypeHelper wmqlTypeHelper) {
+    public RuntimeParameterTypeResolver(Map<String, WMQueryParamInfo> parameters, TypeConfiguration typeConfiguration, WMQLTypeHelper wmqlTypeHelper) {
         typesMap = new HashMap<>();
         for (Map.Entry<String, WMQueryParamInfo> queryParamInfoEntry : parameters.entrySet()) {
             String key = queryParamInfoEntry.getKey();
@@ -54,18 +56,18 @@ public class RuntimeParameterTypeResolver implements ParameterTypeResolver {
                 if (wmqlTypeHelper != null) {
                     javaType = wmqlTypeHelper.aliasFor(javaType);
                 }
-                typesMap.put(key, typeHelper.heuristicType(javaType.getClassName()));
+                HibernateUtils.findType(typeConfiguration, javaType.getClassName()).ifPresent(type -> typesMap.put(key, type));
             }
 
         }
     }
 
     public static RuntimeParameterTypeResolver from(Session session, RuntimeQuery query) {
-        return new RuntimeParameterTypeResolver(query.getParameters(), session.getSessionFactory().getTypeHelper());
+        return new RuntimeParameterTypeResolver(query.getParameters(), HibernateUtils.getTypeConfiguration(session));
     }
 
     @Override
-    public Optional<Type> resolveType(final String name) {
+    public Optional<BasicType<?>> resolveType(final String name) {
         return Optional.ofNullable(typesMap.get(name));
     }
 }

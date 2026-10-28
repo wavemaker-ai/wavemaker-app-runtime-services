@@ -36,9 +36,7 @@ import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.proxy.BlobProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -51,7 +49,6 @@ import com.wavemaker.commons.InvalidInputException;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.util.WMIOUtils;
-import com.wavemaker.runtime.commons.WMAppContext;
 import com.wavemaker.runtime.commons.WMObjectMapper;
 import com.wavemaker.runtime.commons.file.model.DownloadResponse;
 import com.wavemaker.runtime.commons.util.MultipartConstants;
@@ -163,12 +160,7 @@ public class WMMultipartUtils {
         } else if (Objects.equals(BYTE_ARRAY, field.getType().getSimpleName())) {
             method.invoke(instance, byteArray);
         } else if (Objects.equals(BLOB, field.getType().getSimpleName())) {
-            SessionFactory sessionFactory = WMAppContext.getInstance().getSpringBean(serviceId + "SessionFactory");
-            try (Session session = sessionFactory.openSession()) {
-                Blob blob = Hibernate.getLobCreator(session)
-                    .createBlob(new ByteArrayInputStream(byteArray), byteArray.length);
-                method.invoke(instance, blob);
-            }
+            method.invoke(instance, BlobProxy.generateProxy(byteArray));
         } else {
             LOGGER.error("Casting multipart {} to {} is not supported", field.getName(),
                 field.getType().getSimpleName());

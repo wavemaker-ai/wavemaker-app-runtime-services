@@ -18,12 +18,11 @@ import java.io.OutputStream;
 
 import jakarta.annotation.PostConstruct;
 
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.wavemaker.commons.MessageResource;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.NamedQueryExporterCallback;
 import com.wavemaker.runtime.data.dao.callbacks.PaginatedQueryCallback;
 import com.wavemaker.runtime.data.dao.callbacks.QueryCallback;
@@ -44,13 +43,13 @@ import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
 
 public class WMQueryExecutorImpl implements WMQueryExecutor {
 
-    private WMHibernateTemplate template;
+    private WMSessionTemplate template;
     private SessionBackedParameterResolver parameterResolvers;
 
     @PostConstruct
     private void init() {
         parameterResolvers =
-            new SessionBackedParameterResolver((SessionFactoryImplementor) template.getSessionFactory());
+            new SessionBackedParameterResolver(template.getSessionFactory());
     }
 
     @Override
@@ -133,14 +132,14 @@ public class WMQueryExecutorImpl implements WMQueryExecutor {
         NamedQueryExporterCallback<T> callback = new NamedQueryExporterCallback<>(queryProvider, parameterProvider,
             overridenPageable, exportOptions, outputStream, queryInput.getResponseType());
 
-        template.executeWithNativeSession(callback);
+        template.execute(callback);
     }
 
-    public WMHibernateTemplate getTemplate() {
+    public WMSessionTemplate getTemplate() {
         return template;
     }
 
-    public void setTemplate(WMHibernateTemplate template) {
+    public void setTemplate(WMSessionTemplate template) {
         this.template = template;
     }
 }

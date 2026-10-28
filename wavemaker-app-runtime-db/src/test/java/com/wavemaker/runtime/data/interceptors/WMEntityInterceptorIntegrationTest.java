@@ -9,25 +9,25 @@ package com.wavemaker.runtime.data.interceptors;
 
 import java.util.UUID;
 
-import org.hibernate.FlushMode;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import jakarta.persistence.EntityManagerFactory;
+
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
-import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
-import org.springframework.orm.jpa.hibernate.SessionHolder;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.wavemaker.runtime.data.dialect.WMHSQLDialect;
 import com.wavemaker.runtime.data.support.ServerVariables;
+import com.wavemaker.runtime.data.support.TestSessionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,9 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 class WMEntityInterceptorIntegrationTest {
 
-    private static SessionFactory sessionFactory;
-    private static WMHibernateTemplate hibernateTemplate;
-    private static HibernateTransactionManager transactionManager;
+    private static EntityManagerFactory entityManagerFactory;
+    private static TestSessionTemplate hibernateTemplate;
+    private static JpaTransactionManager transactionManager;
 
     private static String currentUser;
 
@@ -58,25 +58,26 @@ class WMEntityInterceptorIntegrationTest {
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
-        Configuration configuration = new Configuration()
-            .setProperty("hibernate.dialect", WMHSQLDialect.class.getName())
-            .setProperty("hibernate.hbm2ddl.auto", "create-drop")
-            .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.jpa.hibernate.SpringSessionContext")
-            .setInterceptor(new WMEntityInterceptor())
-            .addAnnotatedClass(InterceptedEntity.class)
-            .addAnnotatedClass(AuditedEntity.class);
-        configuration.getProperties().put("hibernate.connection.datasource", dataSource);
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(dataSource);
+        factoryBean.setManagedTypes(PersistenceManagedTypes.of(InterceptedEntity.class.getName(), AuditedEntity.class.getName()));
+        factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        java.util.Properties properties = new java.util.Properties();
+        properties.setProperty("hibernate.dialect", WMHSQLDialect.class.getName());
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        factoryBean.setJpaProperties(properties);
+        factoryBean.setJpaPropertyMap(java.util.Map.of("hibernate.session_factory.interceptor", new WMEntityInterceptor()));
+        factoryBean.afterPropertiesSet();
 
-        sessionFactory = configuration.buildSessionFactory();
-        hibernateTemplate = new WMHibernateTemplate(sessionFactory);
-        transactionManager = new HibernateTransactionManager(sessionFactory);
+        entityManagerFactory = factoryBean.getObject();
+        hibernateTemplate = new TestSessionTemplate(entityManagerFactory);
+        transactionManager = new JpaTransactionManager(entityManagerFactory);
     }
 
     @AfterAll
     static void closeSessionFactory() {
-        if (sessionFactory != null) {
-            sessionFactory.close();
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
         }
     }
 
@@ -87,8 +88,6 @@ class WMEntityInterceptorIntegrationTest {
 
         transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition(
             TransactionDefinition.PROPAGATION_REQUIRED));
-        SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-        sessionHolder.getSession().setHibernateFlushMode(FlushMode.AUTO);
     }
 
     @AfterEach

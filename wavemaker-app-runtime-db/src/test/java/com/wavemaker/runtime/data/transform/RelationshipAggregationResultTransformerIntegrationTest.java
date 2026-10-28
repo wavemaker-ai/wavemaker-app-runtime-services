@@ -81,8 +81,7 @@ class RelationshipAggregationResultTransformerIntegrationTest extends AbstractHi
         SelectQueryBuilder builder = new SimpleEntitiyQueryGenerator<Employee, Long>(Employee.class)
             .getAggregatedValues(aggregationInfo);
 
-        Page<Map> page = HqlQueryHelper.execute(
-            hibernateTemplate, Map.class, builder, Pageable.unpaged(), new WMQLDefaultTypeHelper());
+        Page<Map> page = HqlQueryHelper.execute(hibernateTemplate, Map.class, builder, Pageable.unpaged(), new WMQLDefaultTypeHelper());
 
         List<Map> rows = page.getContent();
         assertEquals(2, rows.size());

@@ -29,7 +29,7 @@ import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.util.WMIOUtils;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.NativeProcedureExecutor;
 import com.wavemaker.runtime.data.dao.procedure.parameters.ResolvableParam;
 import com.wavemaker.runtime.data.dao.procedure.parameters.RuntimeParameter;
@@ -41,14 +41,14 @@ public class WMProcedureExecutorImpl implements WMProcedureExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(WMProcedureExecutorImpl.class);
     private Map<String, RuntimeProcedure> procedureMap;
 
-    private WMHibernateTemplate template;
+    private WMSessionTemplate template;
     private String serviceId;
 
-    public WMHibernateTemplate getTemplate() {
+    public WMSessionTemplate getTemplate() {
         return template;
     }
 
-    public void setTemplate(WMHibernateTemplate template) {
+    public void setTemplate(WMSessionTemplate template) {
         this.template = template;
     }
 
@@ -105,7 +105,8 @@ public class WMProcedureExecutorImpl implements WMProcedureExecutor {
             for (final ProcedureParameter parameter : procedure.getParameters()) {
                 resolvableParams.add(new RuntimeParameter(parameter, params));
             }
-            return NativeProcedureExecutor.execute(template, procedure.getProcedureString(), resolvableParams, type);
+            return template.execute(session ->
+                NativeProcedureExecutor.execute(session, procedure.getProcedureString(), resolvableParams, type));
         } catch (Exception e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.named.procedure.execution.failed"), e);
         }

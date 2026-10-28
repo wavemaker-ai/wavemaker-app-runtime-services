@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -37,8 +37,9 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
-import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.util.StringUtils;
 
 import com.wavemaker.app.db.constants.DBType;
@@ -46,7 +47,7 @@ import com.wavemaker.app.db.util.DBUtils;
 import com.wavemaker.runtime.data.dao.DaoBeanDefinitions;
 import com.wavemaker.runtime.data.dao.HqlQueryExecutor;
 import com.wavemaker.runtime.data.dao.NativeSqlQueryExecutor;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 import com.wavemaker.runtime.data.dao.procedure.WMProcedureExecutorImpl;
 import com.wavemaker.runtime.data.dao.query.WMQueryExecutorImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -176,12 +177,16 @@ public class DataServiceBeansRegistrar implements BeanDefinitionRegistryPostProc
         }
         properties.setProperty("hibernate.show_sql", "false");
         properties.setProperty("hibernate.globally_quoted_identifiers", "false");
+        // native queries return java.sql.Date, Time and Timestamp for the date and time columns, as they did in Hibernate 5
+        properties.setProperty("hibernate.query.native.prefer_jdbc_datetime_types", "true");
         properties.setProperty("hibernate.hbm2ddl.auto", placeholder(serviceId, "hbm2ddl"));
-        properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
+        properties.setProperty("hibernate.boot.allow_jdbc_metadata_access", "false");
+        // Hibernate cannot read it from the metadata, which is not accessed, and the data export scrolls the results.
+        properties.setProperty("hibernate.jdbc.use_scrollable_resultset", "true");
         properties.setProperty("hibernate.schema_update.unique_constraint_strategy", "skip");
 
         registerIfAbsent(registry, serviceId + "HibernateProperties",
-            BeanDefinitionBuilder.genericBeanDefinition(PropertiesFactoryBean.class)
+            BeanDefinitionBuilder.genericBeanDefinition(HibernatePropertiesFactoryBean.class)
                 .addPropertyValue("properties", properties)
                 .getBeanDefinition());
     }
@@ -192,38 +197,54 @@ public class DataServiceBeansRegistrar implements BeanDefinitionRegistryPostProc
     }
 
     private void registerMainSessionFactory(BeanDefinitionRegistry registry, String serviceId, String basePackage) {
-        BeanDefinitionBuilder sessionFactory = sessionFactory(serviceId, basePackage, "nonHistoryEntitiesFilter")
-            .addPropertyValue("mappingResources", new String[]{serviceId + "-queries.hbm.xml"});
+        BeanDefinitionBuilder sessionFactory = sessionFactory(registry, serviceId, basePackage, false)
+            .addPropertyValue("persistenceUnitName", serviceId);
         registerIfAbsent(registry, serviceId + "SessionFactory", sessionFactory.getBeanDefinition());
         registerTransactionManagerAndTemplate(registry, serviceId, "SessionFactory", "", property(serviceId, "transactionTimeout"));
     }
 
     private void registerHistorySessionFactory(BeanDefinitionRegistry registry, String serviceId, String basePackage) {
         registerIfAbsent(registry, serviceId + "HistorySessionFactory",
-            sessionFactory(serviceId, basePackage, "historyEntitiesFilter").getBeanDefinition());
+            sessionFactory(registry, serviceId, basePackage, true).addPropertyValue("persistenceUnitName", serviceId + "History")
+                .getBeanDefinition());
         registerTransactionManagerAndTemplate(registry, serviceId, "HistorySessionFactory", "History",
             property(serviceId, "transactionTimeout"));
     }
 
-    private BeanDefinitionBuilder sessionFactory(String serviceId, String basePackage, String entityTypeFilter) {
-        return BeanDefinitionBuilder.genericBeanDefinition(LocalSessionFactoryBean.class)
+    /**
+     * The session factory is the entity manager factory of Hibernate, which is a Hibernate SessionFactory as well.
+     */
+    private BeanDefinitionBuilder sessionFactory(BeanDefinitionRegistry registry, String serviceId, String basePackage,
+                                                 boolean historyEntities) {
+        String managedTypesBeanName = serviceId + (historyEntities ? "History" : "") + "ManagedTypes";
+        registerIfAbsent(registry, managedTypesBeanName, BeanDefinitionBuilder.genericBeanDefinition(FilteredManagedTypesFactoryBean.class)
+            .addConstructorArgValue(basePackage)
+            .addConstructorArgValue(historyEntities)
+            .getBeanDefinition());
+        ManagedMap<String, Object> jpaProperties = new ManagedMap<>();
+        jpaProperties.put("hibernate.session_factory.interceptor", new RuntimeBeanReference(serviceId + "EntityInterceptor"));
+        if (!historyEntities) {
+            // the named queries of the data service
+            jpaProperties.put("hibernate.hbm_xml_files", serviceId + "-queries.hbm.xml");
+        }
+        return BeanDefinitionBuilder.genericBeanDefinition(LocalContainerEntityManagerFactoryBean.class)
             .addPropertyReference("dataSource", serviceId + "DataSource")
-            .addPropertyValue("packagesToScan", basePackage)
-            .addPropertyReference("entityInterceptor", serviceId + "EntityInterceptor")
-            .addPropertyValue("entityTypeFilters", new RuntimeBeanReference(entityTypeFilter))
-            .addPropertyReference("hibernateProperties", serviceId + "HibernateProperties");
+            .addPropertyReference("managedTypes", managedTypesBeanName)
+            .addPropertyValue("jpaVendorAdapter", new HibernateJpaVendorAdapter())
+            .addPropertyReference("jpaProperties", serviceId + "HibernateProperties")
+            .addPropertyValue("jpaPropertyMap", jpaProperties);
     }
 
     private void registerTransactionManagerAndTemplate(BeanDefinitionRegistry registry, String serviceId,
                                                        String sessionFactoryName, String infix, String timeoutProperty) {
         registerIfAbsent(registry, serviceId + infix + "TransactionManager",
-            BeanDefinitionBuilder.genericBeanDefinition(HibernateTransactionManager.class)
-                .addPropertyReference("sessionFactory", serviceId + sessionFactoryName)
+            BeanDefinitionBuilder.genericBeanDefinition(JpaTransactionManager.class)
+                .addPropertyReference("entityManagerFactory", serviceId + sessionFactoryName)
                 .addPropertyValue("defaultTimeout", "${" + timeoutProperty + "}")
                 .getBeanDefinition());
         registerIfAbsent(registry, serviceId + infix + "Template",
-            BeanDefinitionBuilder.genericBeanDefinition(WMHibernateTemplate.class)
-                .addPropertyReference("sessionFactory", serviceId + sessionFactoryName)
+            BeanDefinitionBuilder.genericBeanDefinition(WMSessionTemplate.class)
+                .addConstructorArgReference(serviceId + sessionFactoryName)
                 .getBeanDefinition());
     }
 

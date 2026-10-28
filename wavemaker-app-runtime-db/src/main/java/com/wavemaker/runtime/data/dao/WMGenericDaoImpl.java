@@ -17,19 +17,14 @@ package com.wavemaker.runtime.data.dao;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.OrderingMode;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,13 +58,14 @@ import com.wavemaker.runtime.data.hql.SelectQueryBuilder;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
 import com.wavemaker.runtime.data.util.DaoUtils;
+import com.wavemaker.runtime.data.util.HibernateUtils;
 import com.wavemaker.runtime.data.util.HqlQueryHelper;
 
 public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> implements
     WMGenericDao<E, I> {
 
     protected final Class<E> entityClass;
-    protected final WMHibernateTemplate template;
+    protected final WMSessionTemplate template;
     protected final WMQLTypeHelper wmqlTypeHelper;
     protected EntityQueryGenerator<E, I> queryGenerator;
 
@@ -78,13 +74,13 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     @Autowired
     private ExportedFileManager exportedFileManager;
 
-    public WMGenericDaoImpl(Class<E> entityClass, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+    public WMGenericDaoImpl(Class<E> entityClass, WMSessionTemplate template, WMQLTypeHelper wmqlTypeHelper) {
         this.entityClass = entityClass;
         this.template = template;
         this.wmqlTypeHelper = wmqlTypeHelper;
     }
 
-    public WMHibernateTemplate getTemplate() {
+    public WMSessionTemplate getTemplate() {
         return this.template;
     }
 
@@ -133,9 +129,8 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     public List<E> findByMultipleIds(final List<I> ids, final boolean orderedReturn) {
         final List<I> nonNullIds = ids.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        final List<E> result = getTemplate().execute(session -> session.byMultipleIds(entityClass)
-            .enableOrderedReturn(orderedReturn)
-            .multiLoad(nonNullIds));
+        final List<E> result = getTemplate().execute(session -> session.findMultiple(entityClass, nonNullIds,
+            orderedReturn ? OrderingMode.ORDERED : OrderingMode.UNORDERED));
 
         List<E> resultWithNulls = new ArrayList<>(ids.size());
         int index = 0;
@@ -170,11 +165,8 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
         final Object value, final String fieldName, final String key, final Pageable pageable) {
         Pageable validPageable = PageUtils.defaultIfNull(pageable);
         this.sortValidator.validate(validPageable, entityClass);
-        return getTemplate().execute(session -> {
-            Criteria criteria = session.createCriteria(entityClass).createCriteria(fieldName);
-            criteria.add(Restrictions.eq(key, value));
-            return CriteriaUtils.executeAndGetPageableData(criteria, validPageable, null);
-        });
+        return getTemplate().execute(session ->
+            CriteriaUtils.searchByAssociation(session, entityClass, fieldName, key, value, validPageable));
     }
 
     @Override
@@ -183,22 +175,7 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
         Pageable validPageable = PageUtils.defaultIfNull(pageable);
         this.sortValidator.validate(validPageable, entityClass);
         DaoUtils.validateQueryFilters(queryFilters);
-        return getTemplate().execute((WMHibernateCallback<Page>) session -> {
-            Criteria criteria = session.createCriteria(entityClass);
-            Set<String> aliases = new HashSet<>();
-            if (ArrayUtils.isNotEmpty(queryFilters)) {
-                for (QueryFilter queryFilter : queryFilters) {
-                    final String attributeName = queryFilter.getAttributeName();
-
-                    // if search filter contains related table property, then add entity alias to criteria to perform search on related properties.
-                    CriteriaUtils.criteriaForRelatedProperty(criteria, attributeName, aliases);
-
-                    Criterion criterion = CriteriaUtils.createCriterion(queryFilter);
-                    criteria.add(criterion);
-                }
-            }
-            return CriteriaUtils.executeAndGetPageableData(criteria, validPageable, aliases);
-        });
+        return getTemplate().execute(session -> CriteriaUtils.search(session, entityClass, queryFilters, validPageable));
     }
 
     @Override
@@ -221,7 +198,7 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
     public long count(final String query) {
         return getTemplate().execute(session -> {
             final WMQueryInfo queryInfo = queryGenerator.searchByQuery(query).build();
-            return QueryHelper.getQueryResultCount(queryInfo, false, getTemplate(), getWMQLTypeHelper());
+            return QueryHelper.getQueryResultCount(queryInfo, false, session, getWMQLTypeHelper());
         });
     }
 
@@ -255,7 +232,7 @@ public class WMGenericDaoImpl<E extends Serializable, I extends Serializable> im
         getTemplate().execute(session -> {
             final WMQueryInfo queryInfo = queryGenerator.searchByQuery(options.getQuery()).build();
             final RuntimeQueryProvider<E> queryProvider = RuntimeQueryProvider.from(queryInfo, entityClass);
-            ParametersProvider provider = new AppRuntimeParameterProvider(queryInfo, session.getTypeHelper(), getWMQLTypeHelper());
+            ParametersProvider provider = new AppRuntimeParameterProvider(queryInfo, HibernateUtils.getTypeConfiguration(session), getWMQLTypeHelper());
 
             final Query<E> hqlQuery = queryProvider.getQuery(session, validPageable, provider);
             QueryExtractor queryExtractor = new HqlQueryExtractor(hqlQuery.scroll());

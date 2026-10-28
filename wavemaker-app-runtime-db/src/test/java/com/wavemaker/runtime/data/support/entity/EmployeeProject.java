@@ -34,7 +34,7 @@ import jakarta.persistence.ManyToOne;
  *   {@code project} come back {@code null} on every reload even though the insert itself "succeeded".</li>
  *   <li>{@code @MapsId} (deriving the scalar id from the association automatically) does not resolve the
  *   identifier early enough for this harness's call path - {@code WMGenericDaoImpl.create()} uses Hibernate's
- *   legacy {@code session.save()}, which needs the full composite id resolved immediately, before
+ *   legacy {@code session.persist()}, which needs the full composite id resolved immediately, before
  *   {@code @MapsId}'s normal flush-time derivation has run. {@code @MapsId} was dropped entirely in favor of
  *   explicit scalar setters.</li>
  * </ul>

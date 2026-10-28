@@ -14,22 +14,19 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dialect;
 
-import java.sql.Types;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
-import org.hibernate.dialect.SQLServer2008Dialect;
-import org.hibernate.type.StandardBasicTypes;
-
-import com.wavemaker.commons.CommonConstants;
-
-public class WMSQLServer2008Dialect extends SQLServer2008Dialect {
+/**
+ * The versioned SQL Server dialects are merged into one dialect in Hibernate 7, which picks the features from the version of the
+ * database. Kept for the applications which have this class as their dialect.
+ */
+public class WMSQLServer2008Dialect extends WMSQLServerDialect {
 
     public WMSQLServer2008Dialect() {
         super();
-        registerHibernateType(Types.NCHAR, StandardBasicTypes.STRING.getName());
-        registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.TEXT.getName());
-        registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
+    }
 
-        registerColumnType(Types.CHAR, "nchar(1)");
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "datetime");
+    public WMSQLServer2008Dialect(DialectResolutionInfo info) {
+        super(info);
     }
 }

@@ -16,22 +16,32 @@ package com.wavemaker.runtime.data.util;
 
 import java.util.Optional;
 
-import org.hibernate.TypeHelper;
-import org.hibernate.type.Type;
+import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.spi.TypeConfiguration;
 
-/**
- * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
- * @since 22/8/17
- */
 public class HibernateUtils {
 
-    public static Optional<Type> findType(TypeHelper typeHelper, String classOrType) {
-        Optional<Type> typeOptional = Optional.ofNullable(typeHelper.basic(classOrType));
+    private HibernateUtils() {
+    }
 
-        if (!typeOptional.isPresent()) {
-            typeOptional = Optional.ofNullable(typeHelper.heuristicType(classOrType));
+    public static TypeConfiguration getTypeConfiguration(Session session) {
+        return ((SessionFactoryImplementor) session.getSessionFactory()).getTypeConfiguration();
+    }
+
+    /**
+     * Finds the basic type registered with the given name, otherwise the basic type of the java class with the given name.
+     */
+    public static Optional<BasicType<?>> findType(TypeConfiguration typeConfiguration, String classOrType) {
+        BasicType<?> type = typeConfiguration.getBasicTypeRegistry().getRegisteredType(classOrType);
+        if (type == null) {
+            try {
+                type = typeConfiguration.getBasicTypeForJavaType(Class.forName(classOrType));
+            } catch (ClassNotFoundException e) {
+                // not a java class, no type found
+            }
         }
-
-        return typeOptional;
+        return Optional.ofNullable(type);
     }
 }

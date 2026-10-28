@@ -156,7 +156,7 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
             new RuntimeParameter(inParam, Map.of("x", 21)),
             new RuntimeParameter(outParam, Map.of()));
 
-        Map result = NativeProcedureExecutor.execute(hibernateTemplate, "{call double_value(?, ?)}", params, Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call double_value(?, ?)}", params, Map.class);
 
         assertEquals(42, result.get("y"));
     }
@@ -167,7 +167,7 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
 
         List<ResolvableParam> params = List.of(new RuntimeParameter(inOutParam, Map.of("x", 5)));
 
-        Map result = NativeProcedureExecutor.execute(hibernateTemplate, "{call increment_value(?)}", params, Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call increment_value(?)}", params, Map.class);
 
         assertEquals(6, result.get("x"));
     }
@@ -180,8 +180,7 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
         newEmployee("Bob", false);
         flushAndClear();
 
-        Map result = NativeProcedureExecutor.execute(
-            hibernateTemplate, "{call list_active_employee_names()}", List.of(), Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call list_active_employee_names()}", List.of(), Map.class);
 
         if (isPostgres()) {
             List<?> content = (List<?>) result.get(NativeProcedureExecutor.CONTENT_FIELD);
@@ -200,8 +199,7 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
         newEmployee("Bob", false);
         flushAndClear();
 
-        Map result = NativeProcedureExecutor.execute(
-            hibernateTemplate, "{call list_active_and_inactive_employee_names()}", List.of(), Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call list_active_and_inactive_employee_names()}", List.of(), Map.class);
 
         if (isPostgres()) {
             List<?> content = (List<?>) result.get(NativeProcedureExecutor.CONTENT_FIELD);
@@ -234,7 +232,7 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
             new RuntimeParameter(inParam, Map.of()),
             new RuntimeParameter(outParam, Map.of()));
 
-        Map result = NativeProcedureExecutor.execute(hibernateTemplate, "{call double_value(?, ?)}", params, Map.class);
+        Map result = NativeProcedureExecutor.execute(currentSession(), "{call double_value(?, ?)}", params, Map.class);
 
         assertTrue(result.containsKey("y"));
         assertNull(result.get("y"));
@@ -254,8 +252,8 @@ class NativeProcedureExecutorIntegrationTest extends AbstractHibernateIntegratio
         // driver rejects (it expects Types.REF_CURSOR). Once fixed, each OUT value should be read into a list of rows:
         // active_names = [{name=Alice}], inactive_names = [{name=Bob}].
         InvalidDataAccessResourceUsageException failure = assertThrows(InvalidDataAccessResourceUsageException.class,
-            () -> NativeProcedureExecutor.execute(
-                hibernateTemplate, "{call list_active_and_inactive_employee_names(?, ?)}", params, Map.class));
+            () -> hibernateTemplate.execute(session ->
+                NativeProcedureExecutor.execute(session, "{call list_active_and_inactive_employee_names(?, ?)}", params, Map.class)));
         assertTrue(failure.getMostSpecificCause().getMessage().contains("java.sql.Types=" + Types.REF_CURSOR));
     }
 

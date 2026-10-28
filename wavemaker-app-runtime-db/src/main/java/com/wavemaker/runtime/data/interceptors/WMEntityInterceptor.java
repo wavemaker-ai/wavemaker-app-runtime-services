@@ -15,12 +15,11 @@
 package com.wavemaker.runtime.data.interceptors;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 
 import com.wavemaker.commons.MessageResource;
@@ -33,7 +32,7 @@ import com.wavemaker.runtime.data.replacers.ListenerContext;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 20/6/16
  */
-public class WMEntityInterceptor extends EmptyInterceptor {
+public class WMEntityInterceptor implements Interceptor {
 
     private InterceptorContext context;
 
@@ -42,16 +41,8 @@ public class WMEntityInterceptor extends EmptyInterceptor {
     }
 
     @Override
-    public void onDelete(
-        final Object entity, final Serializable id, final Object[] state, final String[] propertyNames,
-        final Type[] types) {
-//        final EntityValueReplacer valueOverrider = getEntityValueOverrider(entity.getClass());
-//        valueOverrider.apply(new ListenerContext(entity, Scope.DELETE));
-    }
-
-    @Override
     public boolean onFlushDirty(
-        final Object entity, final Serializable id, final Object[] currentState, final Object[] previousState,
+        final Object entity, final Object id, final Object[] currentState, final Object[] previousState,
         final String[] propertyNames,
         final Type[] types) {
         final EntityValueReplacer valueReplacer = context.getEntityValueOverrider(entity.getClass());
@@ -65,7 +56,7 @@ public class WMEntityInterceptor extends EmptyInterceptor {
 
     @Override
     public boolean onLoad(
-        final Object entity, final Serializable id, final Object[] state, final String[] propertyNames,
+        final Object entity, final Object id, final Object[] state, final String[] propertyNames,
         final Type[] types) {
         final EntityValueReplacer valueReplacer = context.getEntityValueOverrider(entity.getClass());
         final Map<String, PropertyDescriptor> descriptorMap = valueReplacer.getPropertyDescriptorMap();
@@ -89,8 +80,8 @@ public class WMEntityInterceptor extends EmptyInterceptor {
     }
 
     @Override
-    public boolean onSave(
-        final Object entity, final Serializable id, final Object[] state, final String[] propertyNames,
+    public boolean onPersist(
+        final Object entity, final Object id, final Object[] state, final String[] propertyNames,
         final Type[] types) {
         final EntityValueReplacer valueReplacer = context.getEntityValueOverrider(entity.getClass());
         final boolean applied = valueReplacer.apply(new ListenerContext(entity, Scope.INSERT));
@@ -102,7 +93,7 @@ public class WMEntityInterceptor extends EmptyInterceptor {
 
     private void updateState(
         Object entity, Object[] state, String[] propertyNames, Map<String, PropertyDescriptor>
-        descriptorMap) {
+            descriptorMap) {
         try {
             for (int i = 0; i < propertyNames.length; i++) {
                 final PropertyDescriptor descriptor = descriptorMap.get(propertyNames[i]);

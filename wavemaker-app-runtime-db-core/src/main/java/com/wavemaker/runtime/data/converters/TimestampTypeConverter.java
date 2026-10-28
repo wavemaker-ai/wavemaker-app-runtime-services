@@ -15,8 +15,10 @@
 package com.wavemaker.runtime.data.converters;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
-import org.hibernate.type.TimestampType;
+import org.hibernate.type.descriptor.java.JdbcTimestampJavaType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -29,7 +31,7 @@ public class TimestampTypeConverter extends HibernateBackedJavaTypeConverter {
     public static final String ORACLE_SQL_TIMESTAMP = "oracle.sql.TIMESTAMP";
 
     public TimestampTypeConverter() {
-        super(TimestampType.INSTANCE.getJavaTypeDescriptor());
+        super(JdbcTimestampJavaType.INSTANCE);
     }
 
     @Override
@@ -38,8 +40,16 @@ public class TimestampTypeConverter extends HibernateBackedJavaTypeConverter {
 
         if (numberValue instanceof Long) {
             return new Timestamp((Long) numberValue);
-        } else {
-            return super.fromString(value);
+        }
+        try {
+            // the JDBC format, like 2023-12-01 10:15:30.000, which the timestamp type of Hibernate 5 parsed
+            return Timestamp.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            try {
+                return Timestamp.valueOf(LocalDateTime.parse(value));
+            } catch (DateTimeParseException ignored) {
+                return super.fromString(value);
+            }
         }
     }
 

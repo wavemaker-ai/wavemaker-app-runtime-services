@@ -36,7 +36,7 @@ class DaoUtilsValidateQueryFiltersTest {
     void scalarValueIsConvertedToItsAttributeType() {
         QueryFilter filter = new QueryFilter("age", "42", Type.EQUALS, AttributeType.INTEGER);
 
-        DaoUtils.validateQueryFilters(new QueryFilter[] {filter});
+        DaoUtils.validateQueryFilters(new QueryFilter[]{filter});
 
         assertEquals(42, filter.getAttributeValue());
     }
@@ -45,25 +45,25 @@ class DaoUtilsValidateQueryFiltersTest {
     void collectionValueHasEachElementConvertedAndStaysAList() {
         QueryFilter filter = new QueryFilter("age", List.of("1", "2"), Type.IN, AttributeType.INTEGER);
 
-        DaoUtils.validateQueryFilters(new QueryFilter[] {filter});
+        DaoUtils.validateQueryFilters(new QueryFilter[]{filter});
 
         assertEquals(List.of(1, 2), filter.getAttributeValue());
     }
 
     @Test
     void arrayValueHasEachElementConvertedAndStaysAnArray() {
-        QueryFilter filter = new QueryFilter("age", new Object[] {"1", "2"}, Type.BETWEEN, AttributeType.INTEGER);
+        QueryFilter filter = new QueryFilter("age", new Object[]{"1", "2"}, Type.BETWEEN, AttributeType.INTEGER);
 
-        DaoUtils.validateQueryFilters(new QueryFilter[] {filter});
+        DaoUtils.validateQueryFilters(new QueryFilter[]{filter});
 
-        assertArrayEquals(new Object[] {1, 2}, (Object[]) filter.getAttributeValue());
+        assertArrayEquals(new Object[]{1, 2}, (Object[]) filter.getAttributeValue());
     }
 
     @Test
     void nullAttributeValueIsSkippedRatherThanNullPointerException() {
         QueryFilter filter = new QueryFilter("age", null, Type.EQUALS, AttributeType.INTEGER);
 
-        DaoUtils.validateQueryFilters(new QueryFilter[] {filter});
+        DaoUtils.validateQueryFilters(new QueryFilter[]{filter});
 
         assertNull(filter.getAttributeValue());
     }
@@ -75,7 +75,7 @@ class DaoUtilsValidateQueryFiltersTest {
         // rather than trying (and potentially failing) to convert it.
         QueryFilter filter = new QueryFilter("age", "unused", Type.NULL, AttributeType.INTEGER);
 
-        DaoUtils.validateQueryFilters(new QueryFilter[] {filter});
+        DaoUtils.validateQueryFilters(new QueryFilter[]{filter});
 
         assertEquals("unused", filter.getAttributeValue());
     }

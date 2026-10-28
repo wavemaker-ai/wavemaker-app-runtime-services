@@ -15,11 +15,11 @@
 package com.wavemaker.runtime.data.dao.callbacks;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-import com.wavemaker.runtime.data.dao.WMHibernateCallback;
 import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
 import com.wavemaker.runtime.data.dao.query.providers.QueryProvider;
 
@@ -27,7 +27,7 @@ import com.wavemaker.runtime.data.dao.query.providers.QueryProvider;
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
  * @since 3/8/17
  */
-public class QueryCallback<R> implements WMHibernateCallback<Optional<R>> {
+public class QueryCallback<R> implements Function<Session, Optional<R>> {
 
     private final QueryProvider<R> queryProvider;
     private final ParametersProvider parametersProvider;
@@ -40,7 +40,7 @@ public class QueryCallback<R> implements WMHibernateCallback<Optional<R>> {
     }
 
     @Override
-    public Optional<R> doInHibernate(final Session session) {
+    public Optional<R> apply(final Session session) {
         final Query<R> query = queryProvider.getQuery(session, parametersProvider);
         return query.uniqueResultOptional();
     }

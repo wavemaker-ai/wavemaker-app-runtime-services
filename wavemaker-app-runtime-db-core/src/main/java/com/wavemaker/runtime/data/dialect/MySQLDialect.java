@@ -16,30 +16,41 @@ package com.wavemaker.runtime.data.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.dialect.InnoDBStorageEngine;
-import org.hibernate.dialect.MySQL5Dialect;
-import org.hibernate.dialect.MySQLStorageEngine;
-import org.hibernate.dialect.function.NoArgSQLFunction;
-import org.hibernate.type.StringType;
+import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.type.StandardBasicTypes;
 
 import com.wavemaker.commons.CommonConstants;
 
 /**
  * @author Simon Toens
  */
-public class MySQLDialect extends MySQL5Dialect {
+public class MySQLDialect extends org.hibernate.dialect.MySQLDialect {
 
     public MySQLDialect() {
         super();
-        registerFunction("uuid", new NoArgSQLFunction("uuid", StringType.INSTANCE));
+    }
 
-        //as hibernate timestamp is mapping to sql datetime in mysql,So forcing hibernate timestamp to map sql timestamp.
-        registerColumnType(Types.TIMESTAMP, "timestamp");
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "datetime");
+    public MySQLDialect(DialectResolutionInfo info) {
+        super(info);
     }
 
     @Override
-    protected MySQLStorageEngine getDefaultMySQLStorageEngine() {
-        return InnoDBStorageEngine.INSTANCE;
+    public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+        super.initializeFunctionRegistry(functionContributions);
+        functionContributions.getFunctionRegistry().registerNoArgs("uuid",
+            functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.STRING));
+    }
+
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        //as hibernate timestamp is mapping to sql datetime in mysql,So forcing hibernate timestamp to map sql timestamp.
+        if (sqlTypeCode == Types.TIMESTAMP) {
+            return "timestamp";
+        }
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "datetime";
+        }
+        return super.columnType(sqlTypeCode);
     }
 }

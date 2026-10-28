@@ -17,14 +17,11 @@ package com.wavemaker.runtime.data.transform;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
-
 /**
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>
  * @since 27/6/16
  */
-public class AliasToEntityLinkedHashMapTransformer extends AliasedTupleSubsetResultTransformer implements
-    WMResultTransformer {
+public class AliasToEntityLinkedHashMapTransformer implements WMResultTransformer {
 
     public static final AliasToEntityLinkedHashMapTransformer INSTANCE = new AliasToEntityLinkedHashMapTransformer();
 
@@ -62,11 +59,6 @@ public class AliasToEntityLinkedHashMapTransformer extends AliasedTupleSubsetRes
     @Override
     public boolean containsField(final String fieldName) {
         return true;
-    }
-
-    @Override
-    public boolean isTransformedValueATupleElement(String[] aliases, int tupleLength) {
-        return false;
     }
 
     /**

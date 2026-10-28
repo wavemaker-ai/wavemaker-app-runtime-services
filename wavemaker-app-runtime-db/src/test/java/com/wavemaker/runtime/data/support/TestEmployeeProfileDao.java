@@ -7,7 +7,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.support;
 
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 
 import com.wavemaker.runtime.data.dao.WMGenericDaoImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -18,7 +18,7 @@ import com.wavemaker.runtime.data.support.entity.EmployeeProfile;
  */
 public class TestEmployeeProfileDao extends WMGenericDaoImpl<EmployeeProfile, Long> {
 
-    public TestEmployeeProfileDao(final WMHibernateTemplate template) {
+    public TestEmployeeProfileDao(final WMSessionTemplate template) {
         super(EmployeeProfile.class, template, new WMQLDefaultTypeHelper());
         init();
     }

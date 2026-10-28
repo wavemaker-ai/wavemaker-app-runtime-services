@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
+    <query name="widgetsByName">
+        <![CDATA[
+        select w.id as id, w.name as name from Widget w where w.name = :name
+        ]]>
+        <query-param name="name" type="java.lang.String"/>
+    </query>
+    <query name="widgetsByName__count">
+        <![CDATA[
+        select count(*) from Widget w where w.name = :name
+        ]]>
+        <query-param name="name" type="java.lang.String"/>
+    </query>
+    <query name="renameWidgets">
+        <![CDATA[
+        update Widget set name = :name
+        ]]>
+        <query-param name="name" type="java.lang.String"/>
+    </query>
+    <sql-query name="nativeWidgets">
+        <![CDATA[
+        select id, name from Widget where name = :name
+        ]]>
+        <query-param name="name" type="java.lang.String"/>
+        <return-scalar column="id" type="java.lang.Integer"/>
+        <return-scalar column="name" type="java.lang.String"/>
+    </sql-query>
 </hibernate-mapping>

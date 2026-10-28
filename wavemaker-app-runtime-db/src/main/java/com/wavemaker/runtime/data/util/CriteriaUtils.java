@@ -14,12 +14,25 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.util;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.ManagedType;
+import jakarta.persistence.metamodel.SingularAttribute;
+
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,72 +48,116 @@ public abstract class CriteriaUtils {
 
     public static final String SEARCH_PROPERTY_DELIMITER = ".";
 
-    public static Criterion createCriterion(QueryFilter queryFilter) {
-        Object attributeValue = queryFilter.getAttributeValue();
-        String attributeName = queryFilter.getAttributeName();
-        return queryFilter.getFilterCondition().criterion(attributeName, attributeValue);
+    /**
+     * Searches the entities which satisfy all the filters. A filter on a property of a related entity, like
+     * {@code department.name}, joins the related entity.
+     */
+    public static <E> Page<E> search(Session session, Class<E> entityClass, QueryFilter[] queryFilters, Pageable pageable) {
+        return query(session, entityClass, (builder, root, joins) -> predicates(builder, root, joins, queryFilters), null, pageable);
     }
 
-    public static Page executeAndGetPageableData(Criteria criteria, Pageable pageable, Set<String> aliases) {
-        if (pageable != null) {
-            long count = getRowCount(criteria);
-            updateCriteriaForPageable(criteria, pageable, aliases);
-            return new WMPageImpl(criteria.list(), pageable, count);
-        } else {
-            return new WMPageImpl(criteria.list());
-        }
+    /**
+     * Searches the entities which have an associated entity, reached by the field, with the given value for the key.
+     */
+    public static <E> Page<E> searchByAssociation(
+        Session session, Class<E> entityClass, String fieldName, String key, Object value, Pageable pageable) {
+        // The sort properties are the ones of the associated entity, as they were for the sub-criteria of Hibernate 5.
+        return query(session, entityClass, (builder, root, joins) -> {
+            From<?, ?> associated = join(root, fieldName, joins, fieldName);
+            return new Predicate[]{builder.equal(associated.get(key), value)};
+        }, fieldName, pageable);
     }
 
-    public static Long getRowCount(Criteria criteria) {
-        //set the projection
-        criteria.setProjection(Projections.rowCount());
-
-        Long count;
-        try {
-            count = (Long) criteria.uniqueResult();
-
-            if (count == null) {
-                count = 0L;
-            }
-        } finally {
-            //unset the projection
-            criteria.setProjection(null);
-            criteria.setResultTransformer(Criteria.ROOT_ENTITY);
-        }
-        return count;
-    }
-
-    public static Criteria criteriaForRelatedProperty(
-        Criteria criteria, final String attributeName, final Set<String> aliases) {
-        final int indexOfDot = attributeName.lastIndexOf(SEARCH_PROPERTY_DELIMITER);
-        if (indexOfDot != -1) {
-            String relatedEntityName = attributeName.substring(0, indexOfDot);
-            if (aliases == null) {
-                return criteria.createAlias(relatedEntityName, relatedEntityName);
-            } else if (!aliases.contains(relatedEntityName)) {
-                aliases.add(relatedEntityName);
-                return criteria.createAlias(relatedEntityName, relatedEntityName);
-            }
-        }
-        return criteria;
-    }
-
-    public static void updateCriteriaForPageable(Criteria criteria, Pageable pageable, Set<String> aliases) {
+    private static <E> Page<E> query(
+        Session session, Class<E> entityClass, PredicateBuilder predicateBuilder, String sortJoinName, Pageable pageable) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<E> query = builder.createQuery(entityClass);
+        Root<E> root = query.from(entityClass);
+        Map<String, From<?, ?>> joins = new HashMap<>();
+        query.select(root).where(predicateBuilder.build(builder, root, joins));
         if (pageable == null) {
-            throw new RuntimeException("Pageable object cannot be null");
+            return new WMPageImpl<>(session.createQuery(query).list());
         }
-        criteria.setFirstResult((int) pageable.getOffset());
-        criteria.setMaxResults(pageable.getPageSize());
-        if (pageable.getSort() != null) {
-            for (final Sort.Order order : pageable.getSort()) {
-                final String property = order.getProperty();
-                criteriaForRelatedProperty(criteria, property, aliases);
-                if (order.getDirection() == Sort.Direction.DESC) {
-                    criteria.addOrder(Order.desc(property));
-                } else {
-                    criteria.addOrder(Order.asc(property));
-                }
+
+        long count = count(session, entityClass, predicateBuilder);
+        List<Order> orders = new ArrayList<>();
+        From<?, ?> sortBase = sortJoinName == null ? root : joins.get(sortJoinName);
+        // the joins of the sort are relative to the entity it sorts
+        Map<String, From<?, ?>> sortJoins = sortJoinName == null ? joins : new HashMap<>();
+        for (Sort.Order order : pageable.getSort()) {
+            Path<?> path = getPath(sortBase, order.getProperty(), sortJoins);
+            orders.add(order.getDirection() == Sort.Direction.DESC ? builder.desc(path) : builder.asc(path));
+        }
+        query.orderBy(orders);
+
+        Query<E> hibernateQuery = session.createQuery(query);
+        hibernateQuery.setFirstResult((int) pageable.getOffset());
+        hibernateQuery.setMaxResults(pageable.getPageSize());
+        return new WMPageImpl<>(hibernateQuery.list(), pageable, count);
+    }
+
+    private static <E> long count(Session session, Class<E> entityClass, PredicateBuilder predicateBuilder) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        Root<E> root = countQuery.from(entityClass);
+        countQuery.select(builder.count(root)).where(predicateBuilder.build(builder, root, new HashMap<>()));
+        Long count = session.createQuery(countQuery).uniqueResult();
+        return count == null ? 0L : count;
+    }
+
+    private static Predicate[] predicates(
+        CriteriaBuilder builder, Root<?> root, Map<String, From<?, ?>> joins, QueryFilter[] queryFilters) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (queryFilters != null) {
+            for (QueryFilter queryFilter : queryFilters) {
+                Path<?> path = getPath(root, queryFilter.getAttributeName(), joins);
+                predicates.add(queryFilter.getFilterCondition().predicate(builder, path, queryFilter.getAttributeValue()));
             }
         }
+        return predicates.toArray(new Predicate[0]);
+    }
+
+    /**
+     * Returns the path of the attribute, a name like {@code department.name} navigates to a property of a related entity. An
+     * association on the way is joined once, an embedded property like {@code id.employeeId} is navigated without a join.
+     */
+    public static Path<?> getPath(From<?, ?> base, String attributeName, Map<String, From<?, ?>> joins) {
+        String[] names = attributeName.split("\\" + SEARCH_PROPERTY_DELIMITER);
+        Path<?> current = base;
+        StringBuilder joinName = new StringBuilder();
+        for (int i = 0; i < names.length - 1; i++) {
+            joinName.append(i == 0 ? "" : SEARCH_PROPERTY_DELIMITER).append(names[i]);
+            if (isAssociation(current, names[i])) {
+                current = join((From<?, ?>) current, names[i], joins, joinName.toString());
+            } else {
+                current = current.get(names[i]);
+            }
+        }
+        return current.get(names[names.length - 1]);
+    }
+
+    private static From<?, ?> join(From<?, ?> from, String name, Map<String, From<?, ?>> joins, String joinName) {
+        return joins.computeIfAbsent(joinName, key -> from.join(name));
+    }
+
+    private static boolean isAssociation(Path<?> path, String name) {
+        Bindable<?> model = path.getModel();
+        ManagedType<?> managedType = null;
+        if (model instanceof ManagedType<?> type) {
+            managedType = type;
+        } else if (model instanceof SingularAttribute<?, ?> attribute && attribute.getType() instanceof ManagedType<?> type) {
+            managedType = type;
+        }
+        if (managedType == null) {
+            return false;
+        }
+        Attribute<?, ?> attribute = managedType.getAttribute(name);
+        return attribute.isAssociation() || attribute.isCollection();
+    }
+
+    @FunctionalInterface
+    private interface PredicateBuilder {
+
+        Predicate[] build(CriteriaBuilder builder, Root<?> root, Map<String, From<?, ?>> joins);
     }
 }
