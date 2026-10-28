@@ -160,6 +160,13 @@ public class WMApplicationListener implements ServletContextListener {
             FilterRegistration.Dynamic reactPreviewFilter = registerDelegatingFilterProxyFilter(servletContext, "reactPreviewFilter");
             logger.info("Registering ReactPreview filter : {} ", reactPreviewFilter);
             reactPreviewFilter.addMappingForUrlPatterns(null, true, "/*");
+
+            Set<String> rnBundlePaths = servletContext.getResourcePaths("/rn-bundle");
+            if (rnBundlePaths != null && !rnBundlePaths.isEmpty()) {
+                FilterRegistration.Dynamic expoGoHeadersFilter = registerDelegatingFilterProxyFilter(servletContext, "expoGoHeadersFilter");
+                logger.info("Registering ExpoGoHeaders filter : {} ", expoGoHeadersFilter);
+                expoGoHeadersFilter.addMappingForUrlPatterns(null, true, "/rn-bundle/*");
+            }
         }
     }
 
