@@ -72,6 +72,7 @@
 
     <bean id="activeThemeReplacementFilter" class="com.wavemaker.runtime.web.filter.ActiveThemeReplacementFilter"/>
 
+    <bean id="expoGoHeadersFilter" class="com.wavemaker.runtime.web.filter.ExpoGoHeadersFilter"/>
     <bean id="reactRoutingFilter" class="com.wavemaker.runtime.web.filter.ReactRoutingFilter"/>
     <bean id="reactPreviewFilter" class="com.wavemaker.runtime.web.filter.ReactPreviewFilter"/>
     <bean id="uiBuildTypeSectionToggleFilter" class="com.wavemaker.runtime.web.filter.UiBuildTypeSectionToggleFilter"/>
