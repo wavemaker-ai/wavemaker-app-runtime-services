@@ -25,12 +25,14 @@ import org.hibernate.Session;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
+import org.hibernate.query.spi.SqmQuery;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 
 import com.wavemaker.runtime.data.converters.JavaTypeConverters;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
 import com.wavemaker.runtime.data.dao.query.types.RuntimeParameterTypeResolver;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLTypeHelper;
 import com.wavemaker.runtime.data.filter.WMQueryInfo;
@@ -42,6 +44,7 @@ import com.wavemaker.runtime.data.model.queries.QueryParameter;
 import com.wavemaker.runtime.data.model.queries.RuntimeQuery;
 import com.wavemaker.runtime.data.transform.Transformers;
 import com.wavemaker.runtime.data.transform.WMResultTransformer;
+import com.wavemaker.runtime.data.util.HibernateUtils;
 
 public class QueryHelper {
 
@@ -127,30 +130,42 @@ public class QueryHelper {
     }
 
     public static void setResultTransformer(Query query, Class<?> type) {
-//        TODO replace deprecated methods
-        if (query instanceof NativeQuery || (query.getReturnAliases() != null && query
-            .getReturnAliases().length != 0)) {
-            query.setResultTransformer(Transformers.aliasToMappedClass(type));
+        if (query instanceof NativeQuery || hasReturnAliases(query)) {
+            query.setTupleTransformer(Transformers.aliasToMappedClass(type));
         }
+    }
+
+    /**
+     * Tells whether the select clause of the HQL query has any aliased selection, like {@code select e.name as name}.
+     */
+    public static boolean hasReturnAliases(Query<?> query) {
+        if (query instanceof SqmQuery<?> sqmQuery && sqmQuery.getSqmStatement() instanceof SqmSelectStatement<?> select) {
+            for (SqmSelection<?> selection : select.getQuerySpec().getSelectClause().getSelections()) {
+                if (selection.getAlias() != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static Query createQuery(final Session session, final boolean isNative, final String query) {
         return (isNative) ? session.createNativeQuery(query) : session.createQuery(query);
     }
 
-    public static Long getQueryResultCount(WMQueryInfo wmQueryInfo, boolean isNative, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
-        return getCountFromCountStringQuery(wmQueryInfo, isNative, template, wmqlTypeHelper);
+    public static Long getQueryResultCount(WMQueryInfo wmQueryInfo, boolean isNative, Session session, WMQLTypeHelper wmqlTypeHelper) {
+        return getCountFromCountStringQuery(wmQueryInfo, isNative, session, wmqlTypeHelper);
     }
 
     private static Long getCountFromCountStringQuery(WMQueryInfo wmQueryInfo, final boolean isNative,
-                                                     final WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper) {
+                                                     final Session session, WMQLTypeHelper wmqlTypeHelper) {
         try {
             final String strQuery = getCountQuery(wmQueryInfo.getQuery(), isNative);
             if (strQuery == null) {
                 return maxCount();
             }
 
-            return template.execute(session -> executeCountQuery(session, isNative, strQuery, wmQueryInfo, wmqlTypeHelper));
+            return executeCountQuery(session, isNative, strQuery, wmQueryInfo, wmqlTypeHelper);
         } catch (Exception ex) {
             LOGGER.error("Count query operation failed", ex);
             return maxCount();
@@ -161,7 +176,7 @@ public class QueryHelper {
         final Session session, final boolean isNative, final String strQuery, final WMQueryInfo wmQueryInfo, WMQLTypeHelper wmqlTypeHelper) {
         Query<Integer> query = isNative ? session.createNativeQuery(strQuery) : session.createQuery(strQuery);
         ParametersConfigurator.configure(query, wmQueryInfo.getParameterValueMap(wmqlTypeHelper),
-            new RuntimeParameterTypeResolver(wmQueryInfo.getParameters(), session.getTypeHelper(), wmqlTypeHelper));
+            new RuntimeParameterTypeResolver(wmQueryInfo.getParameters(), HibernateUtils.getTypeConfiguration(session), wmqlTypeHelper));
         Object result = query.uniqueResult();
         return result == null ? 0 : ((Number) result).longValue();
     }

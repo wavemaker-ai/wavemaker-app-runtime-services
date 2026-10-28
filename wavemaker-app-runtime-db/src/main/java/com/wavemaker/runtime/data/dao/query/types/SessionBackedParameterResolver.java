@@ -19,11 +19,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hibernate.engine.spi.NamedQueryDefinition;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.internal.TypeLocatorImpl;
-import org.hibernate.query.spi.NamedQueryRepository;
-import org.hibernate.type.Type;
+import org.hibernate.query.sqm.spi.NamedSqmQueryMemento;
+import org.hibernate.type.BasicType;
 
 import com.wavemaker.runtime.data.util.HibernateUtils;
 
@@ -43,25 +41,17 @@ public class SessionBackedParameterResolver {
         resolversCache = new ConcurrentHashMap<>();
     }
 
-    @SuppressWarnings("unchecked")
     public ParameterTypeResolver getResolver(String queryName) {
         return resolversCache.computeIfAbsent(queryName, name -> {
-            Map<String, Type> typesMap = new HashMap<>();
+            Map<String, BasicType<?>> typesMap = new HashMap<>();
 
-            final NamedQueryRepository repository = factory.getNamedQueryRepository();
-
-            NamedQueryDefinition definition = repository.getNamedQueryDefinition(name);
-
-            if (definition == null) {
-                definition = repository.getNamedSQLQueryDefinition(name);
-            }
-
-            final Map<String, String> parameterTypes = definition.getParameterTypes();
+            // The parameter types are declared only for the HQL queries.
+            final NamedSqmQueryMemento<?> memento = factory.getQueryEngine().getNamedObjectRepository().getSqmQueryMemento(name);
+            final Map<String, String> parameterTypes = memento == null ? null : memento.getParameterTypes();
 
             if (parameterTypes != null) {
-                final TypeLocatorImpl typeHelper = new TypeLocatorImpl(factory.getTypeResolver());
                 parameterTypes.forEach((paramName, paramType) -> {
-                    final Optional<Type> typeOptional = HibernateUtils.findType(typeHelper, paramType);
+                    final Optional<BasicType<?>> typeOptional = HibernateUtils.findType(factory.getTypeConfiguration(), paramType);
                     typeOptional.ifPresent(type -> typesMap.put(paramName, type));
                 });
             }

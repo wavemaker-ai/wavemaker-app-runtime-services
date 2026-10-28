@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * generated app's Spring container. There is no such container anywhere in this module's test harness, so this
  * test constructs the {@code WMAppContext} singleton via reflection (its constructor is private and only ever
  * invoked by Spring in production) and feeds it a {@link StaticApplicationContext} carrying real (not mocked)
- * collaborators wired to this harness's own {@code SessionFactory}/{@code HibernateTemplate} - the same pattern
+ * collaborators wired to this harness's own {@code SessionFactory}/{@code WMSessionTemplate} - the same pattern
  * used in {@code datasource/WMDataSourceTest} for a similar Spring-only class.
  *
  * <p><b>Real behavior turned out to differ from the spec's "design-query-syntax-error" scenario:</b> the spec

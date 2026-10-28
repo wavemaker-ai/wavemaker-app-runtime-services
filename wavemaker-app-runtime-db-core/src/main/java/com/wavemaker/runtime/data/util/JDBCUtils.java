@@ -18,14 +18,15 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.dialect.OracleTypesHelper;
-
 import com.wavemaker.commons.CommonConstants;
 import com.wavemaker.commons.MessageResource;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.runtime.data.model.JavaType;
 
 public class JDBCUtils {
+
+    // oracle.jdbc.OracleTypes.CURSOR
+    private static final int ORACLE_CURSOR_TYPE_CODE = -10;
 
     private static final Map<JavaType, Integer> javaTypeVsSqlTypeCodes = new HashMap<>();
 
@@ -95,7 +96,7 @@ public class JDBCUtils {
         if (typeCode == null) {
             // for lazy loading. Oracle Cursor type.
             if (javaType == JavaType.CURSOR) {
-                typeCode = OracleTypesHelper.INSTANCE.getOracleCursorTypeSqlType();
+                typeCode = ORACLE_CURSOR_TYPE_CODE;
             } else {
                 throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.sql.type.code.not.found"), javaType);
             }

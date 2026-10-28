@@ -14,13 +14,17 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dao.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.query.Query;
-import org.hibernate.type.Type;
+import org.hibernate.query.QueryParameter;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.BindableType;
 
 import com.wavemaker.runtime.commons.variable.VariableType;
 import com.wavemaker.runtime.commons.variable.VariableTypeHelper;
@@ -44,16 +48,18 @@ public class ParametersConfigurator {
     public static <R> Query<R> configure(
         Query<R> query, Map<String, Object> parameters, ParameterTypeResolver resolver) {
         query.getParameterMetadata().getNamedParameterNames().forEach(parameterName -> {
-            final Object value = getValue(parameters, parameterName);
-            final Optional<Type> typeOptional = resolver.resolveType(parameterName);
+            final Object rawValue = getValue(parameters, parameterName);
+            final Object value = coerce(query, parameterName, rawValue);
+            // a converted value has the type the query expects, so the explicit type of the parameter is not used for it
+            final Optional<BasicType<?>> typeOptional = value == rawValue ? resolver.resolveType(parameterName) : Optional.empty();
 
             boolean listType = Collection.class.isInstance(value);
 
             if (typeOptional.isPresent()) {
                 if (listType) {
-                    query.setParameterList(parameterName, (Collection) value, typeOptional.get());
+                    query.setParameterList(parameterName, (Collection) value, (BindableType) typeOptional.get());
                 } else {
-                    query.setParameter(parameterName, value, typeOptional.get());
+                    query.setParameter(parameterName, value, (BindableType) typeOptional.get());
                 }
             } else {
                 if (listType) {
@@ -65,6 +71,38 @@ public class ParametersConfigurator {
         });
 
         return query;
+    }
+
+    /**
+     * Hibernate 5 converted a java.sql date, time or timestamp for the java.time attribute it was compared to. Hibernate 7
+     * rejects it, so it is converted here to the java.time type the query expects for the parameter.
+     */
+    public static Object coerce(final Query<?> query, final String parameterName, final Object value) {
+        if (value instanceof Collection<?> values) {
+            final List<Object> converted = values.stream().map(element -> coerce(query, parameterName, element)).toList();
+            return converted.equals(new ArrayList<>(values)) ? value : converted;
+        }
+        if (value == null || !(value instanceof java.util.Date)) {
+            return value;
+        }
+        final QueryParameter<?> parameter = query.getParameterMetadata().getQueryParameter(parameterName);
+        Class<?> expected = parameter.getParameterType();
+        if (expected == null && parameter.getHibernateType() != null) {
+            expected = parameter.getHibernateType().getJavaType();
+        }
+        if (expected == null || expected.isInstance(value)) {
+            return value;
+        }
+        if (value instanceof java.sql.Timestamp timestamp && java.time.LocalDateTime.class.equals(expected)) {
+            return timestamp.toLocalDateTime();
+        }
+        if (value instanceof java.sql.Date date && java.time.LocalDate.class.equals(expected)) {
+            return date.toLocalDate();
+        }
+        if (value instanceof java.sql.Time time && java.time.LocalTime.class.equals(expected)) {
+            return time.toLocalTime();
+        }
+        return value;
     }
 
     private static Object getValue(final Map<String, Object> parameters, final String parameterName) {

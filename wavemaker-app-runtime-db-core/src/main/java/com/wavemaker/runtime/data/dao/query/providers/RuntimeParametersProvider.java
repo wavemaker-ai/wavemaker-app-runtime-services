@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 
 import com.wavemaker.runtime.data.dao.util.QueryHelper;
 import com.wavemaker.runtime.data.model.JavaType;
@@ -52,10 +52,10 @@ public class RuntimeParametersProvider implements ParametersProvider {
     }
 
     @Override
-    public Optional<Type> getType(final Session session, final String name) {
+    public Optional<BasicType<?>> getType(final Session session, final String name) {
         if (parameterMap.containsKey(name)) {
             final JavaType javaType = parameterMap.get(name).getType();
-            return HibernateUtils.findType(session.getTypeHelper(), javaType.getClassName());
+            return HibernateUtils.findType(HibernateUtils.getTypeConfiguration(session), javaType.getClassName());
         }
 
         return Optional.empty();

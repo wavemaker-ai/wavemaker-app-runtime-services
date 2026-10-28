@@ -17,10 +17,13 @@ package com.wavemaker.runtime.data.service;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.engine.spi.SessionFactoryImplementor;
+import jakarta.persistence.EntityManagerFactory;
+
+import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.wavemaker.commons.MessageResource;
@@ -95,8 +98,10 @@ public class QueryDesignServiceImpl extends AbstractDesignService implements Que
     protected List<ReturnProperty> extractMetaForHql(final String serviceId, final RuntimeQuery query) {
         final String sessionFactoryBeanName = SESSION_FACTORY_BEAN_ST.substitute(getStringTemplateMap(serviceId));
 
-        final SessionFactoryImplementor factory = WMAppContext.getInstance().getSpringBean(sessionFactoryBeanName);
-        final Query hqlQuery = factory.getCurrentSession().createQuery(query.getQueryString());
+        // the session of the transaction this runs in, there is no current session context with the JPA session factory
+        final EntityManagerFactory factory = WMAppContext.getInstance().getSpringBean(sessionFactoryBeanName);
+        final Session session = EntityManagerFactoryUtils.getTransactionalEntityManager(factory).unwrap(Session.class);
+        final Query hqlQuery = session.createQuery(query.getQueryString());
 
         return HQLQueryUtils.extractMetaForHql(hqlQuery);
     }

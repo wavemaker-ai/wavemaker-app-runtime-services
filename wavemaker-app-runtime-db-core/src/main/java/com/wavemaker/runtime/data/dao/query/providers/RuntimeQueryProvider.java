@@ -84,7 +84,7 @@ public class RuntimeQueryProvider<R> implements QueryProvider<R>, PaginatedQuery
             final WMResultTransformer transformer = Transformers.aliasToMappedClass(responseType);
             if (nativeSql) {
                 sortedQuery = QueryHelper.applySortingForNativeQuery(queryString, pageable.getSort(),
-                    transformer, ((SessionFactoryImplementor) session.getSessionFactory()).getDialect());
+                    transformer, ((SessionFactoryImplementor) session.getSessionFactory()).getJdbcServices().getDialect());
             } else {
                 sortedQuery = QueryHelper.applySortingForHqlQuery(queryString, pageable.getSort(), transformer);
             }
@@ -119,11 +119,11 @@ public class RuntimeQueryProvider<R> implements QueryProvider<R>, PaginatedQuery
         final Query<T> hibernateQuery;
         if (nativeSql) {
             hibernateQuery = session.createNativeQuery(queryString);
-            Transformers.aliasToMappedClassOptional(returnType).ifPresent(hibernateQuery::setResultTransformer);
+            Transformers.aliasToMappedClassOptional(returnType).ifPresent(hibernateQuery::setTupleTransformer);
         } else {
             hibernateQuery = session.createQuery(queryString);
-            if (hibernateQuery.getReturnAliases() != null && hibernateQuery.getReturnAliases().length != 0) {
-                Transformers.aliasToMappedClassOptional(returnType).ifPresent(hibernateQuery::setResultTransformer);
+            if (QueryHelper.hasReturnAliases(hibernateQuery)) {
+                Transformers.aliasToMappedClassOptional(returnType).ifPresent(hibernateQuery::setTupleTransformer);
             }
         }
 

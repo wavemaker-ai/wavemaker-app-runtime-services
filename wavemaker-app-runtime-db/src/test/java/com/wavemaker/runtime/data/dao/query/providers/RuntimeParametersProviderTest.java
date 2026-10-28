@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.Session;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 import org.junit.jupiter.api.Test;
 
 import com.wavemaker.runtime.data.model.JavaType;
@@ -60,9 +60,9 @@ class RuntimeParametersProviderTest extends AbstractHibernateIntegrationTest {
         RuntimeQuery query = new RuntimeQuery("from Employee where age = :age", false, QueryType.SELECT, List.of(ageParam));
         RuntimeParametersProvider provider = new RuntimeParametersProvider(query);
 
-        Optional<Type> type = hibernateTemplate.execute((Session session) -> provider.getType(session, "age"));
+        Optional<BasicType<?>> type = hibernateTemplate.execute((Session session) -> provider.getType(session, "age"));
 
-        assertEquals(Integer.class, type.map(Type::getReturnedClass).orElseThrow());
+        assertEquals(Integer.class, type.map(BasicType::getJavaType).orElseThrow());
     }
 
     @Test
@@ -70,7 +70,7 @@ class RuntimeParametersProviderTest extends AbstractHibernateIntegrationTest {
         RuntimeQuery query = new RuntimeQuery("from Employee", false, QueryType.SELECT, List.of());
         RuntimeParametersProvider provider = new RuntimeParametersProvider(query);
 
-        Optional<Type> type = hibernateTemplate.execute((Session session) -> provider.getType(session, "missing"));
+        Optional<BasicType<?>> type = hibernateTemplate.execute((Session session) -> provider.getType(session, "missing"));
 
         assertTrue(type.isEmpty());
     }

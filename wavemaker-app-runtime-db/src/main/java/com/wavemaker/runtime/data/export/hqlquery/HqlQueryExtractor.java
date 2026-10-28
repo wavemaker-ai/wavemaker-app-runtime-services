@@ -24,10 +24,10 @@ import com.wavemaker.runtime.data.export.QueryExtractor;
  */
 public class HqlQueryExtractor implements QueryExtractor {
 
-    private ScrollableResults results;
+    private ScrollableResults<?> results;
     private int currentIndex;
 
-    public HqlQueryExtractor(final ScrollableResults results) {
+    public HqlQueryExtractor(final ScrollableResults<?> results) {
         this.results = results;
     }
 
@@ -46,6 +46,6 @@ public class HqlQueryExtractor implements QueryExtractor {
 
     @Override
     public Object getCurrentRow() throws Exception {
-        return results.get(0);
+        return results.get();
     }
 }

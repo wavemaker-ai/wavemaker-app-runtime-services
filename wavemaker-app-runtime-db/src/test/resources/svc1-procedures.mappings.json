@@ -1,1 +1,9 @@
-{ }
+{
+  "addOne": {
+    "procedureString": "{call ADD_ONE(?, ?)}",
+    "parameters": [
+      {"name": "a", "type": "integer", "parameterType": "IN", "variableType": "PROMPT"},
+      {"name": "b", "type": "integer", "parameterType": "OUT", "variableType": "PROMPT"}
+    ]
+  }
+}

@@ -14,7 +14,9 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.expression;
 
-import org.hibernate.criterion.Criterion;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * @author <a href="mailto:sunil.pulugula@wavemaker.com">Sunil Kumar</a>
@@ -22,5 +24,5 @@ import org.hibernate.criterion.Criterion;
  */
 public interface Criteria {
 
-    Criterion criterion(final String name, final Object value);
+    Predicate predicate(CriteriaBuilder builder, Expression<?> attribute, Object value);
 }

@@ -19,7 +19,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 import com.wavemaker.runtime.data.dao.callbacks.PaginatedQueryCallback;
 import com.wavemaker.runtime.data.dao.callbacks.QueryCallback;
 import com.wavemaker.runtime.data.dao.query.providers.AppRuntimeParameterProvider;
@@ -36,26 +36,26 @@ import com.wavemaker.runtime.data.hql.SelectQueryBuilder;
 public class HqlQueryHelper {
 
     public static <R> Page<R> execute(
-        WMHibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder,
+        WMSessionTemplate template, Class<R> returnType, SelectQueryBuilder builder,
         Pageable pageable, WMQLTypeHelper wmqlTypeHelper) {
 
         final WMQueryInfo queryInfo = builder.build();
 
         final RuntimeQueryProvider<R> queryProvider = RuntimeQueryProvider.from(queryInfo, returnType);
-        ParametersProvider parametersProvider = new AppRuntimeParameterProvider(queryInfo, template.getSessionFactory().getTypeHelper(), wmqlTypeHelper);
+        ParametersProvider parametersProvider = new AppRuntimeParameterProvider(queryInfo, (template.getSessionFactory()).getTypeConfiguration(), wmqlTypeHelper);
 
         return template
             .execute(new PaginatedQueryCallback<>(queryProvider, parametersProvider, pageable));
     }
 
     public static <R> Optional<R> execute(
-        WMHibernateTemplate template, Class<R> returnType, SelectQueryBuilder builder, WMQLTypeHelper wmqlTypeHelper) {
+        WMSessionTemplate template, Class<R> returnType, SelectQueryBuilder builder, WMQLTypeHelper wmqlTypeHelper) {
 
         final WMQueryInfo queryInfo = builder.build();
 
         final RuntimeQueryProvider<R> queryProvider = RuntimeQueryProvider.from(queryInfo, returnType);
 
-        ParametersProvider parametersProvider = new AppRuntimeParameterProvider(queryInfo, template.getSessionFactory().getTypeHelper(), wmqlTypeHelper);
+        ParametersProvider parametersProvider = new AppRuntimeParameterProvider(queryInfo, (template.getSessionFactory()).getTypeConfiguration(), wmqlTypeHelper);
 
         return template.execute(new QueryCallback<>(queryProvider, parametersProvider));
     }

@@ -87,10 +87,13 @@ class WMGenericDaoImplEmployeeRelationshipsIntegrationTest extends AbstractHiber
         employeeDao.create(alice);
 
         Employee managedIvan = employeeDao.findById(ivan.getId());
-        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> {
+        // Hibernate 7 finds that Alice references the removed Ivan while flushing, before the DELETE reaches the database
+        // foreign key, and reports it as an IllegalStateException caused by a TransientPropertyValueException.
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
             employeeDao.delete(managedIvan);
             hibernateTemplate.flush();
         });
+        assertTrue(thrown.getCause() instanceof org.hibernate.TransientPropertyValueException, String.valueOf(thrown.getCause()));
     }
 
     @Test
@@ -170,6 +173,9 @@ class WMGenericDaoImplEmployeeRelationshipsIntegrationTest extends AbstractHiber
 
     @Test
     void findByIdForTheSeparateFkOneToOneReturnsTheBadgeByItsOwnSurrogateId() {
+        // Hibernate 7 gives each entity its own id sequence, where Hibernate 5 shared one for all of them, so the
+        // ids of the two entities only differ when the employee is not the first row.
+        employeeDao.create(employee("Filler"));
         Employee grace = employeeDao.create(employee("Grace"));
         EmployeeBadge badge = new EmployeeBadge();
         badge.setEmployee(grace);

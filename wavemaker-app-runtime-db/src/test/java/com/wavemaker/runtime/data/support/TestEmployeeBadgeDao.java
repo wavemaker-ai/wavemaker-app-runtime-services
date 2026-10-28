@@ -7,7 +7,7 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.support;
 
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
+import com.wavemaker.runtime.data.dao.WMSessionTemplate;
 
 import com.wavemaker.runtime.data.dao.WMGenericDaoImpl;
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -18,7 +18,7 @@ import com.wavemaker.runtime.data.support.entity.EmployeeBadge;
  */
 public class TestEmployeeBadgeDao extends WMGenericDaoImpl<EmployeeBadge, Long> {
 
-    public TestEmployeeBadgeDao(final WMHibernateTemplate template) {
+    public TestEmployeeBadgeDao(final WMSessionTemplate template) {
         super(EmployeeBadge.class, template, new WMQLDefaultTypeHelper());
         init();
     }

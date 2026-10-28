@@ -23,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class HqlQueryExecutor extends AbstractDatabaseQueryExecutor {
 
-    public HqlQueryExecutor(final WMHibernateTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
+    public HqlQueryExecutor(final WMSessionTemplate hibernateTemplate, final PlatformTransactionManager transactionManager) {
         super(hibernateTemplate, transactionManager);
     }
 

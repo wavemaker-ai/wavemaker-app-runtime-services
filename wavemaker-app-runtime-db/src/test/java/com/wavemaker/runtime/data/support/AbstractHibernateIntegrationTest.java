@@ -13,46 +13,34 @@ import java.sql.Statement;
 import java.util.UUID;
 import javax.sql.DataSource;
 
-import org.hibernate.FlushMode;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import jakarta.persistence.EntityManagerFactory;
+
+import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.postgresql.ds.PGSimpleDataSource;
-import com.wavemaker.runtime.data.dao.WMHibernateTemplate;
-import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
-import org.springframework.orm.jpa.hibernate.SessionHolder;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.MountableFile;
 
 import com.wavemaker.runtime.data.dialect.WMHSQLDialect;
 import com.wavemaker.runtime.data.dialect.WMPostgresSQLDialect;
-import com.wavemaker.runtime.data.support.entity.Department;
-import com.wavemaker.runtime.data.support.entity.Employee;
-import com.wavemaker.runtime.data.support.entity.EmployeeAward;
-import com.wavemaker.runtime.data.support.entity.EmployeeBadge;
-import com.wavemaker.runtime.data.support.entity.EmployeeProfile;
-import com.wavemaker.runtime.data.support.entity.EmployeeProject;
-import com.wavemaker.runtime.data.support.entity.Project;
-import com.wavemaker.runtime.data.support.entity.Task;
-import com.wavemaker.runtime.data.support.entity.TaskAssignment;
-import com.wavemaker.runtime.data.support.entity.TemporalEmployee;
-import com.wavemaker.runtime.data.support.entity.TemporalEmployeeAward;
-import com.wavemaker.runtime.data.support.entity.TemporalEmployeeHistory;
-import com.wavemaker.runtime.data.support.entity.TypedRecord;
 
 /**
  * Bootstraps a real Hibernate {@link SessionFactory} so subclasses can exercise DAO/query/criteria/transform code
- * against a live Hibernate 5 session rather than mocks. There is no Spring {@code ApplicationContext} in this
+ * against a live Hibernate session rather than mocks. There is no Spring {@code ApplicationContext} in this
  * harness - production code (e.g. {@code WMGenericDaoImpl}) is driven under a Spring-managed transaction, so tests
- * use {@link HibernateTransactionManager} directly to bind a session per test the same way a real
+ * use {@link JpaTransactionManager} directly to bind a session per test the same way a real
  * {@code @Transactional} boundary would, and roll it back afterwards for isolation.
  *
  * <p>Targets in-memory HSQLDB (via {@link WMHSQLDialect}) by default - fast, no setup, safe for every test class
@@ -79,9 +67,10 @@ public abstract class AbstractHibernateIntegrationTest {
         return USE_POSTGRES;
     }
 
-    protected static SessionFactory sessionFactory;
-    protected static WMHibernateTemplate hibernateTemplate;
-    protected static HibernateTransactionManager transactionManager;
+    protected static SessionFactoryImplementor sessionFactory;
+    protected static EntityManagerFactory entityManagerFactory;
+    protected static TestSessionTemplate hibernateTemplate;
+    protected static JpaTransactionManager transactionManager;
 
     // Deliberately NOT a JUnit-managed @Container (which would restart it per test class) - one container is
     // started lazily on first use and reused for every test class in the whole run, since starting a container
@@ -96,33 +85,30 @@ public abstract class AbstractHibernateIntegrationTest {
 
     @BeforeAll
     static void buildSessionFactory() {
-        Configuration configuration = USE_POSTGRES ? postgresConfiguration() : hsqldbConfiguration();
+        LocalContainerEntityManagerFactoryBean factoryBean = USE_POSTGRES ? postgresConfiguration() : hsqldbConfiguration();
+        factoryBean.setPackagesToScan("com.wavemaker.runtime.data.support.entity");
+        factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        factoryBean.afterPropertiesSet();
 
-        configuration
-            .addAnnotatedClass(Department.class)
-            .addAnnotatedClass(Employee.class)
-            .addAnnotatedClass(EmployeeAward.class)
-            .addAnnotatedClass(EmployeeProfile.class)
-            .addAnnotatedClass(EmployeeBadge.class)
-            .addAnnotatedClass(Project.class)
-            .addAnnotatedClass(Task.class)
-            .addAnnotatedClass(TaskAssignment.class)
-            .addAnnotatedClass(EmployeeProject.class)
-            .addAnnotatedClass(TemporalEmployee.class)
-            .addAnnotatedClass(TemporalEmployeeAward.class)
-            .addAnnotatedClass(TemporalEmployeeHistory.class)
-            .addAnnotatedClass(TypedRecord.class);
-
-        sessionFactory = configuration.buildSessionFactory();
-        hibernateTemplate = new WMHibernateTemplate(sessionFactory);
-        transactionManager = new HibernateTransactionManager(sessionFactory);
+        entityManagerFactory = factoryBean.getObject();
+        sessionFactory = entityManagerFactory.unwrap(SessionFactoryImplementor.class);
+        hibernateTemplate = new TestSessionTemplate(entityManagerFactory);
+        transactionManager = new JpaTransactionManager(entityManagerFactory);
     }
 
-    private static Configuration hsqldbConfiguration() {
+    /**
+     * The session of the running transaction, which is what {@code SessionFactory.getCurrentSession()} was in the
+     * Hibernate 5 harness.
+     */
+    protected static Session currentSession() {
+        return EntityManagerFactoryUtils.getTransactionalEntityManager(entityManagerFactory).unwrap(Session.class);
+    }
+
+    private static LocalContainerEntityManagerFactoryBean hsqldbConfiguration() {
         String dbName = "testdb" + UUID.randomUUID().toString().replace("-", "");
 
         // A DriverManager-based connection provider cannot be unwrapped to javax.sql.DataSource, which
-        // HibernateTransactionManager requires (SessionFactoryUtils.getDataSource) - use HSQLDB's own DataSource.
+        // the transaction manager needs - use HSQLDB's own DataSource.
         // No ";shutdown=true" - that destroys the in-memory catalog when the LAST open connection closes,
         // which happens as soon as hbm2ddl's own schema-export connection closes during buildSessionFactory(),
         // wiping the schema (including the id-generator sequence) before any test runs. Each test class already
@@ -132,20 +118,17 @@ public abstract class AbstractHibernateIntegrationTest {
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
-        Configuration configuration = new Configuration()
-            .setProperty("hibernate.dialect", WMHSQLDialect.class.getName())
-            .setProperty("hibernate.hbm2ddl.auto", "create-drop")
-            // Without this, HibernateTemplate.doExecute()'s call to sessionFactory.getCurrentSession() cannot see
-            // the session HibernateTransactionManager bound to the transaction - production code relies on
-            // LocalSessionFactoryBean wiring this automatically, which our bare Configuration bootstrap must do
-            // itself.
-            .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.jpa.hibernate.SpringSessionContext");
-        configuration.getProperties().put("hibernate.connection.datasource", dataSource);
-        return configuration;
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(dataSource);
+        java.util.Properties properties = new java.util.Properties();
+        properties.setProperty("hibernate.dialect", WMHSQLDialect.class.getName());
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        properties.setProperty("hibernate.query.native.prefer_jdbc_datetime_types", "true");
+        factoryBean.setJpaProperties(properties);
+        return factoryBean;
     }
 
-    private static Configuration postgresConfiguration() {
+    private static LocalContainerEntityManagerFactoryBean postgresConfiguration() {
         if (postgresContainer == null) {
             // withCopyFileToContainer copies postgres-init/*.sql (src/test/resources) into Postgres's own
             // /docker-entrypoint-initdb.d/ convention. Loaded from the test classpath rather than a host path so it
@@ -189,14 +172,15 @@ public abstract class AbstractHibernateIntegrationTest {
             throw new IllegalStateException("Could not create schema " + postgresSchemaName, e);
         }
 
-        Configuration configuration = new Configuration()
-            .setProperty("hibernate.dialect", WMPostgresSQLDialect.class.getName())
-            .setProperty("hibernate.hbm2ddl.auto", "create-drop")
-            .setProperty("hibernate.default_schema", postgresSchemaName)
-            .setProperty("hibernate.current_session_context_class",
-                "org.springframework.orm.jpa.hibernate.SpringSessionContext");
-        configuration.getProperties().put("hibernate.connection.datasource", dataSource);
-        return configuration;
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(dataSource);
+        java.util.Properties properties = new java.util.Properties();
+        properties.setProperty("hibernate.dialect", WMPostgresSQLDialect.class.getName());
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        properties.setProperty("hibernate.default_schema", postgresSchemaName);
+        properties.setProperty("hibernate.query.native.prefer_jdbc_datetime_types", "true");
+        factoryBean.setJpaProperties(properties);
+        return factoryBean;
     }
 
     @AfterAll
@@ -222,12 +206,6 @@ public abstract class AbstractHibernateIntegrationTest {
     void beginTransaction() {
         transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition(
             TransactionDefinition.PROPAGATION_REQUIRED));
-
-        // HibernateTransactionManager only normalizes flush mode back to AUTO when it reuses an existing
-        // session for a non-read-only transaction; a brand new session (our case, every test) is left as-is,
-        // so force AUTO explicitly to match how a real @Transactional read-write boundary behaves in production.
-        SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-        sessionHolder.getSession().setHibernateFlushMode(FlushMode.AUTO);
     }
 
     /**

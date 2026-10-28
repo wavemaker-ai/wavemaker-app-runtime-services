@@ -15,16 +15,17 @@
 package com.wavemaker.runtime.data.util;
 
 import tools.jackson.databind.JacksonModule;
-import tools.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
+import tools.jackson.datatype.hibernate7.Hibernate7Module;
+
 import com.wavemaker.runtime.commons.WMObjectMapperModuleProvider;
 
 public class HibernateObjectMapperModuleProvider implements WMObjectMapperModuleProvider {
 
     @Override
     public JacksonModule getModule() {
-        Hibernate5JakartaModule module = new Hibernate5JakartaModule();
+        Hibernate7Module module = new Hibernate7Module();
         // uninitialized lazy proxies are written as null instead of hitting the database
-        module.disable(Hibernate5JakartaModule.Feature.FORCE_LAZY_LOADING);
+        module.disable(Hibernate7Module.Feature.FORCE_LAZY_LOADING);
         return module;
     }
 }

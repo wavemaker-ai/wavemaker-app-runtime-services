@@ -8,6 +8,8 @@
 package com.wavemaker.runtime.data.dao;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ import com.wavemaker.runtime.data.support.TestTaskDao;
 import com.wavemaker.runtime.data.support.entity.Project;
 import com.wavemaker.runtime.data.support.entity.Task;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -91,5 +95,34 @@ class WMGenericDaoImplProjectTaskIntegrationTest extends AbstractHibernateIntegr
 
         assertThrows(EntityNotFoundException.class, () -> taskDao.findById(task1.getId()));
         assertThrows(EntityNotFoundException.class, () -> taskDao.findById(task2.getId()));
+    }
+
+    @Test
+    void updateThenRefreshOfADetachedProjectLoadsTheStoredTasksIntoIt() {
+        // The generated service update: dao.update(project) then dao.refresh(project) on the same detached instance,
+        // here with the cascaded tasks collection: one task edited, one task added, one task left out (orphan removal).
+        Project saved = projectDao.create(project("Apollo"));
+        Task design = taskDao.create(task(saved, "Design", false));
+        Task build = taskDao.create(task(saved, "Build", false));
+        flushAndClear();
+
+        Project detached = project("Apollo 2");
+        detached.setId(saved.getId());
+        Task editedDesign = task(detached, "Design (edited)", true);
+        editedDesign.setId(design.getId());
+        detached.getTasks().add(editedDesign);
+        detached.getTasks().add(task(detached, "Ship", false));
+
+        projectDao.update(detached);
+        projectDao.refresh(detached);
+
+        assertEquals("Apollo 2", detached.getName());
+        assertEquals(Set.of("Design (edited)", "Ship"),
+            detached.getTasks().stream().map(Task::getTitle).collect(Collectors.toSet()));
+        detached.getTasks().forEach(task -> assertNotNull(task.getId(), "every task has its stored id"));
+
+        flushAndClear();
+        assertEquals(2, taskDao.count(), "the omitted task was removed and the new one stored");
+        assertThrows(EntityNotFoundException.class, () -> taskDao.findById(build.getId()));
     }
 }

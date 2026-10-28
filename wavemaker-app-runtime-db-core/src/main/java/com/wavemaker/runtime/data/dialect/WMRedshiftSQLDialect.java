@@ -14,13 +14,18 @@
  ******************************************************************************/
 package com.wavemaker.runtime.data.dialect;
 
-import org.hibernate.dialect.PostgreSQL82Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
-public class WMRedshiftSQLDialect extends PostgreSQL82Dialect {
+public class WMRedshiftSQLDialect extends PostgreSQLDialect {
 
     public WMRedshiftSQLDialect() {
         super();
+    }
+
+    public WMRedshiftSQLDialect(DialectResolutionInfo info) {
+        super(info);
     }
 
     @Override

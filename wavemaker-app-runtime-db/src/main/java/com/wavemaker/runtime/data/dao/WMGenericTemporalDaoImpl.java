@@ -48,6 +48,7 @@ import com.wavemaker.runtime.data.hql.UpdateQueryBuilder;
 import com.wavemaker.runtime.data.model.TemporalHistoryEntity;
 import com.wavemaker.runtime.data.periods.PeriodClause;
 import com.wavemaker.runtime.data.util.AnnotationUtils;
+import com.wavemaker.runtime.data.util.HibernateUtils;
 import com.wavemaker.runtime.data.util.HqlQueryHelper;
 import com.wavemaker.runtime.data.util.PropertyDescription;
 
@@ -58,14 +59,14 @@ import com.wavemaker.runtime.data.util.PropertyDescription;
 public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializable>
     extends WMGenericDaoImpl<E, I> implements WMGenericTemporalDao<E, I> {
 
-    private final WMHibernateTemplate historyTemplate;
+    private final WMSessionTemplate historyTemplate;
 
     private Class<TemporalHistoryEntity<E>> historyClass;
 
     private List<PropertyDescriptor> updatableProperties;
 
-    public WMGenericTemporalDaoImpl(Class<E> entityClass, WMHibernateTemplate template, WMQLTypeHelper wmqlTypeHelper,
-                                    WMHibernateTemplate historyTemplate) {
+    public WMGenericTemporalDaoImpl(Class<E> entityClass, WMSessionTemplate template, WMQLTypeHelper wmqlTypeHelper,
+                                    WMSessionTemplate historyTemplate) {
         super(entityClass, template, wmqlTypeHelper);
         this.historyTemplate = historyTemplate;
     }
@@ -104,7 +105,7 @@ public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializ
         }
     }
 
-    protected WMHibernateTemplate getHistoryTemplate() {
+    protected WMSessionTemplate getHistoryTemplate() {
         return this.historyTemplate;
     }
 
@@ -206,7 +207,7 @@ public class WMGenericTemporalDaoImpl<E extends Serializable, I extends Serializ
         return getHistoryTemplate().execute(session -> {
             final Query<?> query = session.createQuery(queryInfo.getQuery());
             ParametersConfigurator.configure(query, queryInfo.getParameterValueMap(getWMQLTypeHelper()),
-                new RuntimeParameterTypeResolver(queryInfo.getParameters(), session.getTypeHelper(), getWMQLTypeHelper()));
+                new RuntimeParameterTypeResolver(queryInfo.getParameters(), HibernateUtils.getTypeConfiguration(session), getWMQLTypeHelper()));
             return query.executeUpdate();
         });
     }

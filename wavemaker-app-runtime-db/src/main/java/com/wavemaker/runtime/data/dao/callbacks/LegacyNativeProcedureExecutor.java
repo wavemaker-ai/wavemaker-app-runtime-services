@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Session;
-import org.hibernate.dialect.OracleTypesHelper;
-import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +55,13 @@ public class LegacyNativeProcedureExecutor {
 
     private static List<Object> executeNativeJDBCCall(
         Session session, String procedureStr, List<CustomProcedureParam>
-        customParams) {
-        try (Connection conn = ((SessionImpl) session).connection()) {
+            customParams) {
+        return session.doReturningWork(conn -> executeNativeJDBCCall(session, conn, procedureStr, customParams));
+    }
+
+    private static List<Object> executeNativeJDBCCall(
+        Session session, Connection conn, String procedureStr, List<CustomProcedureParam> customParams) throws SQLException {
+        try {
             List<Integer> cursorPosition = new ArrayList<>();
 
             NativeQuery sqlProcedure = session.createNativeQuery(procedureStr);
@@ -115,6 +118,8 @@ public class LegacyNativeProcedureExecutor {
                 return responseWrapper;
             }
 
+        } catch (SQLException e) {
+            throw e;
         } catch (Exception e) {
             throw new WMRuntimeException(MessageResource.create("com.wavemaker.runtime.failed.to.execute.procedure"), e);
         }
@@ -176,7 +181,8 @@ public class LegacyNativeProcedureExecutor {
     private static Integer getTypeCode(String typeName) throws IllegalAccessException, NoSuchFieldException {
         Integer typeCode;
         if (typeName.equalsIgnoreCase(CURSOR)) {
-            typeCode = OracleTypesHelper.INSTANCE.getOracleCursorTypeSqlType();
+            // oracle.jdbc.OracleTypes.CURSOR
+            typeCode = -10;
         } else {
             typeCode = typeName.equals("String") ? Types.VARCHAR : (Integer) Types.class
                 .getField(typeName.toUpperCase()).get(null);

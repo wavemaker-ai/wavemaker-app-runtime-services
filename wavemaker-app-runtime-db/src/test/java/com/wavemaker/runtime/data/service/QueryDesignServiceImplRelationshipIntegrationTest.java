@@ -77,13 +77,13 @@ class QueryDesignServiceImplRelationshipIntegrationTest extends AbstractHibernat
         Department engineering = new Department();
         engineering.setName("Engineering");
         engineering.setLocation("Building 2");
-        sessionFactory.getCurrentSession().persist(engineering);
+        currentSession().persist(engineering);
 
         Employee employee = new Employee();
         employee.setName("Alice");
         employee.setDepartment(engineering);
-        sessionFactory.getCurrentSession().persist(employee);
-        sessionFactory.getCurrentSession().flush();
+        currentSession().persist(employee);
+        currentSession().flush();
         transactionManager.commit(transactionStatus);
     }
 

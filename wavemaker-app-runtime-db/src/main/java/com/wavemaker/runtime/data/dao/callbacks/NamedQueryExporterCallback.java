@@ -15,29 +15,24 @@
 package com.wavemaker.runtime.data.dao.callbacks;
 
 import java.io.OutputStream;
-import java.sql.ResultSet;
+import java.util.function.Function;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.springframework.data.domain.Pageable;
 
-import com.wavemaker.runtime.data.dao.WMHibernateCallback;
 import com.wavemaker.runtime.data.dao.query.providers.PaginatedQueryProvider;
 import com.wavemaker.runtime.data.dao.query.providers.ParametersProvider;
 import com.wavemaker.runtime.data.export.DataExporter;
 import com.wavemaker.runtime.data.export.ExportOptions;
 import com.wavemaker.runtime.data.export.QueryExtractor;
 import com.wavemaker.runtime.data.export.hqlquery.HqlQueryExtractor;
-import com.wavemaker.runtime.data.export.nativesql.NativeQueryExtractor;
-import com.wavemaker.runtime.data.export.util.DataSourceExporterUtil;
-import com.wavemaker.runtime.data.transform.Transformers;
 
 /**
  * @author <a href="mailto:anusha.dharmasagar@wavemaker.com">Anusha Dharmasagar</a>
  * @since 16/11/16
  */
-public class NamedQueryExporterCallback<R> implements WMHibernateCallback<Void> {
+public class NamedQueryExporterCallback<R> implements Function<Session, Void> {
 
     private final PaginatedQueryProvider<R> queryProvider;
     private final ParametersProvider parametersProvider;
@@ -61,16 +56,10 @@ public class NamedQueryExporterCallback<R> implements WMHibernateCallback<Void> 
     }
 
     @Override
-    public Void doInHibernate(final Session session) {
-        QueryExtractor queryExtractor;
-        Query namedQuery = queryProvider.getQuery(session, pageable, parametersProvider);
-        final boolean isNative = namedQuery instanceof NativeQuery;
-        if (isNative) {
-            final ResultSet resultSet = DataSourceExporterUtil.constructResultSet(namedQuery.scroll());
-            queryExtractor = new NativeQueryExtractor(resultSet, Transformers.aliasToMappedClass(responseType));
-        } else {
-            queryExtractor = new HqlQueryExtractor(namedQuery.scroll());
-        }
+    public Void apply(final Session session) {
+        // The rows are already transformed to the response type by the tuple transformer of the query.
+        Query<?> namedQuery = queryProvider.getQuery(session, pageable, parametersProvider);
+        QueryExtractor queryExtractor = new HqlQueryExtractor(namedQuery.scroll());
         DataExporter.export(queryExtractor, exportOptions, responseType, outputStream);
         return null;
     }

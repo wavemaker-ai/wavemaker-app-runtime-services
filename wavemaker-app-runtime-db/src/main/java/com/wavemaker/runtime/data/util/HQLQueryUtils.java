@@ -18,7 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.query.Query;
-import org.hibernate.type.AbstractStandardBasicType;
+import org.hibernate.query.spi.SqmQuery;
+import org.hibernate.query.sqm.tree.domain.SqmPluralValuedSimplePath;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
 
 import com.wavemaker.runtime.data.model.ReferenceType;
 import com.wavemaker.runtime.data.model.returns.FieldType;
@@ -27,44 +31,37 @@ import com.wavemaker.runtime.data.transform.WMResultTransformer;
 
 public class HQLQueryUtils {
 
-    public static List<ReturnProperty> extractMetaForHql(final Query query) {
-        final org.hibernate.type.Type[] returnTypes = query.getReturnTypes();
-        final String[] returnAliases = query.getReturnAliases();
-        List<ReturnProperty> properties = new ArrayList<>(returnTypes.length);
-        for (int i = 0; i < returnTypes.length; i++) {
-            final org.hibernate.type.Type type = returnTypes[i];
-
+    public static List<ReturnProperty> extractMetaForHql(final Query<?> query) {
+        if (!(query instanceof SqmQuery<?> sqmQuery) || !(sqmQuery.getSqmStatement() instanceof SqmSelectStatement<?> select)) {
+            throw new IllegalArgumentException("The query is not a HQL select query");
+        }
+        final List<SqmSelection<?>> selections = select.getQuerySpec().getSelectClause().getSelections();
+        final String[] returnAliases = selections.stream().map(SqmSelection::getAlias).toArray(String[]::new);
+        List<ReturnProperty> properties = new ArrayList<>(selections.size());
+        for (int i = 0; i < selections.size(); i++) {
+            final SqmSelection<?> selection = selections.get(i);
             ReturnProperty property = new ReturnProperty();
-
             property.setName(WMResultTransformer.getAlias(returnAliases, i));
 
             FieldType fieldType = new FieldType();
-            String typeRef = type.getName();
-            if (type.isCollectionType()) {
+            if (selection.getSelectableNode() instanceof SqmPluralValuedSimplePath<?>) {
                 fieldType.setList(true);
             }
-            if (type.isAssociationType()) {
-                fieldType.setType(ReferenceType.ENTITY);
-            } else {
-                fieldType.setType(ReferenceType.PRIMITIVE);
-            }
-            if (type instanceof AbstractStandardBasicType) {
-                final Class typeClass = ((AbstractStandardBasicType) type).getJavaTypeDescriptor().getJavaTypeClass();
-                typeRef = typeClass.getCanonicalName();
-            }
+            final boolean entity = selection.getSelectableNode() instanceof SqmPath<?> path
+                && path.getReferencedPathSource().getPathType() instanceof jakarta.persistence.metamodel.EntityType<?>;
+            fieldType.setType(entity ? ReferenceType.ENTITY : ReferenceType.PRIMITIVE);
 
-            fieldType.setTypeRef(typeRef);
+            final Class<?> javaType = selection.getNodeJavaType() == null ? null : selection.getNodeJavaType().getJavaTypeClass();
+            fieldType.setTypeRef(javaType == null ? Object.class.getCanonicalName() : javaType.getCanonicalName());
             property.setFieldType(fieldType);
 
-            if (i == 0 && (returnAliases == null || returnAliases.length == 1) && (fieldType.getType() == ReferenceType.ENTITY)) {
+            if (i == 0 && selections.size() == 1 && fieldType.getType() == ReferenceType.ENTITY) {
                 // setting property name to for avoiding creating new model class
                 // in case of query returning only entity.
                 property.setName(null);
             }
-
             properties.add(property);
         }
         return properties;
     }
-
 }

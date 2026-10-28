@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 import org.junit.jupiter.api.Test;
 
 import com.wavemaker.runtime.data.dao.query.types.wmql.WMQLDefaultTypeHelper;
@@ -37,10 +37,10 @@ class RuntimeParameterTypeResolverTest extends AbstractHibernateIntegrationTest 
             new QueryParameter("age", JavaType.INTEGER, false, null));
 
         RuntimeParameterTypeResolver resolver =
-            new RuntimeParameterTypeResolver(parameters, sessionFactory.getTypeHelper());
+            new RuntimeParameterTypeResolver(parameters, sessionFactory.getTypeConfiguration());
 
-        assertEquals(String.class, resolver.resolveType("name").map(Type::getReturnedClass).orElseThrow());
-        assertEquals(Integer.class, resolver.resolveType("age").map(Type::getReturnedClass).orElseThrow());
+        assertEquals(String.class, resolver.resolveType("name").map(BasicType::getJavaType).orElseThrow());
+        assertEquals(Integer.class, resolver.resolveType("age").map(BasicType::getJavaType).orElseThrow());
         assertTrue(resolver.resolveType("missing").isEmpty());
     }
 
@@ -51,9 +51,9 @@ class RuntimeParameterTypeResolverTest extends AbstractHibernateIntegrationTest 
             "untyped", new WMQueryParamInfo("no-type-here"));
 
         RuntimeParameterTypeResolver resolver =
-            new RuntimeParameterTypeResolver(parameters, sessionFactory.getTypeHelper(), new WMQLDefaultTypeHelper());
+            new RuntimeParameterTypeResolver(parameters, sessionFactory.getTypeConfiguration(), new WMQLDefaultTypeHelper());
 
-        assertEquals(String.class, resolver.resolveType("name").map(Type::getReturnedClass).orElseThrow());
+        assertEquals(String.class, resolver.resolveType("name").map(BasicType::getJavaType).orElseThrow());
         // A parameter with no declared JavaType is skipped entirely, not defaulted to something.
         assertTrue(resolver.resolveType("untyped").isEmpty());
     }
@@ -63,11 +63,11 @@ class RuntimeParameterTypeResolverTest extends AbstractHibernateIntegrationTest 
         Map<String, WMQueryParamInfo> parameters = Map.of("t", new WMQueryParamInfo("10:15:30", JavaType.TIME));
 
         RuntimeParameterTypeResolver resolver = new RuntimeParameterTypeResolver(
-            parameters, sessionFactory.getTypeHelper(), new WMQLSqlServerTypeHelper());
+            parameters, sessionFactory.getTypeConfiguration(), new WMQLSqlServerTypeHelper());
 
         // WMQLSqlServerTypeHelper aliases TIME to STRING - the resolved Hibernate Type should reflect that,
         // not a TIME type.
-        Optional<Type> resolved = resolver.resolveType("t");
-        assertEquals(String.class, resolved.map(Type::getReturnedClass).orElseThrow());
+        Optional<BasicType<?>> resolved = resolver.resolveType("t");
+        assertEquals(String.class, resolved.map(BasicType::getJavaType).orElseThrow());
     }
 }

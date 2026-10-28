@@ -16,7 +16,7 @@ package com.wavemaker.runtime.data.dao.query.types;
 
 import java.util.Optional;
 
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 
 /**
  * @author <a href="mailto:dilip.gundu@wavemaker.com">Dilip Kumar</a>
@@ -24,5 +24,5 @@ import org.hibernate.type.Type;
  */
 public interface ParameterTypeResolver {
 
-    Optional<Type> resolveType(String name);
+    Optional<BasicType<?>> resolveType(String name);
 }

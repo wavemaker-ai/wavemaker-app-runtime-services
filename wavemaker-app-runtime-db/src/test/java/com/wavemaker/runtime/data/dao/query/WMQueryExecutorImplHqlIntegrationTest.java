@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.hql.internal.ast.QuerySyntaxException;
+import org.hibernate.query.SyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -129,16 +129,13 @@ class WMQueryExecutorImplHqlIntegrationTest extends AbstractHibernateIntegration
     }
 
     @Test
-    void anUnregisteredNamedQueryThrowsButNotAClearExceptionNamingTheUnknownQuery() {
-        // The spec assumes a clear exception naming the unknown query. The real behavior is worse: parameter
-        // type resolution (SessionBackedParameterResolver.getResolver) looks up the query's NamedQueryDefinition
-        // to read its parameter types, gets null back for an unregistered name, and calls a method on it without
-        // a null check - a raw NullPointerException, with no mention of "Employee.doesNotExist" anywhere in the
-        // message, well before the "unknown query" error this module's own code was ever meant to raise.
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> executor.executeNamedQuery(
+    void anUnregisteredNamedQueryThrowsAnExceptionNamingTheUnknownQuery() {
+        // With Hibernate 5 this was a raw NullPointerException without the query name, from the lookup of the parameter types
+        // of a query that is not registered. The lookup now tolerates it and Hibernate reports the unknown query.
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> executor.executeNamedQuery(
             "Employee.doesNotExist", Map.of(), Employee.class, PageRequest.of(0, 10)));
 
-        assertTrue(exception.getMessage() != null && !exception.getMessage().contains("Employee.doesNotExist"));
+        assertTrue(exception.getMessage() != null && exception.getMessage().contains("Employee.doesNotExist"), exception.getMessage());
     }
 
     @Test
@@ -304,7 +301,7 @@ class WMQueryExecutorImplHqlIntegrationTest extends AbstractHibernateIntegration
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
             () -> executor.executeRuntimeQuery(query, PageRequest.of(0, 10, Sort.by("name"))));
 
-        assertInstanceOf(QuerySyntaxException.class, thrown.getCause());
+        assertInstanceOf(SyntaxException.class, thrown.getCause());
         assertTrue(thrown.getMessage().contains("order by e.id order by"), thrown.getMessage());
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.Session;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 
@@ -50,7 +50,7 @@ class NamedQueryExporterCallbackTest extends AbstractHibernateIntegrationTest {
         }
 
         @Override
-        public Optional<Type> getType(final Session session, final String name) {
+        public Optional<BasicType<?>> getType(final Session session, final String name) {
             return Optional.empty();
         }
     };
@@ -79,7 +79,7 @@ class NamedQueryExporterCallbackTest extends AbstractHibernateIntegrationTest {
             ACTIVE_TRUE_PROVIDER, PageRequest.of(0, 10),
             nameOnly(), outputStream, Employee.class);
 
-        hibernateTemplate.execute(callback::doInHibernate);
+        hibernateTemplate.execute(callback::apply);
 
         List<String> lines = outputStream.toString(StandardCharsets.UTF_8).lines().toList();
         assertEquals("Name", lines.get(0));
@@ -95,7 +95,7 @@ class NamedQueryExporterCallbackTest extends AbstractHibernateIntegrationTest {
             ACTIVE_TRUE_PROVIDER, PageRequest.of(0, 10),
             new ExportOptions(ExportType.CSV), outputStream, EmployeeNameRow.class);
 
-        hibernateTemplate.execute(callback::doInHibernate);
+        hibernateTemplate.execute(callback::apply);
 
         // A header line, then one "name,salary" line per active employee. Values are unquoted and the salary
         // (1.00 in the column) is written without trailing zeros.

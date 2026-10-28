@@ -16,9 +16,10 @@ package com.wavemaker.runtime.data.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.type.descriptor.sql.CharTypeDescriptor;
-import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
+import org.hibernate.boot.model.TypeContributions;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.descriptor.jdbc.TimestampJdbcType;
 
 import com.wavemaker.commons.CommonConstants;
 
@@ -29,19 +30,35 @@ public class OracleDialect extends org.hibernate.dialect.OracleDialect {
 
     public OracleDialect() {
         super();
-        registerColumnType(CommonConstants.DATE_TIME_WM_TYPE_CODE, "date");
-        registerColumnType(Types.TIMESTAMP, "timestamp");
+    }
 
-        registerHibernateType(CommonConstants.TIMESTAMP_WITH_TIMEZONE_SQL_CODE, StandardBasicTypes.TIMESTAMP.getName());
-        registerHibernateType(CommonConstants.TIMESTAMP_WITH_LOCAL_TIMEZONE_SQL_CODE, StandardBasicTypes.TIMESTAMP.getName());
+    public OracleDialect(DialectResolutionInfo info) {
+        super(info);
     }
 
     @Override
-    protected SqlTypeDescriptor getSqlTypeDescriptorOverride(int sqlCode) {
-        SqlTypeDescriptor sqlTypeDescriptor = super.getSqlTypeDescriptorOverride(sqlCode);
-        if (sqlCode == Types.BOOLEAN) {
-            sqlTypeDescriptor = new CharTypeDescriptor();
+    public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+        super.contributeTypes(typeContributions, serviceRegistry);
+        // Oracle specific timestamp with time zone codes are read as timestamp.
+        typeContributions.getTypeConfiguration().getJdbcTypeRegistry()
+            .addDescriptor(CommonConstants.TIMESTAMP_WITH_TIMEZONE_SQL_CODE, TimestampJdbcType.INSTANCE);
+        typeContributions.getTypeConfiguration().getJdbcTypeRegistry()
+            .addDescriptor(CommonConstants.TIMESTAMP_WITH_LOCAL_TIMEZONE_SQL_CODE, TimestampJdbcType.INSTANCE);
+    }
+
+    @Override
+    public int getPreferredSqlTypeCodeForBoolean() {
+        return Types.CHAR;
+    }
+
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == CommonConstants.DATE_TIME_WM_TYPE_CODE) {
+            return "date";
         }
-        return sqlTypeDescriptor;
+        if (sqlTypeCode == Types.TIMESTAMP) {
+            return "timestamp";
+        }
+        return super.columnType(sqlTypeCode);
     }
 }

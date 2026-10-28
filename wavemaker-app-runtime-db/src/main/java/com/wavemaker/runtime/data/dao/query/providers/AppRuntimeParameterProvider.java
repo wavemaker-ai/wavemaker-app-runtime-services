@@ -19,8 +19,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
-import org.hibernate.TypeHelper;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.spi.TypeConfiguration;
 
 import com.wavemaker.runtime.commons.variable.VariableType;
 import com.wavemaker.runtime.commons.variable.VariableTypeHelper;
@@ -43,8 +43,8 @@ public class AppRuntimeParameterProvider implements ParametersProvider {
         this.resolver = resolver;
     }
 
-    public AppRuntimeParameterProvider(WMQueryInfo queryInfo, TypeHelper typeHelper, WMQLTypeHelper wmqlTypeHelper) {
-        this(queryInfo.getParameterValueMap(wmqlTypeHelper), new RuntimeParameterTypeResolver(queryInfo.getParameters(), typeHelper, wmqlTypeHelper));
+    public AppRuntimeParameterProvider(WMQueryInfo queryInfo, TypeConfiguration typeConfiguration, WMQLTypeHelper wmqlTypeHelper) {
+        this(queryInfo.getParameterValueMap(wmqlTypeHelper), new RuntimeParameterTypeResolver(queryInfo.getParameters(), typeConfiguration, wmqlTypeHelper));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class AppRuntimeParameterProvider implements ParametersProvider {
             VariableType variableType = variableInfo.getLeft();
             String variableName = variableInfo.getRight();
             if (variableType.isVariable()) {
-                final Optional<Type> type = getType(session, name);
+                final Optional<BasicType<?>> type = getType(session, name);
                 if (type.isPresent()) {
                     value = variableType.getValue(variableName);
                 } else {
@@ -69,7 +69,7 @@ public class AppRuntimeParameterProvider implements ParametersProvider {
     }
 
     @Override
-    public Optional<Type> getType(final Session session, final String name) {
+    public Optional<BasicType<?>> getType(final Session session, final String name) {
         return resolver.resolveType(name);
     }
 }

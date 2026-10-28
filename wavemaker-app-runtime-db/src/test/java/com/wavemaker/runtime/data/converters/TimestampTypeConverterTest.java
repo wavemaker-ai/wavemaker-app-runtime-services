@@ -9,10 +9,8 @@ package com.wavemaker.runtime.data.converters;
 
 import java.sql.Timestamp;
 
-import org.hibernate.HibernateException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * The Oracle-specific branch of {@link TimestampTypeConverter#fromDbValue} (detecting a value whose canonical
  * class name is {@code oracle.sql.TIMESTAMP} via reflection) needs the real Oracle JDBC driver on the classpath
@@ -52,10 +50,10 @@ class TimestampTypeConverterTest {
     }
 
     @Test
-    void aTimestampStringWithoutMillisecondsCurrentlyFailsToParse() {
-        // Bug: a non-numeric string goes to Hibernate's TimestampTypeDescriptor, which only accepts
-        // "yyyy-MM-dd HH:mm:ss.SSS", so a filter value like '2023-12-01 10:15:30' fails.
-        assertThrows(HibernateException.class, () -> converter.fromString("2023-12-01 10:15:30"));
-        assertThrows(HibernateException.class, () -> converter.fromString("2023-12-01T10:15:30"));
+    void aTimestampStringWithoutMillisecondsIsParsed() {
+        // The timestamp type of Hibernate 5 only accepted "yyyy-MM-dd HH:mm:ss.SSS", so a filter value like
+        // '2023-12-01 10:15:30' failed. The JDBC format and the ISO format are both parsed now.
+        assertEquals(Timestamp.valueOf("2023-12-01 10:15:30"), converter.fromString("2023-12-01 10:15:30"));
+        assertEquals(Timestamp.valueOf("2023-12-01 10:15:30"), converter.fromString("2023-12-01T10:15:30"));
     }
 }
