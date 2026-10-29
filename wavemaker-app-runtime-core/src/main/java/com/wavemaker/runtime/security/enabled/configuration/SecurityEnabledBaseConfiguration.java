@@ -55,6 +55,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.authentication.AuthenticationManagerBeanDefinitionParser;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.FilterInvocation;
@@ -514,6 +515,8 @@ public class SecurityEnabledBaseConfiguration {
         filterSecurityInterceptor.setAccessDecisionManager(new AffirmativeBased(List.of(webExpressionVoter)));
         filterSecurityInterceptor.setAuthenticationManager(authenticationManager());
         filterSecurityInterceptor.setApplicationEventPublisher(applicationContext);
+        applicationContext.getBeanProvider(SecurityContextHolderStrategy.class)
+            .ifUnique(filterSecurityInterceptor::setSecurityContextHolderStrategy);
         return filterSecurityInterceptor;
     }
 

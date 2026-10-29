@@ -57,6 +57,8 @@ dependencies {
     implementation(appDependenciesLibs.wordnik.swagger.annotations)
     implementation(appDependenciesLibs.jakarta.annotation.api)
     compileOnly(appDependenciesLibs.jakarta.servlet.api)
+    testImplementation(appDependenciesLibs.jakarta.servlet.api)
+    testImplementation(appDependenciesLibs.test.mockito.core)
     compileOnly(appDependenciesLibs.spring.contextSupport)
     compileOnly(appDependenciesLibs.spring.security.cas)
     compileOnly(appDependenciesLibs.spring.security.ldap)

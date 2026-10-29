@@ -47,6 +47,9 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 import org.springframework.web.util.UriTemplateHandler;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import com.wavemaker.commons.json.Jackson2JsonMapper;
 import com.wavemaker.runtime.commons.converters.WMYamlJackson2HttpMessageConverter;
 
 /**
@@ -91,7 +94,9 @@ public class WMRestTemplate extends RestTemplate {
             messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
         }
         if (JACKSON_2_PRESENT) {
-            messageConverters.add(new JacksonJsonHttpMessageConverter());
+            messageConverters.add(new JacksonJsonHttpMessageConverter(Jackson2JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)));
         } else if (GSON_PRESENT) {
             messageConverters.add(new GsonHttpMessageConverter());
         }

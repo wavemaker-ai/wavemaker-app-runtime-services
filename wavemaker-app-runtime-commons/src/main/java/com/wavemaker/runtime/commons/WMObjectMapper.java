@@ -74,8 +74,8 @@ public class WMObjectMapper extends JsonMapper {
     private static final WMObjectMapper INSTANCE = new WMObjectMapper();
     private static final WMPropertyNamingStrategy PROPERTY_NAMING_STRATEGY = new WMPropertyNamingStrategy();
 
-    private ObjectMapper readMapper;
-    private ObjectMapper writeMapper;
+    private volatile ObjectMapper readMapper;
+    private volatile ObjectMapper writeMapper;
 
     protected WMObjectMapper() {
         super(JsonMapper.builderWithJackson2Defaults()

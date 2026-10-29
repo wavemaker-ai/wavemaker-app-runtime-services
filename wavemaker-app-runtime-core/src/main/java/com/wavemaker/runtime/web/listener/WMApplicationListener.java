@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import com.wavemaker.runtime.RuntimeEnvironment;
@@ -110,6 +111,12 @@ public class WMApplicationListener implements ServletContextListener {
 
         FilterRegistration.Dynamic springEncodingFilter = registerDelegatingFilterProxyFilter(servletContext, "springEncodingFilter");
         springEncodingFilter.addMappingForUrlPatterns(null, false, "/*");
+
+        if (WMAppContext.getInstance().getSpringBean(Environment.class).getProperty("app.request.useTrailingSlashMatch", Boolean.class, false)) {
+            FilterRegistration.Dynamic trailingSlashFilter = registerFilter(servletContext, "trailingSlashFilter",
+                UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build());
+            trailingSlashFilter.addMappingForUrlPatterns(null, false, "/services/*");
+        }
 
         if (applicationType.equals(APPLICATION)) {
             FilterRegistration.Dynamic wmCompositeSecurityFilter = registerDelegatingFilterProxyFilter(servletContext, "wmCompositeSecurityFilter");
