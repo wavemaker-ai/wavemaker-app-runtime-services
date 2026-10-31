@@ -55,7 +55,7 @@ dependencies {
     testImplementation(appDependenciesLibs.test.mockito.core)
     testImplementation(appDependenciesLibs.jakarta.servlet.api)
     testImplementation(appDependenciesLibs.jdbc.driver.postgresql)
-    testImplementation(appDependenciesLibs.testcontainers.postgresql)
+    testImplementation(appDependenciesLibs.test.testcontainers.postgresql)
 
     //TODO: To support DB2 implementation, the custom code needs to be updated as per the new hibernate library code
     /*runtimeLibDependencies(appDependenciesLibs.hibernate.core) {

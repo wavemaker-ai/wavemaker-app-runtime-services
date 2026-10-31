@@ -28,8 +28,6 @@ import jakarta.validation.Path;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hibernate.validator.internal.engine.path.NodeImpl;
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,10 +143,9 @@ public class ApplicationRestServiceExceptionResolver extends AbstractHandlerExce
             for (ConstraintViolation<?> constraintViolation : constraintViolations) {
                 String paramName = "";
                 Path propertyPath = constraintViolation.getPropertyPath();
-                if (propertyPath != null && propertyPath instanceof PathImpl pathImpl) {
-                    NodeImpl leafNode = pathImpl.getLeafNode();
-                    if (leafNode != null) {
-                        paramName = leafNode.getName();
+                if (propertyPath != null) {
+                    for (Path.Node node : propertyPath) {
+                        paramName = node.getName();
                     }
                 }
                 errorResponseList.add(getErrorResponse(MessageResource.INVALID_FIELD_VALUE, paramName,
